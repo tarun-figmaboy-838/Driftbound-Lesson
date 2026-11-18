@@ -15,7 +15,7 @@ const radar = new Radar($('radar'));
 const dialogue = new Dialogue($('dialog'), (who) => sound.blip(who));
 const els = {
   title: $('scene-title'), dots: $('dots'), stage: $('stage'), holo: $('holo'), readout: $('readout'),
-  controls: $('controls'), qbar: $('qbar'), qtext: $('qtext'), qtimer: $('qbar').querySelector('.timer'),
+  controls: $('controls'), qbar: $('qbar'), qtext: $('qtext'),
   warden: $('warden-holo'), next: $('next'), back: $('back'),
 };
 
@@ -24,13 +24,12 @@ let cleanups = [];
 const seen = new Set();
 const data = {};
 
-// the question bar from the game (prompt + time bar); qbar(null) hides it
-function qbar(html, { timer = false } = {}) {
+// the question bar from the game (no timer, like the game); qbar(null) hides it
+function qbar(html) {
   els.qbar.classList.toggle('hidden', !html);
-  els.qbar.classList.remove('ok', 'bad', 'hl');
+  els.qbar.classList.remove('ok', 'bad');
   if (!html) return;
   els.qtext.innerHTML = html;
-  els.qtimer.classList.toggle('run', timer);
 }
 qbar.el = els.qbar;
 qbar.flash = (mood) => {

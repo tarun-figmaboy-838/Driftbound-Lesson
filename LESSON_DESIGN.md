@@ -26,7 +26,7 @@ By the end of the briefing, the student can:
 4. Find an unknown angle on a straight line: x = 180° − the given angle (Rule 1).
 5. Find an unknown vertically opposite angle: x = the given angle (Rule 2).
 6. Recognise the common wrong answers, and check an answer by estimating first and then checking the sum.
-7. Read the game's battle radar: the cannon beam, the enemy line, the given angle, x and the timer.
+7. Read the game's battle radar: the cannon beam, the enemy line, the given angle and x; know that taking too long gets the ship blasted.
 
 ## Shared language with the game
 
@@ -41,7 +41,7 @@ The lesson uses exactly what the game uses, so nothing needs to be relearned:
 | Unknown angle | White arc labelled with an italic serif x |
 | Right angle | A small white square in the corner |
 | Radar | Thin cyan ring with a tick every 10° and a longer tick every 30° |
-| Question bar | "Find x" in gold, the question in white, a time bar along the bottom |
+| Question bar | "Find *x*" in gold, the question in white, the given angle in orange (like its arc); no timer is shown |
 | Answers | Gold capsule buttons that turn green when right and red when wrong |
 | Feedback | The rule on a miss, the second hint after another miss, the working on a hit |
 | Characters | The co-pilot (teacher), the Warden (boss), raiders (enemies), each with their portrait and comms box |
@@ -59,7 +59,7 @@ Each scene has a short title, one interaction and a few co-pilot lines. Lines ty
 | 5 | Rule 1: straight line | Drags the red line along a straight line; both numbers change and the sum stays 180°. Taps Show me for the worked example | "Rule 1: angles on a straight line add up to 180°." "Drag the red line. They always make 180°." "76° + x = 180°" "So x = 180° − 76° = 104°." | The worked example is shown |
 | 6 | Rule 2: opposite angles | Drags one of two crossing lines; the opposite angles stay equal. Taps Show me | "Rule 2: vertically opposite angles are equal." "The 68° angle is opposite x." "So x = 68°." "Angles next to each other still make 180°." | The worked example is shown |
 | 7 | Watch out for traps | Answers two game-style questions (58°, then 88° on a straight line); every wrong answer explains its trap. Then the two habits appear | "The game hides traps in the answers." Traps: "That's the given angle. x is the other one." "That's 90° − 58°. A straight line is 180°, not 90°." "180° is the whole line. x is only part of it." Habits: "Estimate first: is x more or less than 90°?" "Then check: do they add up to 180°?" | Both questions answered |
-| 8 | Read the radar | Taps each part of a full battle view (Cannon, Enemy, Given, x, Timer); the part lights up | "The bright line is your cannon." "The red line points at the enemy." "The orange angle is given." "The white angle is x. Find it!" "This bar is your time. Estimate first!" "Wrong answer? The enemy fires back." "Time runs out? The mission fails. Just retry the level." | All five parts tapped |
+| 8 | Read the radar | Taps each part of a full battle view (Cannon, Enemy, Given, x); the part lights up | "The bright line is your cannon." "The red line points at the enemy." "The orange angle is given." "The white angle is x. Find it!" "Wrong answer? The enemy fires back." "Too slow? The raider blasts your ship. Estimate first, then tap!" | All four parts tapped |
 | 9 | Practice | Answers four questions in the game's format (two of each rule, new numbers, random orientations), with no time limit | GLIB taunts and reacts. Co-pilot: the rule on a miss, the second hint after another miss, the working on a hit ("64° + 116° = 180°"). | Four questions answered |
 | 10 | Ready check | Sees the practice stars and the two rule cards; taps Launch mission (or Extra training) | "Perfect practice! You are ready, pilot." (or a gentler line for 1 to 2 stars) "Remember: estimate, then check." | Launch mission opens the game |
 | + | Extra training (optional) | Drags the red line in three diagrams: a right angle split in two (90°), angles around a point (360°), a triangle (180°) | "The two parts of a right angle add up to 90°." "Angles around a point add up to 360°." "The three angles of a triangle add up to 180°." | Open-ended |
@@ -74,7 +74,7 @@ Each scene has a short title, one interaction and a few co-pilot lines. Lines ty
 | 5 Rule 1 | L1, L3, L4, L6, L8, the mastery levels M1 to M4 (mixed rules) and the Warden's questions |
 | 6 Rule 2 | L2, L5, L7, M1 to M4 and the Warden's questions |
 | 7 Traps | The wrong options in every level: the given angle itself (L1 76°, L3 118°, L4 43°, L6 152°), 180° (L2 to L8), the near miss (L8 89° and 91°) |
-| 8 Read the radar | The battle view, the question bar and its time bar, the enemy firing back after a miss, the instant fail and Retry on a time-out |
+| 8 Read the radar | The battle view, the question bar, the enemy firing back after a miss, the raider's blast and Retry when time runs out (no timer is shown in the game; the last seconds tick and the screen edge pulses red) |
 | 9 Practice | The same question bar, capsules and feedback as a level; stars use the game's rule |
 | 10 Ready check | Launch mission opens the game at its title screen |
 | Extra training | The game's question generator also supports right-angle, around-a-point and triangle questions (src/game/angles.js), which the current levels do not use yet |
@@ -89,7 +89,7 @@ Each scene has a short title, one interaction and a few co-pilot lines. Lines ty
 | For opposite angles, using 180° − given | Rule 2 scene shows the adjacent pair still makes 180° while the opposite pair stays equal; practice options include the supplement | L2 (112°), L5 (67°), L7 (133°) offer the supplement |
 | Doubling the given angle | Practice options include the double (144°, 236°) with the rule hint on a miss | L2 (136°), L5 (226°), L7 (94°) offer the double |
 | Accepting a close answer | Near-miss round (88° / 92°) and the check habit | L8 offers 89° and 91° |
-| Guessing under time pressure | The estimate-first habit; practice has no time limit | The time bar turns amber then red, then the mission fails and the level restarts |
+| Guessing under time pressure | The estimate-first habit; practice has no time limit | No visible timer; in the last seconds the clock ticks and the screen edge pulses red, then the raider blasts the ship and the level restarts |
 
 ## Assessment
 

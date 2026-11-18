@@ -57,9 +57,10 @@ function chip(label, color, onTap) {
   return c;
 }
 
+const FIND = '<b class="find">Find <i class="xv">x</i></b>';
 const prompt = (type, given) => (type === 'linear'
-  ? `<b class="find">Find x</b>It makes a straight line with ${given}°`
-  : `<b class="find">Find x</b>It is opposite the ${given}° angle`);
+  ? `${FIND}It makes a straight line with <span class="deg">${given}°</span>`
+  : `${FIND}It is opposite the <span class="deg">${given}°</span> angle`);
 
 export const SCENES = [
   // 1 ------------------------------------------------------------ the strategy meeting
@@ -288,15 +289,13 @@ export const SCENES = [
         { key: 'enemy', label: 'Enemy', color: '#ff5a4a', line: 'The red line points at the enemy.' },
         { key: 'given', label: 'Given', color: '#ffa62b', line: 'The orange angle is given.' },
         { key: 'x', label: 'x', color: '#ffffff', line: 'The white angle is x. Find it!' },
-        { key: 'timer', label: 'Timer', color: '#ffe066', line: 'This bar is your time. Estimate first!' },
       ];
       const tapped = new Set();
       let hl = null;
       const draw = () => {
-        ctx.radar.draw({ ...linear(270, 118, { xLabel: 'x', raider: true }), highlight: hl && hl !== 'timer' ? hl : null, aria: 'The battle radar from the game' });
-        ctx.qbar.el.classList.toggle('hl', hl === 'timer');
+        ctx.radar.draw({ ...linear(270, 118, { xLabel: 'x', raider: true }), highlight: hl, aria: 'The battle radar from the game' });
       };
-      ctx.qbar(prompt('linear', 62), { timer: true });
+      ctx.qbar(prompt('linear', 62));
       draw();
       ctx.controls.replaceChildren(...PARTS.map((p) => chip(p.key === 'x' ? '<span style="font:italic 700 18px Cambria,serif">x</span>' : p.label, p.color, (c) => {
         ctx.controls.querySelectorAll('.chip').forEach((o) => o.classList.toggle('on', o === c));
@@ -307,7 +306,7 @@ export const SCENES = [
         const lines = [crew(p.line)];
         if (tapped.size === PARTS.length && !this.told) {
           this.told = true;
-          lines.push(crew('Wrong answer? The enemy fires back.'), crew('Time runs out? The mission fails. Just retry the level.'));
+          lines.push(crew('Wrong answer? The enemy fires back.'), crew('Too slow? The raider blasts your ship. Estimate first, then tap!'));
           ctx.say(lines, () => ctx.ready());
         } else ctx.say(lines);
       })));

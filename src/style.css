@@ -84,19 +84,24 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .controls { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 14px; max-width: 920px; }
 .controls:empty { display: none; }
 
-/* the game's question bar (prompt + time bar), for the practice screens */
-.qbar { flex: none; position: relative; display: flex; align-items: center; gap: 10px; padding: 10px 22px 14px; border-radius: 14px; overflow: hidden;
-  background: rgba(8, 16, 38, 0.88); border: 2px solid rgba(255, 181, 71, 0.9); box-shadow: 0 0 24px rgba(255, 160, 60, 0.22);
-  font: 700 clamp(16px, 1.7vw, 20px)/1.25 'Inter', sans-serif; text-align: center; max-width: 92vw; }
-.qbar .find { font: 400 1.15em var(--font-game); letter-spacing: 0.03em; color: var(--gold); text-shadow: var(--ink-outline); margin-right: 0.35em; }
-.qbar .timer { position: absolute; left: 10px; right: 10px; bottom: 4px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.12); }
-.qbar .timer i { display: block; height: 100%; width: 100%; border-radius: 2px; background: #6fe3ff; transform-origin: left; }
-.qbar .timer.run i { animation: drain 9s linear infinite; }
-@keyframes drain { 0% { transform: scaleX(1); background: #6fe3ff; } 55% { background: #6fe3ff; } 56% { background: #ffb547; } 78% { background: #ffb547; } 79% { background: #ff5a4f; } 100% { transform: scaleX(0); background: #ff5a4f; } }
-.qbar.ok { border-color: #4dff88; box-shadow: 0 0 26px rgba(77, 255, 136, 0.45); }
-.qbar.bad { border-color: #ff6a4f; box-shadow: 0 0 26px rgba(255, 90, 60, 0.45); }
-.qbar.hl { animation: qhl 0.9s ease-in-out infinite; }
-@keyframes qhl { 50% { box-shadow: 0 0 0 3px #fff, 0 0 26px rgba(255, 255, 255, 0.6); } }
+/* the game's question bar, for the practice screens: built like the game's panels (ink outline,
+   gold rim, gradient, gloss, lip); angles in orange like their arcs, x in the radar's italic serif.
+   Like the game, it shows no timer. */
+.qbar { flex: none; position: relative; display: flex; align-items: center; padding: 11px 24px 12px; border-radius: 18px; max-width: 92vw; text-align: center;
+  background: linear-gradient(180deg, #1d2a5c 0%, #111a3d 55%, #0b1230 100%);
+  box-shadow: 0 0 0 3px #060a1c, 0 5px 0 3px #060a1c, 0 14px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 2px #ffb547, inset 0 -4px 0 rgba(0, 0, 0, 0.28);
+  font: 600 clamp(16px, 1.7vw, 20px)/1.25 'Fredoka', 'Inter', sans-serif; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); }
+.qbar::before { content: ''; position: absolute; left: 14px; right: 14px; top: 4px; height: 38%; border-radius: 14px 14px 50% 50% / 14px 14px 100% 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0)); pointer-events: none; }
+.qbar .text { position: relative; }
+.qbar .find { font: 400 1.12em var(--font-game); letter-spacing: 0.03em; color: var(--gold); text-shadow: var(--ink-outline); margin-right: 0.4em; }
+.qbar .xv { font-family: 'Cambria Math', Cambria, 'Times New Roman', serif; font-style: italic; font-weight: 700; font-size: 1.12em; }
+.qbar .deg { color: #ffb547; font-weight: 700; }
+.qbar.ok { box-shadow: 0 0 0 3px #060a1c, 0 5px 0 3px #060a1c, 0 0 28px rgba(77, 255, 136, 0.45), inset 0 0 0 2px #4dff88, inset 0 -4px 0 rgba(0, 0, 0, 0.28); }
+.qbar.ok .deg { color: #fff; }
+.qbar.bad { box-shadow: 0 0 0 3px #060a1c, 0 5px 0 3px #060a1c, 0 0 28px rgba(255, 90, 60, 0.45), inset 0 0 0 2px #ff6a4f, inset 0 -4px 0 rgba(0, 0, 0, 0.28);
+  animation: qshake 0.4s ease; }
+@keyframes qshake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 
 /* ---------------------------------------------------------------- buttons */
 /* answer capsules from the game (POLYGON kit): gold acts, green and red are verdicts */
