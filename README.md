@@ -17,7 +17,7 @@ five summary cards and the mouth moves to the drone's screen.
   picture's own screen behind the lesson screen.
 - Buttons: the capsule buttons from the POLYGON Figma file (`assets/ui/polygon/`), cut into a left cap,
   a stretching middle and a right cap so they fit any label.
-- Start banner, play button, recall drone and card: made with Figma AI (`assets/ui/start/`,
+- Start banner, play button, recall drone and card, hint hand: made with Figma AI (`assets/ui/start/`,
   `assets/ui/recall/`).
 - UI kit: Figma, https://www.figma.com/design/tyeZIE8dPEVxyAIccfBrov. Its colour variables carry the
   same names as `src/tokens.css`. (Its screens show an earlier layout.)
@@ -56,6 +56,7 @@ assets/ui/bg/         HQ background pictures (Figma AI): hq-wide.png, hq-tall.pn
 assets/ui/polygon/    button art from the POLYGON Figma file (gold, blue, green, red; caps and middles)
 assets/ui/start/      start banner and play button (Figma AI)
 assets/ui/recall/     recall drone and card (Figma AI)
+assets/ui/hint/       the hint hand (Figma AI)
 LESSON_DESIGN.md      the lesson design: flow, mapping to the deck and the game
 ```
 

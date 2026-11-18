@@ -158,15 +158,25 @@ button { font: inherit; color: inherit; }
 .fig-svg .hit { fill: transparent; }
 .fig-svg .hit-line { stroke: transparent; fill: none; stroke-linecap: round; }
 .fig-svg .tap { cursor: pointer; outline: none; }
-.fig-svg .cue { fill: rgba(127, 243, 255, .08); stroke: var(--holo); stroke-width: 2.5; stroke-dasharray: 5 5; transform-box: fill-box; transform-origin: center; animation: cue 2.4s linear infinite; }
-@keyframes cue { to { transform: rotate(360deg); } }
-.fig-svg .focus { fill: none; stroke: #ffffff; stroke-width: 2.5; stroke-dasharray: 6 5; opacity: 0; }
-.fig-svg path.focus[stroke-linecap] { stroke: rgba(255, 255, 255, .5); }
-.fig-svg .tap:focus-visible .focus, .fig-svg .drag:focus-visible .focus { opacity: 1; }
-@media (hover: hover) {
-  .fig-svg .tap:hover .hit { fill: rgba(127, 243, 255, .1); }
-  .fig-svg .tap:hover .hit-line { stroke: rgba(127, 243, 255, .16); }
-}
+/* tap targets glow: a ring round a point, a line along an arm, an outline round an angle. A hinted target
+   pulses softly; hover and keyboard focus light it fully. No fills, no dashes. */
+.fig-svg .glow-t { fill: none; stroke: var(--holo); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0;
+  filter: drop-shadow(0 0 5px rgba(127, 243, 255, .95)) drop-shadow(0 0 12px rgba(61, 220, 242, .6)); transition: opacity .2s ease; }
+.fig-svg .glow-line { stroke: #b6fbff; }
+.fig-svg .glow-t.cue { animation: glow-pulse 1.3s ease-in-out infinite alternate; }
+@keyframes glow-pulse { from { opacity: .45; } to { opacity: 1; } }
+.fig-svg .tap:focus-visible .glow-t { opacity: 1; animation: none; }
+@media (hover: hover) { .fig-svg .tap:hover .glow-t { opacity: 1; animation: none; } }
+.fig-svg .focus { fill: none; stroke: var(--holo); stroke-width: 2.5; opacity: 0; filter: drop-shadow(0 0 6px rgba(127, 243, 255, .9)); }
+.fig-svg .drag:focus-visible .focus { opacity: 1; }
+/* the hint hand: comes in after a moment, then taps (or presses and drags a little) */
+.fig-svg .hint-hand-wrap { pointer-events: none; animation: hand-in .4s ease-out .7s both; }
+@keyframes hand-in { from { opacity: 0; } to { opacity: 1; } }
+.fig-svg .hint-hand { filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); animation: hand-tap var(--per, 1.3s) ease-in-out infinite; }
+@keyframes hand-tap { 0%, 18% { transform: translate(6px, 10px); } 34% { transform: translate(0, 0) scale(.9); } 48%, 100% { transform: translate(6px, 10px); } }
+.fig-svg .hint-hand.is-drag { animation: hand-drag 1.8s ease-in-out infinite; }
+@keyframes hand-drag { 0% { transform: translate(6px, 10px); opacity: 0; } 15% { opacity: 1; } 28% { transform: translate(0, 0) scale(.9); }
+  70% { transform: translate(-18px, -14px) scale(.9); opacity: 1; } 85%, 100% { transform: translate(-18px, -14px); opacity: 0; } }
 .fig-svg .tap.nope { animation: nope .45s ease; }
 @keyframes nope { 30% { filter: drop-shadow(0 0 6px #ff7a6b); } }
 .fig-svg .drag { cursor: grab; outline: none; }
@@ -256,10 +266,6 @@ button { font: inherit; color: inherit; }
 .qcard.is-off { opacity: .45; cursor: default; }
 
 /* ---------------------------------------------------------------- title (deck slide 1) */
-.title-card { height: 100%; display: grid; align-content: center; justify-items: center; gap: clamp(12px, 2.4vh, 22px); padding: 6px 4%; text-align: center; overflow: auto; }
-.title-card .sub { margin: 0; font: 700 clamp(14px, .8rem + .3vw, 17px) var(--font-ui); letter-spacing: .2em; text-transform: uppercase; color: var(--holo); text-shadow: 0 0 12px rgba(127, 243, 255, .6); }
-.lead { max-width: 30em; margin: 0; font: 700 clamp(19px, 1rem + .8vw, 30px)/1.35 var(--font-ui); color: #ffffff; text-wrap: balance; }
-.skills { margin: 0; font: 600 clamp(14px, .8rem + .3vw, 18px)/1.4 var(--font-ui); color: var(--text-2); text-wrap: balance; }
 
 
 /* ---------------------------------------------------------------- hologram hexagon bursts */
@@ -289,6 +295,8 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .holo--glow, .holo--scan { animation: none !important; }
   .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
+  .fig-svg .glow-t.cue { animation: none; opacity: .8; }
+  .fig-svg .hint-hand, .fig-svg .hint-hand-wrap { animation: none; }
 }
 
 /* ---------------------------------------------------------------- the recall: a hologram drone (Figma AI art)
@@ -350,13 +358,24 @@ button { font: inherit; color: inherit; }
   background: none; cursor: pointer; filter: drop-shadow(0 12px 26px rgba(0, 0, 0, .55)) drop-shadow(0 0 28px rgba(127, 243, 255, .45));
   animation: play-breathe 2.2s ease-in-out infinite; }
 .start__play img { display: block; width: 100%; height: 100%; pointer-events: none; }
-.start__play::before, .start__play::after { content: ''; position: absolute; inset: -4%; border-radius: 50%; border: 3px solid rgba(127, 243, 255, .75);
-  pointer-events: none; animation: play-ring 2.2s ease-out infinite; }
-.start__play::after { animation-delay: 1.1s; }
 @keyframes play-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-@keyframes play-ring { from { transform: scale(.95); opacity: .9; } to { transform: scale(1.45); opacity: 0; } }
 .start__play:active { transform: scale(.93); animation: none; }
 .start__play:focus-visible { outline: 3px solid var(--holo); outline-offset: 10px; }
 .start.is-going { pointer-events: none; }
-.start.is-going .start__play::before, .start.is-going .start__play::after { display: none; }
-@media (prefers-reduced-motion: reduce) { .start__pic, .start__play, .start__play::before, .start__play::after { animation: none; } }
+/* the game title: the chunky gold logo, a light sweeping across it now and then, and the lesson's name
+   on a hologram tag under it */
+.start__title { position: absolute; z-index: 1; top: max(5vh, 22px); left: 0; right: 0; display: grid; justify-items: center; gap: clamp(8px, 1.4vh, 14px);
+  padding: 0 16px; text-align: center; pointer-events: none; }
+.start__logo { font-size: clamp(46px, 9vw, 118px); letter-spacing: .03em; filter: drop-shadow(0 0 22px rgba(255, 197, 49, .35));
+  animation: ghost-in .9s cubic-bezier(.22, 1, .36, 1) .15s both; }
+.start__logo .logo__text {
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, .9) 50%, transparent 58%) 160% 0 / 260% 100% no-repeat,
+    linear-gradient(180deg, var(--sun-200) 12%, var(--sun-300) 40%, var(--sun-400) 62%, var(--sun-500) 92%);
+  -webkit-background-clip: text; background-clip: text; animation: logo-shine 4.5s ease-in-out 1.2s infinite; }
+@keyframes logo-shine { 0% { background-position: 160% 0, 0 0; } 35%, 100% { background-position: -60% 0, 0 0; } }
+.start__sub { margin: 0; padding: .45em 1.3em .5em; border-radius: 999px; font: 700 clamp(14px, 1.6vw, 22px)/1 var(--font-ui); letter-spacing: .22em;
+  text-transform: uppercase; color: #e8fbff; background: rgba(5, 18, 58, .78);
+  box-shadow: inset 0 0 0 1.5px var(--holo), 0 0 22px rgba(61, 220, 242, .4); text-shadow: 0 0 10px rgba(127, 243, 255, .7);
+  animation: ghost-in .8s cubic-bezier(.22, 1, .36, 1) .45s both; }
+.start.is-going .start__title { transition: opacity .35s ease-in, transform .35s ease-in; opacity: 0; transform: translateY(-16px); }
+@media (prefers-reduced-motion: reduce) { .start__pic, .start__play, .start__logo, .start__logo .logo__text, .start__sub { animation: none; } }

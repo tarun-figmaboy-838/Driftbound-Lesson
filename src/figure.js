@@ -20,6 +20,8 @@ class Builder {
     this.f = fig;
     this.k = fig.k;
     this.items = [];
+    this.cuePts = [];     // tap targets being hinted: the hint hand visits each of them
+    this.handAt = null;   // a drag handle being hinted: the hint hand shows the drag on it
   }
 
   P(p) { return [n(this.f.ox + p[0] * this.f.s), n(this.f.oy - p[1] * this.f.s)]; }
@@ -146,34 +148,58 @@ class Builder {
   }
 
   // something the student can tap: a point {c, r}, a segment {p, q, w} or a sector {o, a, b, r}
+  // a tap target. It glows (a ring round a point, a line along an arm, an outline round an angle):
+  // softly pulsing while it is hinted (cue), fully on hover and keyboard focus.
   tap(key, id, shape, label, { cue = false } = {}) {
-    const k = this.k;
-    let hit = '', ring = '', mark = '';
+    const k = this.k, gc = `glow-t${cue ? ' cue' : ''}`;
+    let hit = '', glow = '';
     if (shape.c) {
       const [x, y] = this.P(shape.c), R = n((shape.r || 26) * k);
       hit = `<circle class="hit" cx="${x}" cy="${y}" r="${R}"/>`;
-      ring = `<circle class="focus" cx="${x}" cy="${y}" r="${R}"/>`;
-      if (cue) mark = `<circle class="cue" cx="${x}" cy="${y}" r="${n(17 * k)}"/>`;
+      glow = `<circle class="${gc}" cx="${x}" cy="${y}" r="${n(16 * k)}"/>`;
+      if (cue) this.cuePts.push(shape.c);
     } else if (shape.p) {
       const [x1, y1] = this.P(shape.p), [x2, y2] = this.P(shape.q);
       const d = `M${x1} ${y1}L${x2} ${y2}`;
       hit = `<path class="hit-line" d="${d}" stroke-width="${n((shape.w || 30) * k)}"/>`;
-      ring = `<path class="focus" d="${d}" stroke-width="${n((shape.w || 30) * k)}" stroke-linecap="round"/>`;
-      if (cue) { const m = this.P([(shape.p[0] + shape.q[0]) / 2, (shape.p[1] + shape.q[1]) / 2]); mark = `<circle class="cue" cx="${m[0]}" cy="${m[1]}" r="${n(14 * k)}"/>`; }
+      glow = `<path class="${gc} glow-line" d="${d}" stroke-width="${n(6 * k)}"/>`;
+      if (cue) this.cuePts.push([lerp(shape.p[0], shape.q[0], 0.62), lerp(shape.p[1], shape.q[1], 0.62)]);
     } else {
       const { o, a, b, r } = shape;
       const R = n(r * this.f.s), [cx, cy] = this.P(o), pa = this.P(at(o, a, r)), pb = this.P(at(o, b, r));
       const d = `M${cx} ${cy}L${pa[0]} ${pa[1]}A${R} ${R} 0 ${b - a > 180 ? 1 : 0} 0 ${pb[0]} ${pb[1]}Z`;
       hit = `<path class="hit" d="${d}"/>`;
-      ring = `<path class="focus" d="${d}"/>`;
+      glow = `<path class="${gc}" d="${d}"/>`;
     }
-    this.push(key, mark + hit + ring, { cls: 'tap', attrs: { tabindex: '0', role: 'button', 'aria-label': label, 'data-tap': id } });
+    this.push(key, glow + hit, { cls: 'tap', attrs: { tabindex: '0', role: 'button', 'aria-label': label, 'data-tap': id } });
+  }
+
+  // the hint hand (Figma AI art): taps each hinted target in turn, or shows a drag on a hinted handle
+  hand(key, pts, { drag = false } = {}) {
+    const H = n(64 * this.k), W = n(H * 0.615);
+    const P = pts.map((p) => this.P(p));
+    const [x0, y0] = P[0];
+    const img = `<image href="assets/ui/hint/hand.png" x="${n(x0 - W * 0.207)}" y="${n(y0 + 6)}" width="${W}" height="${H}"/>`;
+    let move = '';
+    const per = 1.3, dwell = 0.95;
+    if (P.length > 1) {
+      const T = P.length * per, vals = [], times = [];
+      P.forEach(([x, y], i) => {
+        const d = `${n(x - x0)},${n(y - y0)}`;
+        vals.push(d, d);
+        times.push((i * per) / T, (i * per + dwell) / T);
+      });
+      vals.push('0,0'); times.push(1);
+      move = `<animateMotion dur="${T}s" repeatCount="indefinite" values="${vals.join(';')}" keyTimes="${times.map((t) => n(t)).join(';')}"/>`;
+    }
+    this.push(key, `<g class="hint-hand${drag ? ' is-drag' : ''}" style="--per:${per}s;transform-origin:${x0}px ${y0}px">${img}</g>${move}`, { cls: 'hint-hand-wrap' });
   }
 
   // a draggable knob (a slider for keyboards and screen readers)
   handle(key, id, p, { label = 'Handle', now = 0, min = 0, max = 180, hint = false, color = '#ffc531' } = {}) {
     const k = this.k, R = 13 * k;
     const [x, y] = this.P(p);
+    if (hint) this.handAt = p;
     const html = (hint ? `<circle class="hint-ring" cx="${x}" cy="${y}" r="${n(R * 1.5)}"/>` : '')
       + `<circle class="hit" cx="${x}" cy="${y}" r="${n(R * 2.6)}"/>`
       + `<circle class="ink-f" cx="${x}" cy="${y}" r="${n(R + 3 * k)}"/>`
@@ -285,6 +311,8 @@ export class Figure {
     if (!this.fn || !this.layout()) return;
     const b = new Builder(this);
     this.fn(b);
+    if (b.cuePts.length) b.hand('zz-hand', b.cuePts);
+    else if (b.handAt) b.hand('zz-hand', [b.handAt], { drag: true });
     this.commit(b.items);
     this.svg.classList.toggle('draggable', !!(this.onDrag && (this.dragAll || b.items.some((i) => i.attrs?.['data-drag']))));
   }

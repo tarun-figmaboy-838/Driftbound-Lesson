@@ -575,7 +575,12 @@ function begin() {
 }
 if (params.has('step')) { banner.remove(); begin(); }
 else {
-  $('play').focus({ preventScroll: true });
+  // Enter or Space also starts (the button is not focused at load, so no focus ring shows on it)
+  const onKey = (e) => {
+    if (!banner.isConnected) { window.removeEventListener('keydown', onKey, true); return; }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); window.removeEventListener('keydown', onKey, true); $('play').click(); }
+  };
+  window.addEventListener('keydown', onKey, true);
   $('play').addEventListener('click', () => {
     if (banner.classList.contains('is-going')) return;
     banner.classList.add('is-going');

@@ -88,23 +88,31 @@ function crossFig(b, s) {
 // two separate angles side by side; s.j slides the second one onto the first (sharing an arm)
 const PAIR_BOX = [-30, -32, 170, 62];
 function pairMini(b, a1, a2, s = {}) {
-  const j = s.j || 0, L = 54, v2 = [lerp(106, 0, j), 0], rot = a1 * j;
-  b.wedge('w1', O, 0, a1, 24, { fill: FILL.orange, edge: C.orange });
-  b.wedge('w2', v2, rot, rot + a2, 24, { fill: FILL.aqua, edge: C.aqua });
-  b.ray('a1', O, 0, L, { color: C.aqua, w: 4.5 });
-  b.ray('b1', O, a1, L, { color: C.sun, w: 4.5 });
+  const j = s.j || 0;
+  // as the two angles join, the pair glides to the middle of the card and grows to fill it
+  const grow = lerp(1, 1.3, j), L = 54 * grow, R = 24 * grow, rot = a1 * j;
+  const ends = [0, a1, a1 + a2].map((d) => at(O, d, L)).concat([O]);
+  const xs = ends.map((p) => p[0]), ys = ends.map((p) => p[1]);
+  const mid = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
+  const box = [(PAIR_BOX[0] + PAIR_BOX[2]) / 2, (PAIR_BOX[1] + PAIR_BOX[3]) / 2];
+  const o = [(box[0] - mid[0]) * j, (box[1] - mid[1]) * j];
+  const v2 = [lerp(106, 0, j) + o[0], o[1]];
+  b.wedge('w1', o, 0, a1, R, { fill: FILL.orange, edge: C.orange });
+  b.wedge('w2', v2, rot, rot + a2, R, { fill: FILL.aqua, edge: C.aqua });
+  b.ray('a1', o, 0, L, { color: C.aqua, w: 4.5 });
+  b.ray('b1', o, a1, L, { color: C.sun, w: 4.5 });
   b.ray('a2', v2, rot, L, { color: C.aqua, w: 4.5 });
   b.ray('b2', v2, rot + a2, L, { color: C.sun, w: 4.5 });
-  b.dot('o1', O, { r: 4.5 });
+  b.dot('o1', o, { r: 4.5 });
   if (j < 0.98) b.dot('o2', v2, { r: 4.5 });
   if (j < 0.4) {
-    b.text('v1', [10, -19], `${a1}°`, { size: 20, color: TXT.orange });
+    b.text('v1', [o[0] + 10, o[1] - 19], `${a1}°`, { size: 20, color: TXT.orange });
     b.text('v2', [v2[0] + 10, -19], `${a2}°`, { size: 20, color: TXT.aqua });
   } else if (j > 0.92) {
-    b.text('v1', at(O, a1 / 2, 40), `${a1}°`, { size: 17, color: TXT.orange });
-    b.text('v2', at(O, a1 + a2 / 2, 40), `${a2}°`, { size: 17, color: TXT.aqua });
+    b.text('v1', at(o, a1 / 2, R + 17), `${a1}°`, { size: 18, color: TXT.orange });
+    b.text('v2', at(o, a1 + a2 / 2, R + 17), `${a2}°`, { size: 18, color: TXT.aqua });
   }
-  if (s.sq) b.square('sq', O, 0, 11);
+  if (s.sq) b.square('sq', o, 0, 7);            // the right-angle mark, small inside the arcs
 }
 
 // three or four rays from one vertex with two tinted angles (deck slide 13)
@@ -303,18 +311,6 @@ const TYPE_WHY = {
 
 export const STEPS = [
   // ============================================================ WARM-UP
-  // deck slide 1: skills covered
-  {
-    id: 'intro', quiet: true, ch: 0, next: 'Start', title: 'Skills covered',
-    async run(c) {
-      c.caption('Lines & Angles · Class 2');
-      c.stage(h(`<div class="title-card">
-        <p class="sub enter" style="--i:0">Skills covered</p>
-        <p class="lead enter" style="--i:1">Explain and identify adjacent angles, linear pairs and vertically opposite angles, then solve missing-angle problems.</p>
-        <p class="skills enter" style="--i:2">Adjacent angles · Linear pair axiom and converse · Vertically opposite angles</p></div>`));
-    },
-  },
-
   // deck slides 2-3: an angle is formed by two rays from one point; the second ray turns away from the first
   {
     id: 'angle', ch: 0, title: 'How an angle is formed',
