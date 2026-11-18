@@ -1,36 +1,41 @@
-// The narration bar: each caption is read aloud (narrate), and instructions and hints type out on the
-// bar's second line and are read aloud too (play), when the device has a voice and the sound is on.
-// The bar's wave is the voice's mouth: it moves while anything is being said. Tapping the bar finishes
-// the line. The last line stays on screen so it can be read at the student's pace.
-// Screen readers get each whole line once.
+// The narration: one line of text beside the voice (the AI mouth), read aloud, word by word.
 //
-// line: 'text' or { text, mood: 'cheer' | 'hint', hold }
+// Everything the voice says appears in that one line, each word lighting up as it is spoken (the
+// browser's word timing when the voice reports it, an even pace when it doesn't or the sound is off),
+// and the mouth bumps on every word.
+//   caption      the step's sentence from the deck: replaces the line
+//   instruction  ("Drag B."): said after the caption, it follows it in the same line
+//   hint         (a wrong answer, Next too early): takes the line at once while it is said, then the
+//                line goes back to the caption
+// Pieces are said in order: a new caption waits for the one before it to be said.
+// Tapping the line finishes it. Screen readers get each whole piece once, through the sr element.
 
-const CPS = 40;   // typing speed, characters per second
+const PACE_VOICE = 14.5;   // characters a second the voice says, when it reports no word timing
+const PACE_QUIET = 19;     // characters a second the line fills in with the sound off
+const BACK = 2.4;          // seconds a hint stays after it has been said
+const START_WAIT = 0.8;    // seconds to wait for a voice to start before filling in without it
+
+import { esc, angles } from './ui.js';
+
+// how the voice should say a word: maths symbols as words
+const sayable = (w) => w.replace(/∠/g, 'angle ').replace(/°/g, ' degrees').replace(/−/g, ' minus ');
 
 export class Dialogue {
-  constructor(root, { voice = null, sr = null, reduced = () => false, onLine = null, onSpeak = null, onWord = null, muted = () => false } = {}) {
+  constructor(root, { text, mouth = null, voice = null, sr = null, reduced = () => false, muted = () => false } = {}) {
     this.root = root;
-    this.voice = voice;
+    this.text = text;          // the narration line
+    this.mouth = mouth;
+    this.voice = voice;        // a tiny blip per word when there is no voice
     this.sr = sr;
     this.reduced = reduced;
-    this.onLine = onLine;
-    this.onSpeak = onSpeak;
-    this.onWord = onWord;
     this.muted = muted;
-    const lineEl = root.querySelector('.line');
-    this.typed = document.createElement('span');
-    this.rest = document.createElement('span');
-    this.rest.className = 'rest';
-    lineEl.replaceChildren(this.typed, this.rest);
+    this.base = '';            // what the line shows when nothing else is being said
     this.queue = [];
-    this.line = null;
-    this.chars = 0;
-    this.hold = 0;
-    this.resolve = null;
+    this.cur = null;
     this.raf = 0;
-    this.speech = false;          // a voice is speaking the current line
-    this.spokeAt = 0;
+    this.speaking = 0;
+    this.gen = 0;              // bumped when speech is cut off, so late events from old speech are ignored
+    this.waiters = [];
     root.addEventListener('pointerdown', () => this.skip());
     this.synth = window.speechSynthesis || null;
     this.voicePick = null;
@@ -43,59 +48,147 @@ export class Dialogue {
     if (this.synth) { pickVoice(); this.synth.addEventListener?.('voiceschanged', pickVoice); }
   }
 
-  // play lines in order; resolves when the last one has been heard (or is interrupted)
-  play(lines) {
-    this.finish();
-    this.queue = lines.filter(Boolean).map((l) => (typeof l === 'string' ? { text: l } : { ...l }));
-    return new Promise((res) => { this.resolve = res; this.next(); });
+  get speech() { return this.speaking > 0; }
+
+  // ------------------------------------------------------------ what the steps call
+  // a new caption: said after whatever is being said now ('' clears the line)
+  narrate(text) {
+    if (!text) { this.clear(); return; }
+    this.add({ kind: 'caption', text });
   }
 
-  finish() { const r = this.resolve; this.resolve = null; r?.(); }
+  // instructions and hints; resolves once they have been said (or the line is cleared)
+  play(lines) {
+    const ps = lines.filter(Boolean).map((l) => (typeof l === 'string' ? { text: l } : l))
+      .map((l) => ({ kind: l.mood === 'hint' ? 'hint' : 'line', text: l.text, hold: l.hold }));
+    if (!ps.length) return Promise.resolve();
+    if (ps[0].kind === 'hint') this.interrupt();
+    return Promise.all(ps.map((p) => this.add(p)));
+  }
+
+  // resolves when everything queued has been said (at most `max` ms)
+  settled(max = 7000) {
+    if (!this.cur && !this.queue.length) return Promise.resolve();
+    return new Promise((res) => {
+      const t = setTimeout(res, max);
+      this.waiters.push(() => { clearTimeout(t); res(); });
+    });
+  }
+
+  clear() {
+    this.queue.forEach((p) => p.resolve?.());
+    this.queue = [];
+    this.cur?.resolve?.();
+    this.cur = null;
+    this.hush();
+    this.base = '';
+    this.text.replaceChildren();
+    this.root.dataset.mood = '';
+    this.talkClass();
+    this.wake();
+  }
 
   hush() {
+    this.gen++;
     try { this.synth?.cancel(); } catch { /* no voice */ }
-    this.inFlight = 0;
-    this.setSpeech(false);
-  }
-
-  setSpeech(on) {
-    if (this.speech === on) return;
-    this.speech = on;
-    this.onSpeak?.(on);
+    this.speaking = 0;
     this.talkClass();
   }
 
-  // the wave moves while something is being said, or a line is typing out
-  talkClass() { this.root.classList.toggle('talking', this.speech || (!!this.line && this.chars < this.line.text.length)); }
-
-  // read a caption aloud (it is already on screen)
-  narrate(text) { if (text) this.speak(text); }
-
-  clear() {
-    this.queue = [];
-    this.finish();
+  // tapping the line: show the rest of what is being said
+  skip() {
+    const p = this.cur;
+    if (!p) return;
+    if (p.k < p.words.length) { this.reveal(p, Infinity); return; }
+    p.hold = 0;
+    p.ended = true;
     this.hush();
-    this.line = null;
-    this.typed.textContent = '';
-    this.rest.textContent = '';
-    this.root.classList.remove('has-more', 'talking', 'has-line');
   }
 
-  // say something aloud, after whatever is already being said; maths symbols are read as words
-  speak(text) {
+  // ------------------------------------------------------------ inside
+  add(p) {
+    return new Promise((res) => {
+      p.resolve = res;
+      if (p.kind === 'hint') this.queue.unshift(p); else this.queue.push(p);
+      this.start();
+    });
+  }
+
+  // a hint answers the student at once: finish what is being said now, without waiting for the voice
+  interrupt() {
+    const p = this.cur;
+    if (p) { this.reveal(p, Infinity); this.done(p); }
+    this.queue = this.queue.filter((q) => (q.kind === 'hint' ? (q.resolve?.(), false) : true));
+    this.hush();
+  }
+
+  wake() {
+    if (this.cur || this.queue.length) return;
+    const w = this.waiters; this.waiters = [];
+    w.forEach((f) => f());
+  }
+
+  talkClass() {
+    const p = this.cur;
+    const on = this.speaking > 0 || (!!p && p.k < p.words.length);
+    this.root.classList.toggle('talking', on);
+    document.documentElement.classList.toggle('is-talking', on);
+  }
+
+  // lay a piece out in the line, its words hidden until they are said
+  begin(p) {
+    this.cur = p;
+    const parts = p.text.split(/(\s+)/).filter(Boolean);
+    const nodes = [];
+    const words = [];
+    let spoken = '';
+    for (const part of parts) {
+      if (/^\s+$/.test(part)) { nodes.push(document.createTextNode(' ')); spoken += ' '; continue; }
+      const el = document.createElement('span');
+      el.className = 'w';
+      el.innerHTML = angles(esc(part));
+      nodes.push(el);
+      words.push({ el, at: spoken.length });
+      spoken += sayable(part);
+    }
+    if (p.kind === 'line' && this.base) {
+      this.text.append(document.createTextNode(' '), ...nodes);
+      this.base = `${this.base} ${p.text}`;
+    } else {
+      this.text.replaceChildren(...nodes);
+      if (p.kind === 'caption') this.base = p.text;
+    }
+    if (p.kind === 'line' && !this.base) this.base = p.text;
+    Object.assign(p, { words, k: 0, t: 0, waited: 0, started: false, heard: false, bound: false, ended: false, voiced: false });
+    this.root.dataset.mood = p.kind === 'hint' ? 'hint' : '';
+    if (this.sr) this.sr.textContent = p.text;
+    if (this.reduced()) this.reveal(p, Infinity);
+    p.voiced = this.speak(p, spoken);
+    if (!p.voiced) p.started = true;
+    this.talkClass();
+  }
+
+  speak(p, spoken) {
     if (!this.synth || this.muted()) return false;
     try {
-      const said = text.replace(/∠/g, 'angle ').replace(/°/g, ' degrees').replace(/−/g, ' minus ');
-      const u = new SpeechSynthesisUtterance(said);
+      const u = new SpeechSynthesisUtterance(spoken);
       if (this.voicePick) u.voice = this.voicePick;
       u.rate = 1.0;
       u.pitch = 1.3;
-      const done = () => { this.inFlight = Math.max(0, (this.inFlight || 0) - 1); if (!this.inFlight) this.setSpeech(false); };
-      u.onstart = () => this.setSpeech(true);
-      u.onend = done;
-      u.onerror = done;
-      this.inFlight = (this.inFlight || 0) + 1;
-      this.spokeAt = performance.now();
+      const g = this.gen;
+      let on = false, over = false;
+      const end = () => {
+        if (over) return;
+        over = true;
+        if (on && g === this.gen) this.speaking = Math.max(0, this.speaking - 1);
+        p.ended = true;
+        if (this.cur === p) this.reveal(p, Infinity);
+        this.talkClass();
+      };
+      u.onstart = () => { if (g !== this.gen) return; on = true; this.speaking += 1; p.started = true; p.heard = true; this.talkClass(); };
+      u.onboundary = (e) => { if (e.name && e.name !== 'word') return; p.bound = true; if (this.cur === p) this.reveal(p, e.charIndex); };
+      u.onend = end;
+      u.onerror = end;
       this.synth.speak(u);
       return true;
     } catch {
@@ -103,36 +196,32 @@ export class Dialogue {
     }
   }
 
-  next() {
-    const l = this.queue.shift();
-    if (!l) { this.finish(); return; }
-    this.line = l;
-    this.root.classList.add('has-line');
-    this.chars = this.reduced() ? l.text.length : 0;
-    this.hold = 0;
-    const r = this.root;
-    r.dataset.mood = '';
-    void r.offsetWidth;                         // restart the hint's pop
-    r.dataset.mood = l.mood || '';
-    if (this.sr) this.sr.textContent = l.text;
-    this.paint();
-    r.classList.toggle('has-more', this.queue.length > 0);
-    this.speak(l.text);
+  // light up every word that starts at or before spoken position `upTo`
+  reveal(p, upTo) {
+    let n = 0;
+    while (p.k < p.words.length && p.words[p.k].at <= upTo) {
+      const el = p.words[p.k].el;
+      el.classList.add('on');
+      if (this.reduced()) el.classList.add('now');
+      p.k++; n++;
+    }
+    if (n) {
+      if (!p.voiced) this.voice?.();
+      this.bump();
+      this.talkClass();
+    }
+  }
+
+  // the mouth bumps on each word
+  bump() {
+    if (!this.mouth || this.reduced()) return;
+    this.mouth.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: 180, easing: 'ease-out' });
+  }
+
+  done(p) {
+    if (this.cur === p) this.cur = null;
+    p.resolve?.();
     this.talkClass();
-    this.start();
-  }
-
-  skip() {
-    if (!this.line) return;
-    if (this.chars < this.line.text.length) this.chars = this.line.text.length;
-    else { this.hold = 99; this.hush(); }
-    this.start();
-  }
-
-  paint() {
-    const k = Math.floor(this.chars);
-    this.typed.textContent = this.line.text.slice(0, k);
-    this.rest.textContent = this.line.text.slice(k);
   }
 
   start() {
@@ -147,26 +236,34 @@ export class Dialogue {
   }
 
   update(dt) {
-    const l = this.line;
-    if (!l) return false;
-    const len = l.text.length;
-    if (this.chars < len) {
-      const before = Math.floor(this.chars / 3);
-      this.chars = Math.min(len, this.chars + dt * CPS);
-      const k = Math.floor(this.chars);
-      if (Math.floor(this.chars / 3) > before && l.text[k - 1] !== ' ') this.voice?.();
-      this.paint();
-      return true;
+    let p = this.cur;
+    if (!p) {
+      p = this.queue.shift();
+      if (!p) { this.wake(); return false; }
+      this.begin(p);
     }
-    if (this.rest.textContent) { this.paint(); this.talkClass(); }
-    // wait for the voice to finish the line (at most 10 s, in case a voice never reports its end)
-    if (this.speech && performance.now() - this.spokeAt < 10000) return true;
-    this.hold += dt;
-    const need = this.queue.length ? (l.hold ?? Math.min(2.2, 0.8 + len / 60)) : (l.hold ?? 0.3);
-    if (this.hold < need) return true;
-    if (this.queue.length) { this.next(); return true; }
-    this.root.classList.remove('has-more');
-    this.finish();
-    return false;
+    // the voice can be slow to start, or never start (no voice, or the browser blocks it)
+    if (!p.started) { p.waited += dt; if (p.waited > START_WAIT) p.started = true; }
+    if (p.started && !p.bound && p.k < p.words.length) {
+      p.t += dt;
+      this.reveal(p, p.t * (p.voiced ? PACE_VOICE : PACE_QUIET));
+    }
+    const allShown = p.k >= p.words.length;
+    // done when the voice has finished; or it never started (no voice); or after 14 s at most
+    const voiceDone = !p.voiced || p.ended || (!p.heard && allShown) || p.waited + p.t > 14;
+    if (!allShown || !voiceDone) return true;
+    // said: a hint stays a moment, then the line goes back to the caption
+    if (p.kind === 'hint') {
+      p.hold = (p.hold ?? BACK) - dt;
+      if (p.hold > 0) return true;
+      this.text.replaceChildren(...this.base.split(/(\s+)/).filter(Boolean).map((s) => {
+        if (/^\s+$/.test(s)) return document.createTextNode(' ');
+        const el = document.createElement('span'); el.className = 'w on now'; el.innerHTML = angles(esc(s)); return el;
+      }));
+      this.root.dataset.mood = '';
+      if (!this.reduced()) this.text.animate([{ opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'none' }], { duration: 420, easing: 'ease-out' });
+    }
+    this.done(p);
+    return true;
   }
 }

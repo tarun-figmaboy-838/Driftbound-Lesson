@@ -4,7 +4,7 @@
 // gate: true keeps Next locked until the step is done; lockHint is what the narration says if Next is
 // pressed too early. quiet: true marks steps with no instructions or hints (no second line in the bar).
 import { at, angleOf, lerp } from './figure.js';
-import { h } from './ui.js';
+import { h, esc, angles } from './ui.js';
 
 export const CHAPTERS = [
   { name: 'Warm-up', color: 'aqua' },
@@ -59,10 +59,6 @@ function linearFig(b, s) {
   if (s.c) b.ray('oc', O, t, 122 * s.c, { color: C.sun });
   pointsAOB(b, s);
   if (s.c > 0.95) b.label('nc', at(O, t, 122), 'C', t + (s.handle ? 0 : 0), s.handle ? 36 : 25);
-  if (s.names) {
-    b.text('mr', at(O, t / 2, labelR(t, 74)), '∠COB', { font: 'name', size: 19, color: TXT.orange });
-    b.text('ml', at(O, (t + 180) / 2, labelR(180 - t, 74)), '∠AOC', { font: 'name', size: 19, color: TXT.aqua });
-  }
   if (s.right != null) b.text('vr', at(O, t / 2, labelR(t)), s.right, { size: 26, color: TXT.orange });
   if (s.left != null) b.text('vl', at(O, (t + 180) / 2, labelR(180 - t)), s.left, { size: 26, color: TXT.aqua });
   if (s.handle) b.handle('hc', 'c', at(O, t, 122), { label: 'Point C. Drag it, or use the arrow keys, to move ray OC.', now: t, min: 15, max: 165, hint: s.hint });
@@ -80,17 +76,13 @@ function crossFig(b, s) {
   if (s.l) b.line('ab', [-150 * s.l, 0], [150 * s.l, 0], { color: C.aqua, start: true, end: true, cls: s.glow === 'ab' ? 'glow' : '' });
   if (s.q) b.line('pq', at(O, t + 180, 126 * s.q), at(O, t, 126 * s.q), { color: C.sun, start: true, end: true, cls: s.glow === 'pq' ? 'glow' : '' });
   pointsAOB(b, s, 292);
-  if (s.pq && s.q > 0.95) {
-    b.label('np', at(O, t, 126), 'P', t - 50, s.handle ? 38 : 28);
-    b.label('nq', at(O, t + 180, 126), 'Q', t + 130, 28);
-  }
   W.forEach(([a, z], k) => {
     const f = s.fill?.[k];
     if (s.names?.[k]) b.text(`n${k}`, at(O, mid(a, z), 64), `∠${k + 1}`, { font: 'name', size: 21, color: TXT[f] || '#fff' });
     if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: 26, color: TXT[f] || '#fff', cls: s.vcls?.[k] || '' });
     if (s.taps) b.tap(`t${k}`, `∠${k + 1}`, { o: O, a: a + 3, b: z - 3, r: 96 }, `Angle ${k + 1}`);
   });
-  if (s.handle) b.handle('hp', 'p', at(O, t, 126), { label: 'Point P. Drag it, or use the arrow keys, to turn line PQ.', now: t, min: 20, max: 160, hint: s.hint });
+  if (s.handle) b.handle('hp', 'p', at(O, t, 126), { label: 'The end of the line. Drag it, or use the arrow keys, to rotate the line.', now: t, min: 20, max: 160, hint: s.hint });
 }
 
 // two separate angles side by side; s.j slides the second one onto the first (sharing an arm)
@@ -140,20 +132,136 @@ function lineMini(b, { t = 65, other = 180, right = '', left = '' } = {}) {
   if (right) b.text('vr', at(O, t / 2, 42), right, { size: 17, color: TXT.orange });
   if (left) b.text('vl', at(O, mid(t, other), 42), left, { size: 17, color: TXT.aqua });
 }
-const CROSSM_BOX = [-66, -50, 66, 50];
-function crossMini(b) {
-  [[0, 55, 'orange'], [55, 180, 'aqua'], [180, 235, 'orange'], [235, 360, 'aqua']].forEach(([a, z, f], k) => b.wedge(`w${k}`, O, a, z, 22, { fill: FILL[f], edge: EDGE[f] }));
-  b.full('ab', O, 0, 62, { color: C.aqua, w: 4.5 });
-  b.full('pq', O, 55, 58, { color: C.sun, w: 4.5 });
-  b.dot('o', O, { r: 4.5 });
-}
-const ANGM_BOX = [-14, -14, 70, 60];
-function angleMini(b) {
-  b.wedge('w', O, 0, 50, 24, { fill: FILL.orange, edge: C.orange });
-  b.ray('oa', O, 0, 62, { color: C.aqua, w: 4.5 });
-  b.ray('ob', O, 50, 62, { color: C.sun, w: 4.5 });
-  b.dot('o', O, { r: 5 });
-}
+// ---------------------------------------------------------------- the recall (deck slide 43)
+
+// the delivery drone (Figma AI art); its small screen carries the voice's mouth during the recall
+const DRONE = '<img class="drone__img" src="assets/ui/recall/drone.png" alt="" draggable="false"><span class="drone__screen"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="drone__beam"></i>';
+
+const RECALL = [
+  {
+    term: 'Angles definition', rule: 'Two rays starting from the same point form an angle.',
+    box: [-18, -18, 78, 70], start: { t: 0, ring: 0 },
+    draw(b, s) {
+      if (s.t > 0.5) b.wedge('w', O, 0, s.t, 28, { fill: FILL.orange, edge: C.orange });
+      b.ray('oa', O, 0, 68, { color: C.aqua, w: 4.5 });
+      b.ray('ob', O, s.t, 68, { color: C.sun, w: 4.5 });
+      b.dot('o', O, { r: 5 });
+      if (s.ring) b.pulse('ring', O);
+    },
+    async play(v, c) {                       // the second ray turns away from the first: the turn is the angle
+      v.set({ t: 0, ring: 0 });
+      await c.wait(200);
+      await v.to({ t: 55 }, 1100, 'inOut');
+      v.set({ ring: 1 });
+      c.sound.pop();
+      await c.wait(1200);
+      v.set({ ring: 0 });
+    },
+  },
+  {
+    term: 'Adjacent angles', rule: 'They have the same vertex. They also have one common arm. The two angles do not overlap.',
+    box: [-64, -16, 70, 70], start: { a: 0, b: 0, ring: 0, glow: 0, blink: 0 },
+    draw(b, s) {
+      if (s.a) b.wedge('w1', O, 0, 50 * s.a, 30, { fill: FILL.orange, edge: C.orange, cls: s.blink ? 'blink' : '' });
+      if (s.b) b.wedge('w2', O, 50, 50 + 65 * s.b, 30, { fill: FILL.aqua, edge: C.aqua, cls: s.blink ? 'blink2' : '' });
+      b.ray('r0', O, 0, 64, { color: C.aqua, w: 4.5 });
+      b.ray('r2', O, 115, 64, { color: C.aqua, w: 4.5 });
+      b.ray('r1', O, 50, 64, { color: C.sun, w: 4.5, cls: s.glow ? 'glow' : '' });
+      b.dot('o', O, { r: 5 });
+      if (s.ring) b.pulse('ring', O);
+    },
+    async play(v, c) {                       // same vertex, one common arm, no overlap
+      v.set({ a: 0, b: 0, ring: 0, glow: 0, blink: 0 });
+      await v.to({ a: 1 }, 500, 'out');
+      await v.to({ b: 1 }, 500, 'out');
+      v.set({ ring: 1 });
+      await c.wait(1300);
+      v.set({ ring: 0, glow: 1 });
+      await c.wait(1500);
+      v.set({ glow: 0, blink: 1 });
+      await c.wait(1400);
+      v.set({ blink: 0 });
+    },
+  },
+  {
+    term: 'Linear pair', rule: 'A linear pair always adds to 180°.',
+    box: [-76, -22, 76, 76], start: { w: 0, sw: 0 },
+    draw(b, s) {
+      if (s.w) {
+        b.wedge('wr', O, 0, 65 * s.w, 26, { fill: FILL.orange, edge: C.orange });
+        b.wedge('wl', O, 65, 65 + 115 * s.w, 26, { fill: FILL.aqua, edge: C.aqua });
+      }
+      b.full('ab', O, 0, 72, { color: C.aqua, w: 4.5 });
+      b.ray('oc', O, 65, 66, { color: C.sun, w: 4.5 });
+      if (s.sw > 1) {
+        b.arc('sw', O, 0, s.sw, 46, { color: '#fff3b0', w: 4, cls: 'glow' });
+        b.text('swv', at(O, s.sw / 2, 62), deg(s.sw), { size: 17, color: '#fff3b0' });
+      }
+      b.dot('o', O, { r: 5 });
+    },
+    async play(v, c) {                       // the two angles fill the straight line: half a turn
+      v.set({ w: 0, sw: 0 });
+      await v.to({ w: 1 }, 700, 'out');
+      await v.to({ sw: 180 }, 1200, 'inOut');
+      c.sound.pop();
+    },
+  },
+  {
+    term: 'Linear pair converse', rule: 'Adjacent angles that add to 180° form a linear pair.',
+    box: [-100, -18, 78, 66], start: { j: 0, line: 0 },
+    draw(b, s) {
+      const j = s.j, len = 54;
+      const pv = [lerp(-44, 0, j), 0], pr = 70 * j;          // the 110° angle slides right and turns 70°
+      const qv = [lerp(20, 0, j), 0];                         // the 70° angle slides left
+      b.wedge('wp', pv, pr, pr + 110, 22, { fill: FILL.aqua, edge: C.aqua });
+      b.wedge('wq', qv, 0, 70, 22, { fill: FILL.orange, edge: C.orange });
+      if (s.line) b.full('ab', O, 0, 72, { color: C.aqua, w: 4.5, cls: 'glow' });
+      else {
+        b.ray('p1', pv, pr + 110, len, { color: C.aqua, w: 4.5 });
+        b.ray('q0', qv, 0, len, { color: C.aqua, w: 4.5 });
+      }
+      b.ray('p0', pv, pr, len, { color: C.sun, w: 4.5 });
+      b.ray('q1', qv, 70, len, { color: C.sun, w: 4.5 });
+      b.dot('pv', pv, { r: 4.5 });
+      if (j < 0.98) b.dot('qv', qv, { r: 4.5 });
+      b.text('vp', at(pv, pr + 55, 40), '110°', { size: 15, color: TXT.aqua });
+      b.text('vq', at(qv, 35, 42), '70°', { size: 15, color: TXT.orange });
+    },
+    async play(v, c) {                       // 110° and 70° slide together: the outer arms make a straight line
+      v.set({ j: 0, line: 0 });
+      await c.wait(300);
+      await v.to({ j: 1 }, 1200, 'inOut');
+      v.set({ line: 1 });
+      c.sound.snap();
+    },
+  },
+  {
+    term: 'Vertically opposite angles', rule: 'Vertically opposite angles are equal.',
+    box: [-74, -58, 74, 58], start: { sp: -1, eq: 0 },
+    draw(b, s) {
+      [[0, 50, 'orange'], [50, 180, 'aqua'], [180, 230, 'orange'], [230, 360, 'aqua']].forEach(([a, z, f], k) => {
+        b.wedge(`w${k}`, O, a, z, 24, { fill: FILL[f], edge: EDGE[f], cls: s.eq && f === 'orange' ? 'blink' : '' });
+      });
+      b.full('ab', O, 0, 70, { color: C.aqua, w: 4.5 });
+      b.full('pq', O, 50, 66, { color: C.sun, w: 4.5 });
+      if (s.sp >= 0) b.wedge('gc', O, s.sp, s.sp + 50, 34, { fill: 'rgba(255, 243, 176, .38)', edge: '#fff3b0' });
+      if (s.eq) {
+        b.text('e1', at(O, 25, 46), '50°', { size: 15, color: TXT.orange });
+        b.text('e3', at(O, 205, 46), '50°', { size: 15, color: TXT.orange });
+      }
+      b.dot('o', O, { r: 4.5 });
+    },
+    async play(v, c) {                       // a copy of one angle turns half a turn and lands on the opposite one
+      v.set({ sp: -1, eq: 0 });
+      await c.wait(250);
+      v.set({ sp: 0 });
+      await v.to({ sp: 180 }, 1400, 'inOut');
+      v.set({ sp: -1, eq: 1 });
+      c.sound.snap();
+      await c.wait(1200);
+    },
+  },
+];
 
 // ---------------------------------------------------------------- the proof panel (deck slides 38-41)
 
@@ -164,9 +272,9 @@ function proofPanel() {
     el,
     add(html, why, { final = false } = {}) {
       ol.querySelectorAll('li').forEach((li) => li.classList.remove('now'));
-      const li = h(`<li class="now${final ? ' final' : ''}"><small></small><span class="m"></span></li>`);
-      li.querySelector('small').textContent = why;
-      li.querySelector('.m').innerHTML = html;
+      const li = h(`<li class="now${final ? ' final' : ''}">${why ? '<small></small>' : ''}<span class="m"></span></li>`);
+      if (why) li.querySelector('small').innerHTML = angles(esc(why));
+      li.querySelector('.m').innerHTML = angles(html);
       ol.appendChild(li);
       li.animate?.([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.22,1,.36,1)' });
       li.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
@@ -322,8 +430,6 @@ export const STEPS = [
           b.label('na', [L, 0], 'A', 300, 25);
           b.label('nc', at(O, TC, L), 'C', TC, 26);
           b.label('nb', at(O, TB, L), 'B', TB, 26);
-          b.text('m1', at(O, TC / 2, 80), '∠AOC', { font: 'name', size: 18, color: TXT.orange });
-          b.text('m2', at(O, mid(TC, TB), 82), '∠COB', { font: 'name', size: 18, color: TXT.aqua });
         }
         if (s.taps === 'points') {
           [['O', O], ['A', [L, 0]], ['C', at(O, TC, L)], ['B', at(O, TB, L)]].forEach(([n, p]) => b.tap(`tp${n}`, n, { c: p, r: 28 }, `Point ${n}`, { cue: true }));
@@ -345,8 +451,8 @@ export const STEPS = [
       await c.tapFig({
         answer: 'O',
         why: {
-          A: 'Point A is only on ∠AOC. Find the point where both angles start.',
-          B: 'Point B is only on ∠COB. Find the point where both angles start.',
+          A: 'Point A is on one angle only. Find the point where both angles start.',
+          B: 'Point B is on one angle only. Find the point where both angles start.',
           C: 'C is on the shared arm, but both angles start at the corner. Tap the corner.',
         },
       });
@@ -356,16 +462,13 @@ export const STEPS = [
 
       v.set({ ring: false, taps: 'arms' });
       c.talk(crew('Tap the arm both angles share.'));
-      await c.tapFig({ answer: 'OC', why: { OA: 'OA is an arm of ∠AOC only.', OB: 'OB is an arm of ∠COB only.' } });
+      await c.tapFig({ answer: 'OC', why: { OA: 'OA is an arm of one angle only.', OB: 'OB is an arm of one angle only.' } });
       v.set({ taps: null, glowC: true, dimArms: true });
       c.caption('They also have one common arm.');
       await c.wait(1500);
 
-      v.set({ glowC: false, dimArms: false });
-      c.caption('Do the two angles overlap?');
-      await c.choose({ options: ['Yes', 'No'], answer: 'No', why: { Yes: 'Look again: the orange and blue parts sit side by side. Neither covers the other.' } });
       c.ready();
-      v.set({ blink: true });
+      v.set({ glowC: false, dimArms: false, blink: true });
       c.caption('The two angles do not overlap.');
       await c.wait(1600);
       v.set({ blink: false });
@@ -397,7 +500,7 @@ export const STEPS = [
     id: 'linear', quiet: true, ch: 2, title: 'Linear pair',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 0, c: 0, w: 0, t: 58, names: false, glow: false }, linearFig);
+      const v = c.view({ l: 0, c: 0, w: 0, t: 58, glow: false }, linearFig);
       c.caption('What happens if a ray starts from a point on a straight line?');
       await c.wait(250);
       await v.to({ l: 1 }, 700, 'out');                    // line AB draws out from O
@@ -406,7 +509,6 @@ export const STEPS = [
       await c.wait(600);
       c.caption('We get a pair of adjacent angles.');
       await v.to({ w: 1 }, 700, 'out');
-      v.set({ names: true });
       await c.wait(1500);
       c.caption('As both angles lie on a straight line, we call them a linear pair.');
       v.set({ glow: true });
@@ -443,7 +545,7 @@ export const STEPS = [
       });
       c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('g', '180°')}`);
       c.talk(crew('Trace from B to A.'));
-      await c.trace(v, { r: 96, from: 0, to: 180, auto: null });
+      await c.trace(v, { r: 100, from: 0, to: 180, auto: null });
     },
   },
 
@@ -487,11 +589,11 @@ export const STEPS = [
     id: 'axiom', quiet: true, ch: 2, title: 'Linear pair axiom',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 1, c: 1, w: 1, t: 62, names: true, sweep: null }, linearFig);
-      c.caption('A linear pair always adds up to 180°.');
+      const v = c.view({ l: 1, c: 1, w: 1, t: 62, sweep: null }, linearFig);
+      c.caption('A linear pair always adds to 180°.');
       c.readout(`${S('a', '∠AOC')}${OP('+')}${S('o', '∠COB')}${OP('=')}${S('g', '180°')}`);
       await c.wait(500);
-      v.set({ sweep: { r: 96, from: 0, at: 0, label: '' } });
+      v.set({ sweep: { r: 100, from: 0, at: 0, label: '' } });
       await c.tween(1200, (k) => { v.s.sweep.at = 180 * k; v.s.sweep.label = deg(180 * k); v.draw(); }, 'inOut');
       await c.wait(900);
       c.caption('If a ray stands on a straight line, the two adjacent angles formed add up to 180°.');
@@ -612,7 +714,6 @@ export const STEPS = [
       c.caption('Four angles are formed.');
       for (let k = 0; k < 4; k++) {                      // counted round O one by one
         v.s.fill[k] = 'dim';
-        v.s.names[k] = 1;
         v.s.wcls[k] = 'flash';
         v.draw();
         c.sound.tick(k);
@@ -664,8 +765,8 @@ export const STEPS = [
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], vals: [null, null, null, null], prot: null }, crossFig);
       c.caption('Let’s measure the angles.');
       await c.wait(300);
-      // protractor on line AB: above it for ∠1 and ∠2, below it for ∠3 and ∠4
-      const MEAS = [[0, 0, 0, 55], [2, 180, 180, 235], [1, 0, 180, 55], [3, 180, 360, 235]];
+      // protractor on line AB: above it for ∠1, below it for ∠3
+      const MEAS = [[0, 0, 0, 55], [2, 180, 180, 235]];
       for (const [k, a0, from, to] of MEAS) {
         v.s.prot = { r: 60, a0, from, needle: from };
         await c.tween(800, (e) => { v.s.prot.needle = lerp(from, to, e); v.s.vals[k] = deg(Math.abs(to - from) * e); v.draw(); }, 'inOut');
@@ -683,11 +784,11 @@ export const STEPS = [
 
   // deck slide 36: turn a line
   {
-    id: 'rotate', ch: 4, gate: true, title: 'Turn the line', lockHint: 'Drag point P to go on.',
+    id: 'rotate', ch: 4, gate: true, title: 'Turn the line', lockHint: 'Drag the line to go on.',
     async run(c) {
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], handle: true, hint: true }, (b, s) => {
-        s.vals = [deg(s.t), deg(180 - s.t), deg(s.t), deg(180 - s.t)];
+        s.vals = [deg(s.t), null, deg(s.t), null];
         crossFig(b, s);
       });
       let moved = 0, finish;
@@ -703,7 +804,7 @@ export const STEPS = [
       c.fig.dragAll = 'p';
       v.draw();
       c.caption('Does that still happen if we rotate a line?');
-      c.talk(crew('Drag point P.'));
+      c.talk(crew('Drag the line.'));
       await c.until(done);
       c.ready();
       c.sound.right();
@@ -720,30 +821,27 @@ export const STEPS = [
       c.side(proof.el);
       c.caption('Let’s see why it happens.');
       const PLAN = [
-        { cap: '∠1 and ∠2 form a linear pair.', fill: ['orange', 'aqua', 'dim', 'dim'], glow: 'ab', arc: [0, 180], m: '∠1 + ∠2 = 180°', why: 'Linear pair on line AB' },
-        { cap: '∠2 and ∠3 form another linear pair.', fill: ['dim', 'aqua', 'orange', 'dim'], glow: 'pq', arc: [55, 235], m: '∠2 + ∠3 = 180°', why: 'Linear pair on line PQ' },
-        { cap: 'Both totals include the same ∠2.', fill: ['orange', 'aqua', 'orange', 'dim'], glow: null, arc: null, m: '∠1 + ∠2 = ∠2 + ∠3', why: 'Both equal 180°' },
-        { cap: 'So ∠1 and ∠3 must be equal.', fill: ['orange', 'dim', 'orange', 'dim'], glow: null, arc: null, m: '∠1 + <s>∠2</s> = <s>∠2</s> + ∠3', why: 'Subtract ∠2 from both sides' },
+        { cap: '∠1 and ∠2 form a linear pair.', fill: ['orange', 'aqua', null, null], glow: 'ab', arc: [0, 180], m: '∠1 + ∠2 = 180°', why: 'Step 1 · Straight line' },
+        { cap: '∠2 and ∠3 form another linear pair.', fill: [null, 'aqua', 'orange', null], glow: 'pq', arc: [55, 235], m: '∠2 + ∠3 = 180°', why: 'Two linear pairs' },
+        { cap: 'Both totals include the same ∠2.', fill: ['orange', 'aqua', 'orange', null], glow: null, arc: null, m: '∠1 + ∠2 = ∠2 + ∠3', why: 'Equal to the same 180°' },
+        { cap: 'So ∠1 and ∠3 must be equal.', fill: ['orange', null, 'orange', null], glow: null, arc: null, m: '∠1 + <s>∠2</s> = <s>∠2</s> + ∠3', why: 'Subtract ∠2 from both sides.' },
       ];
       for (const [k, P] of PLAN.entries()) {
-        await c.button(k === 0 ? 'Next step' : `Next step (${k + 1}/4)`);
+        await c.button('Next step');
         c.caption(P.cap);
         v.set({ fill: P.fill, glow: P.glow, sweep: null });
         proof.add(P.m, P.why);
         if (P.arc) {                                       // the half turn each linear pair fills
           const [a, z] = P.arc;
-          v.s.sweep = { r: 86, from: a, at: a, label: '' };
+          v.s.sweep = { r: 100, from: a, at: a, label: '' };
           await c.tween(1000, (e) => { v.s.sweep.at = lerp(a, z, e); v.s.sweep.label = deg(180 * e); v.draw(); }, 'inOut');
         }
       }
       c.ready();
       await c.wait(700);
-      proof.add('∠1 = ∠3', 'Proved', { final: true });
+      proof.add('∠1 = ∠3', '', { final: true });
       c.sound.right();
       c.burst(c.els.side, { count: 16 });
-      await c.wait(1400);
-      v.set({ fill: ['dim', 'aqua', 'dim', 'aqua'] });
-      proof.add('∠2 = ∠4', 'The same way', { final: true });
       await c.wait(800);
     },
   },
@@ -776,27 +874,110 @@ export const STEPS = [
   },
 
   // ============================================================ RECALL (the last step launches the game)
-  // deck slide 43: recall
+  // deck slide 43: recall. A hologram drone drops the five cards into the collection one by one; as each
+  // card lands, its diagram shows the idea while the voice says the deck's sentence. After that, tapping
+  // a card shows it again.
   {
     id: 'recall', quiet: true, ch: 5, title: 'Recall', next: 'Launch mission', launch: true,
     async run(c) {
       c.caption('Recall');
-      const CARDS = [
-        ['Angle', 'Two rays starting from the same point form an angle.', ANGM_BOX, angleMini],
-        ['Adjacent angles', 'Same vertex, one common arm, no overlap.', ADJ_BOX, (b) => adjMini(b, ADJ.B)],
-        ['Linear pair', 'A linear pair always adds to 180°.', LINM_BOX, (b) => lineMini(b, {})],
-        ['Linear pair converse', 'Adjacent angles that add to 180° form a linear pair.', LINM_BOX, (b) => lineMini(b, { t: 70, right: '70°', left: '110°' })],
-        ['Vertically opposite angles', 'Vertically opposite angles are equal.', CROSSM_BOX, crossMini],
-      ];
-      const grid = h('<div class="recall"></div>');
-      CARDS.forEach(([term, rule, box, draw], k) => {
-        const card = h(`<div class="rcard enter" style="--i:${k}"><span class="mini" aria-hidden="true"></span><div><b></b><p></p></div></div>`);
-        card.querySelector('b').textContent = term;
-        card.querySelector('p').textContent = rule;
-        grid.appendChild(card);
-        c.mini(card.querySelector('.mini'), box, draw, { kMin: 0.42, pad: 6 });
+      const root = h(`<div class="recall"><div class="recall__slots"></div><div class="drone" aria-hidden="true">${DRONE}<i class="drone__beam"></i></div></div>`);
+      const slots = root.querySelector('.recall__slots');
+      const drone = root.querySelector('.drone');
+      c.stage(root);
+      // while the drone is here, it is the one talking: the mouth moves to its screen
+      const bar = document.getElementById('narration');
+      bar.classList.add('mouth-on-drone');
+      c.later(() => bar.classList.remove('mouth-on-drone'));
+      const cards = RECALL.map((R) => {
+        const slot = h('<div class="rslot"><button type="button" class="rcard" disabled><b></b><span class="rcard__fig" aria-hidden="true"></span></button></div>');
+        const el = slot.querySelector('.rcard');
+        el.querySelector('b').textContent = R.term;
+        el.setAttribute('aria-label', `${R.term}: ${R.rule}`);
+        slots.appendChild(slot);
+        return { R, slot, el };
       });
-      c.stage(grid);
+      await c.wait(60);                                   // let the grid lay out before drawing in it
+      cards.forEach((k) => {
+        const f = c.mini(k.el.querySelector('.rcard__fig'), k.R.box, () => {}, { kMin: 0.5, kMax: 1.7, pad: 10 });
+        k.v = c.view({ ...k.R.start }, k.R.draw, f);
+      });
+
+      // the drone: flies over a slot, beams the card down into it
+      const place = (x, y) => { drone.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`; };
+      const over = (slot) => {
+        const rr = root.getBoundingClientRect(), sr = slot.getBoundingClientRect();
+        const dw = drone.offsetWidth, dh = drone.offsetHeight;
+        drone.style.setProperty('--bw', `${sr.width}px`);
+        drone.style.setProperty('--bh', `${sr.height + dh * 0.1 + 4}px`);    // from the emitter to the bottom of the card
+        return [sr.left - rr.left + sr.width / 2 - dw / 2, sr.top - rr.top - dh - 4];
+      };
+      drone.style.transition = 'none';
+      place(-140, -10);
+      void drone.offsetWidth;
+      drone.style.transition = '';
+
+      // the card starts small at the drone's emitter, grows as it falls down the beam and lands in its place
+      const drop = (el) => {
+        el.classList.add('in');
+        if (c.reduced) return;
+        const d = drone.getBoundingClientRect(), r = el.getBoundingClientRect();
+        const dx = d.left + d.width / 2 - (r.left + r.width / 2);
+        const dy = d.top + d.height * 0.95 - (r.top + r.height / 2);
+        el.animate([
+          { transform: `translate(${dx}px, ${dy}px) scale(.08)`, opacity: 0, filter: 'brightness(2.2)' },
+          { transform: `translate(${dx}px, ${dy + 8}px) scale(.16)`, opacity: 1, filter: 'brightness(2)', offset: 0.15 },
+          { transform: 'translate(0, -6px) scale(1.02)', opacity: 1, filter: 'brightness(1.3)', offset: 0.8 },
+          { transform: 'none', opacity: 1, filter: 'none' },
+        ], { duration: 620, easing: 'cubic-bezier(.35, .6, .3, 1)' });
+      };
+
+      let busy = true;
+      const explain = async (k) => {
+        cards.forEach((o) => o.el.classList.toggle('is-on', o === k));
+        c.caption(k.R.rule, true);
+        await Promise.all([k.R.play(k.v, c), c.said()]);
+        await c.wait(400);
+        k.el.classList.remove('is-on');
+      };
+      // tapping a card later: the drone flies back over it, scans it and explains it again
+      const revisit = async (k) => {
+        place(...over(k.slot));
+        c.sound.whoosh();
+        await c.wait(700);
+        drone.classList.add('beam');
+        k.el.classList.remove('in'); void k.el.offsetWidth; k.el.classList.add('in');
+        await c.wait(420);
+        drone.classList.remove('beam');
+        await explain(k);
+      };
+
+      for (const k of cards) {
+        place(...over(k.slot));
+        c.sound.whoosh();
+        await c.wait(780);
+        drone.classList.add('beam');
+        await c.wait(300);
+        drop(k.el);                                      // the card leaves the drone's emitter and drops into place
+        c.sound.pop();
+        await c.wait(560);
+        c.burst(k.el, { count: 10, spread: 90 });
+        drone.classList.remove('beam');
+        await explain(k);
+      }
+      place(root.clientWidth - drone.offsetWidth - 6, 4);   // the drone parks in the corner, clear of the cards
+      c.caption('Recall');
+      busy = false;
+      cards.forEach((k) => {
+        k.el.disabled = false;
+        k.el.addEventListener('click', () => {
+          if (busy) return;
+          busy = true;
+          c.sound.tap();
+          c.spawn(async () => { try { await revisit(k); } finally { busy = false; } });
+        });
+      });
+      c.ready();
     },
   },
 ];

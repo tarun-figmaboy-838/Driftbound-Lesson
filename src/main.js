@@ -7,7 +7,7 @@
 import { Figure, at, angleOf } from './figure.js';
 import { Dialogue } from './dialogue.js';
 import { Sound } from './audio.js';
-import { h, burst, burstAt } from './ui.js';
+import { h, burst, burstAt, esc, angles } from './ui.js';
 import { CHAPTERS, STEPS } from './steps.js';
 import { createScene } from './scene.js';
 
@@ -24,10 +24,12 @@ const els = {
 };
 
 const sound = new Sound();
-// the narration bar reads each caption aloud and shows instructions and hints on its second line
-// (speech synthesis, when the device has a voice and the sound is on); its wave moves while it talks
+// the narration: one line beside the AI mouth, said aloud word by word (speech synthesis, when the
+// device has a voice and the sound is on); the mouth moves while it talks
 const dialogue = new Dialogue($('narration'), {
-  voice: () => { if (!dialogue.speech) sound.blip('crew'); },
+  text: els.caption,
+  mouth: document.querySelector('#narration .voice'),
+  voice: () => sound.blip('crew'),
   sr: $('sr'),
   reduced,
   muted: () => sound.muted,
@@ -98,13 +100,12 @@ function updateNext() {
   els.back.classList.toggle('gone', cur === 0);
 }
 
-function setCaption(text) {
-  const el = els.caption;
+let lastCaption = '';
+function setCaption(text, again = false) {
   const t = text || '';
-  if (el.textContent === t) return;
-  el.textContent = t;
+  if (t === lastCaption && !again) return;
+  lastCaption = t;
   dialogue.narrate(t);
-  if (t && !reduced()) el.animate([{ opacity: 0, transform: 'translateY(-8px) scale(.985)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.34,1.56,.64,1)' });
 }
 
 function resetStage() {
@@ -116,6 +117,16 @@ function resetStage() {
   els.readout.classList.remove('has-label');
   els.controls.replaceChildren();
   setCaption('');
+}
+
+// the ghost entrance (see the CSS): see-through and blurred, drifting up, then solid
+function ghost(el) {
+  if (!el || reduced()) return;
+  el.animate?.([
+    { opacity: 0, filter: 'blur(10px)', transform: 'translateY(12px) scale(.96)' },
+    { opacity: 0.65, filter: 'blur(2px)', offset: 0.5 },
+    { opacity: 1, filter: 'none', transform: 'none' },
+  ], { duration: 600, easing: 'cubic-bezier(.22,1,.36,1)' });
 }
 
 // entrance wrapper for buttons and cards (removed once played so it never locks transforms)
@@ -153,6 +164,7 @@ function makeCtx(i, tk) {
     until: guard,
     caption: setCaption,
     say: (lines) => guard(dialogue.play(Array.isArray(lines) ? lines : [lines])),
+    said: (max = 12000) => guard(dialogue.settled(max)),     // resolves once the narration has been said
     talk,
     wait: (ms) => guard(new Promise((r) => { const id = setTimeout(r, reduced() ? Math.min(ms, 120) : ms); later(() => clearTimeout(id)); })),
     tween(ms, fn, ease = 'inOut') {
@@ -298,12 +310,17 @@ function makeCtx(i, tk) {
       later(() => f.destroy());
       return f;
     },
-    readout(html) { els.readout.classList.remove('has-label'); els.readout.innerHTML = html || ''; },
+    readout(html) {
+      const was = els.readout.innerHTML;
+      els.readout.classList.remove('has-label');
+      els.readout.innerHTML = angles(html || '');
+      if (!was && html) ghost(els.readout);
+    },
     // the deck's label box ("ADJACENT ANGLES"), shown where the readout goes
     stamp(text) {
       els.readout.classList.add('has-label');
       els.readout.textContent = text;
-      els.readout.animate?.([{ opacity: 0, transform: 'scale(.9)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+      ghost(els.readout);
       sound.stamp();
       c.wait(200).then(() => burstAt(els.readout, { count: 12, spread: 130 })).catch(() => {});
     },
@@ -324,7 +341,7 @@ function makeCtx(i, tk) {
         let wrong = 0;
         const btns = options.map((v) => {
           const b = h('<button type="button" class="pill ans"><span class="v"></span></button>');
-          b.querySelector('.v').textContent = fmt(v);
+          b.querySelector('.v').innerHTML = angles(esc(fmt(v)));
           b.dataset.v = String(v);
           b.addEventListener('click', () => {
             if (b.disabled || tk.dead || b.classList.contains('is-right')) return;
@@ -347,7 +364,8 @@ function makeCtx(i, tk) {
           });
           return b;
         });
-        c.controls(...btns);
+        // the answers come in once the question has been said
+        dialogue.settled().then(() => { if (!tk.dead) c.controls(...btns); });
         c.pick = (v) => {
           const b = btns.find((x) => x.dataset.v === String(v));
           if (b) b.click();
@@ -408,7 +426,8 @@ function makeCtx(i, tk) {
           if (!keep) { const w = b.parentElement; (w && w !== els.controls ? w : b).remove(); }
           resolve(b);
         });
-        els.controls.appendChild(entering(b, 0));
+        // it comes in once the narration has been said
+        dialogue.settled().then(() => { if (!tk.dead) els.controls.appendChild(entering(b, 0)); });
       }));
     },
 
@@ -537,6 +556,8 @@ window.addEventListener('keydown', (e) => {
 
 // ---------------------------------------------------------------- the HQ backdrop and the screen layout
 const scene = createScene($('room-pic'));
+// the button art, loaded up front so no button ever shows without its capsule
+['gold', 'blue', 'green', 'red'].forEach((c) => ['l', 'm', 'r'].forEach((p) => { new Image().src = `assets/ui/polygon/pill-${c}-${p}.png`; }));
 
 // start once the fonts used on the figures are ready (or after a short wait)
 const params = new URLSearchParams(location.search);
@@ -544,9 +565,30 @@ const start = Math.max(0, Math.min(STEPS.length - 1, Number(params.get('step')) 
 maxCh = STEPS[start].ch;
 const fonts = ['400 20px "Lilita One"', '600 18px "Fredoka"', '400 18px "Noto Sans Math"'];
 const fontsIn = Promise.race([Promise.all(fonts.map((f) => document.fonts?.load(f, '∠1°−'))), new Promise((r) => setTimeout(r, 1500))]).catch(() => {});
-Promise.race([Promise.all([fontsIn, scene.loaded]), new Promise((r) => setTimeout(r, 4000))]).finally(() => {
-  document.body.classList.add('is-on');
-  go(start);
-});
+const ready = Promise.race([Promise.all([fontsIn, scene.loaded]), new Promise((r) => setTimeout(r, 4000))]);
+
+// the start banner: the lesson begins when the play button is tapped (that tap also lets the browser
+// start the voice). A link to a given step (?step=N) skips it.
+const banner = $('start');
+function begin() {
+  ready.finally(() => { document.body.classList.add('is-on'); go(start); });
+}
+if (params.has('step')) { banner.remove(); begin(); }
+else {
+  $('play').focus({ preventScroll: true });
+  $('play').addEventListener('click', () => {
+    if (banner.classList.contains('is-going')) return;
+    banner.classList.add('is-going');
+    sound.tap();
+    sound.whoosh();
+    begin();
+    const done = () => banner.remove();
+    if (reduced()) { done(); return; }
+    // fly in: the banner zooms towards the station and fades into the HQ
+    banner.querySelector('.start__pic').animate([{ transform: 'scale(1.06)', opacity: 1 }, { transform: 'scale(1.7)', opacity: 0 }], { duration: 900, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' });
+    $('play').animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.6)', opacity: 0 }], { duration: 350, easing: 'ease-in', fill: 'forwards' });
+    banner.animate([{ backgroundColor: 'rgba(3,10,36,1)' }, { backgroundColor: 'rgba(3,10,36,0)' }], { duration: 900, fill: 'forwards' }).onfinish = done;
+  });
+}
 
 window.lesson = { go, get index() { return cur; }, steps: STEPS, memory, shared, dialogue };   // for testing from the console

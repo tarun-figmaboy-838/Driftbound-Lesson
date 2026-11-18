@@ -6,6 +6,11 @@ export function h(html) {
   return t.content.firstElementChild;
 }
 
+// the game fonts have no angle sign; the one the browser borrows is thin, so it is drawn heavier
+// (see .ang in the CSS). esc() for text, angles() to mark the signs in HTML.
+export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+export const angles = (html) => String(html).replace(/∠/g, '<span class="ang">∠</span>');
+
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const COLORS = ['#7ff3ff', '#3ddcf2', '#d4ff7a', '#ffffff', '#ffe066'];
 

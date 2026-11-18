@@ -94,7 +94,14 @@ class Builder {
   text(key, p, str, { size = 20, color = '#ffffff', font = 'num', dx = 0, dy = 0, anchor = 'middle', cls = '' } = {}) {
     const [x, y] = this.P(p);
     const fs = size * this.k;
-    this.push(key, `<text class="t t-${font}" x="${n(x + dx * this.k)}" y="${n(y + dy * this.k)}" font-size="${n(fs)}" fill="${color}" stroke-width="${n(Math.max(2.5, fs * 0.24))}" text-anchor="${anchor}" dominant-baseline="central">${esc(str)}</text>`, { cls });
+    const at = `x="${n(x + dx * this.k)}" y="${n(y + dy * this.k)}" font-size="${n(fs)}" text-anchor="${anchor}" dominant-baseline="central"`;
+    let svg = `<text class="t t-${font}" ${at} fill="${color}" stroke-width="${n(Math.max(2.5, fs * 0.24))}">${esc(str)}</text>`;
+    // the borrowed angle sign is thin: draw it once more on top, stroked in its own colour
+    if (String(str).includes('∠')) {
+      const parts = String(str).split('∠').map((p) => `<tspan fill="transparent">${esc(p)}</tspan>`);
+      svg += `<text class="t-${font} t-ang" ${at}>${parts.join(`<tspan fill="${color}" stroke="${color}" stroke-width="${n(fs * 0.07)}">∠</tspan>`)}</text>`;
+    }
+    this.push(key, svg, { cls });
   }
 
   // an arc stroke from a to b (anticlockwise) at radius r: traced turns, measured angles

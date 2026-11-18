@@ -47,12 +47,13 @@ button { font: inherit; color: inherit; }
 
 /* ---------------------------------------------------------------- the digital screen */
 .screen { position: fixed; left: var(--sx); top: var(--sy); width: var(--sw); height: var(--sh); z-index: 1; overflow: hidden; border-radius: 16px;
-  background: radial-gradient(120% 100% at 50% 0%, rgba(20, 56, 132, .96) 0%, rgba(9, 28, 80, .96) 45%, rgba(5, 14, 46, .97) 100%);
+  background: radial-gradient(120% 100% at 50% 0%, rgb(20, 56, 132) 0%, rgb(9, 28, 80) 45%, rgb(5, 14, 46) 100%);
   box-shadow: 0 0 0 1px rgba(127, 243, 255, .55), 0 0 36px rgba(61, 220, 242, .28), 0 24px 70px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .12); }
 .holo { position: absolute; inset: 0; pointer-events: none; }
 /* honeycomb: a faint grid everywhere, and a brighter patch that drifts across it */
-.holo--hex { background: var(--hex) 0 0 / 28px auto; opacity: .055; }
-.holo--glow { background: var(--hex) 0 0 / 28px auto; opacity: .28;
+.holo--hex { background: var(--hex) 0 0 / 28px auto; opacity: .055;
+  -webkit-mask: radial-gradient(ellipse 62% 58% at 50% 56%, rgba(0, 0, 0, .2) 40%, #000 100%); mask: radial-gradient(ellipse 62% 58% at 50% 56%, rgba(0, 0, 0, .2) 40%, #000 100%); }
+.holo--glow { background: var(--hex) 0 0 / 28px auto; opacity: .16;
   -webkit-mask: radial-gradient(circle at center, #000 0, transparent 70%) no-repeat; mask: radial-gradient(circle at center, #000 0, transparent 70%) no-repeat;
   -webkit-mask-size: 46% 70%; mask-size: 46% 70%; animation: hexdrift 14s ease-in-out infinite alternate; }
 @keyframes hexdrift {
@@ -84,14 +85,22 @@ button { font: inherit; color: inherit; }
   background: linear-gradient(90deg, rgba(127, 243, 255, .6), rgba(127, 243, 255, .15) 70%, transparent); }
 .caption h1 { margin: 0; font: 700 clamp(18px, .95rem + .6vw, 26px)/1.25 var(--font-ui); color: #ffffff; letter-spacing: .005em; text-wrap: balance; }
 .caption:has(h1:empty) { visibility: hidden; }
-/* instructions and hints: a small hologram chip just under the bar (it never moves the layout) */
-.caption .line { position: absolute; left: 82px; top: calc(100% + 10px); z-index: 3; max-width: calc(100% - 96px); margin: 0; padding: 7px 14px 8px; border-radius: 10px;
-  background: rgba(4, 14, 44, .92); box-shadow: inset 0 0 0 1.5px var(--holo), 0 0 18px rgba(61, 220, 242, .35);
-  font: 600 clamp(14px, .78rem + .3vw, 17px)/1.35 var(--font-ui); color: var(--holo); }
-.caption .line .rest { color: transparent; }
-.caption:not(.has-line) .line, .caption.quiet .line { display: none; }
-.caption[data-mood="hint"] .line { animation: flick .45s steps(2, end); }
-@keyframes flick { 0% { opacity: .2; } 40% { opacity: 1; } 60% { opacity: .5; } 100% { opacity: 1; } }
+/* Ghost animation: things appear like a hologram ghost, see-through and blurred, drifting up with a
+   faint echo trailing behind, then turning solid. The narration's words do it one by one, as the voice
+   says them (hints too); buttons, cards and labels do it as they come in. */
+.caption h1 .w { display: inline-block; opacity: 0; }
+.caption h1 .w.on { animation: ghost-word .55s cubic-bezier(.22, 1, .36, 1) both; }
+.caption h1 .w.now { animation: none; opacity: 1; }
+@keyframes ghost-word {
+  0% { opacity: 0; filter: blur(7px); transform: translateY(.45em) scale(1.05);
+    text-shadow: 0 .35em 0 rgba(127, 243, 255, .35), 0 .7em 0 rgba(127, 243, 255, .15); }
+  45% { opacity: .7; filter: blur(1.5px); text-shadow: 0 .12em 0 rgba(127, 243, 255, .3), 0 0 14px rgba(127, 243, 255, .8); }
+  100% { opacity: 1; filter: none; transform: none; text-shadow: 0 0 0 rgba(127, 243, 255, 0); } }
+@keyframes ghost-in {
+  0% { opacity: 0; filter: blur(10px); transform: translateY(14px) scale(.96); }
+  50% { opacity: .65; filter: blur(2px); }
+  100% { opacity: 1; filter: none; transform: none; } }
+.enter { animation: ghost-in .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i, 0) * 90ms + 60ms); }
 .voice { display: flex; align-items: center; justify-content: center; gap: 4px; width: 64px; height: 44px; border-radius: 22px;
   background: radial-gradient(circle at 50% 30%, rgba(127, 243, 255, .28), rgba(6, 18, 54, .95) 75%);
   box-shadow: inset 0 0 0 1.5px rgba(127, 243, 255, .75), 0 0 18px rgba(61, 220, 242, .35); }
@@ -117,7 +126,7 @@ button { font: inherit; color: inherit; }
 .view:not(.is-custom) > .custom { display: none; }
 .view:not(.has-side) > .side { display: none; }
 .view.has-side { grid-template-columns: minmax(0, 1fr) minmax(240px, 32%); column-gap: 20px; }
-.view.has-side > .side { grid-area: 1 / 2; align-self: center; }
+.view.has-side > .side { grid-area: 1 / 2; align-self: stretch; }
 
 /* ---------------------------------------------------------------- figure (SVG) */
 .fig-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; touch-action: manipulation; outline: none; }
@@ -127,6 +136,9 @@ button { font: inherit; color: inherit; }
 .fig-svg .ink-h { fill: #050f33; stroke: #050f33; stroke-linejoin: round; }
 .fig-svg .ink-f { fill: #050f33; }
 .fig-svg .t { paint-order: stroke; stroke: #050f33; stroke-linejoin: round; }
+.fig-svg .t-ang { stroke: none; pointer-events: none; }
+/* the angle sign comes from a thin maths font: stroke it so it is as heavy as the text around it */
+.ang { -webkit-text-stroke: .07em currentColor; }
 .fig-svg .t-num { font-family: var(--font-display); letter-spacing: .02em; }
 .fig-svg .t-name { font-family: var(--font-ui); font-weight: 700; }
 .fig-svg .t-x { font-family: var(--font-x); font-style: italic; font-weight: 700; }
@@ -181,9 +193,11 @@ button { font: inherit; color: inherit; }
 /* ---------------------------------------------------------------- buttons: the POLYGON capsule kit (3-slice, caps never stretch) */
 .bar { position: fixed; z-index: 2; left: var(--sx); width: var(--sw); top: calc(var(--sy) + var(--sh) + 18px);
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 16px; padding: 0 2px; }
-.pill { --pill: url(../assets/ui/polygon/pill-gold.png);
-  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .35em; height: 54px; min-width: 112px; margin: 0; padding: 0 6px 3px; cursor: pointer;
-  border: 0 solid transparent; border-width: 0 27px; border-image: var(--pill) 0 73 fill / 0 27px stretch; background: none;
+/* the POLYGON capsules: a left cap, a stretching middle and a right cap, as plain background layers */
+.pill { --cap: 27px;
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .35em; height: 54px; min-width: 112px; margin: 0; padding: 0 calc(var(--cap) + 6px) 3px; cursor: pointer;
+  border: 0;
+  background: url(../assets/ui/polygon/pill-gold-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-gold-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-gold-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat;
   font: 700 clamp(19px, .9rem + .4vw, 23px)/1 var(--font-ui); color: #4a2600; letter-spacing: .01em;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), filter .15s ease, opacity .2s ease; }
 .pill > * { pointer-events: none; }
@@ -191,9 +205,9 @@ button { font: inherit; color: inherit; }
 .pill:active:not(:disabled):not([aria-disabled="true"]) { transform: translateY(2px) scale(.97); transition-duration: 60ms; }
 .pill:focus-visible { outline: 3px solid var(--holo); outline-offset: 4px; border-radius: 999px; }
 .pill--blue, .pill.is-right, .pill.is-wrong { color: #ffffff; text-shadow: 0 2px 0 rgba(0, 20, 70, .45); }
-.pill--blue { --pill: url(../assets/ui/polygon/pill-blue.png); }
-.pill.is-right { --pill: url(../assets/ui/polygon/pill-green.png); pointer-events: none; animation: pop 420ms ease-out; }
-.pill.is-wrong { --pill: url(../assets/ui/polygon/pill-red.png); opacity: .85; cursor: default; }
+.pill--blue { background: url(../assets/ui/polygon/pill-blue-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-blue-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-blue-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat; }
+.pill.is-right { background: url(../assets/ui/polygon/pill-green-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-green-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-green-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat; pointer-events: none; animation: pop 420ms ease-out; }
+.pill.is-wrong { background: url(../assets/ui/polygon/pill-red-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-red-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-red-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat; opacity: .85; cursor: default; }
 .pill.is-off { opacity: .4; pointer-events: none; }
 .pill .ico { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .back { min-width: 0; width: 66px; padding: 0; }
@@ -212,7 +226,7 @@ button { font: inherit; color: inherit; }
   background: var(--glass); box-shadow: inset 0 0 0 1.5px var(--holo-line), 0 0 22px rgba(61, 220, 242, .18); }
 .side__tag { display: block; margin: 0 0 10px; font: 700 13px var(--font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--holo); }
 .proof { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.proof li { padding: 7px 14px 9px; border-radius: 10px; background: rgba(127, 243, 255, .06); box-shadow: inset 0 0 0 1px rgba(127, 243, 255, .25); opacity: .65; transition: opacity .25s; }
+.proof li { text-align: center; padding: 7px 14px 9px; border-radius: 10px; background: rgba(127, 243, 255, .06); box-shadow: inset 0 0 0 1px rgba(127, 243, 255, .25); opacity: .65; transition: opacity .25s; }
 .proof li.now { opacity: 1; box-shadow: inset 0 0 0 1.5px #ffe066, 0 0 14px rgba(255, 224, 102, .25); }
 .proof li.final { opacity: 1; box-shadow: inset 0 0 0 1.5px #d4ff7a, 0 0 14px rgba(212, 255, 122, .3); }
 .proof small { display: block; margin-bottom: 2px; font: 700 11px var(--font-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--holo); }
@@ -223,7 +237,7 @@ button { font: inherit; color: inherit; }
 
 /* ---------------------------------------------------------------- question cards: hologram panels */
 .cards { height: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); align-items: center; gap: clamp(12px, 1.8vw, 24px); padding: 4px; }
-.cards > span { display: grid; min-height: 0; aspect-ratio: 1; max-height: 100%; align-self: center; }
+.cards > span { display: grid; min-height: 0; aspect-ratio: 4 / 3; max-height: 100%; align-self: center; }
 .qcard-wrap { min-height: 0; display: grid; }
 .qcard { position: relative; display: grid; grid-template-rows: minmax(0, 1fr); min-height: 0; padding: 10px; border: 0; border-radius: 12px; cursor: pointer;
   background: var(--glass); box-shadow: inset 0 0 0 1.5px var(--holo-line), 0 0 18px rgba(61, 220, 242, .18);
@@ -247,13 +261,6 @@ button { font: inherit; color: inherit; }
 .lead { max-width: 30em; margin: 0; font: 700 clamp(19px, 1rem + .8vw, 30px)/1.35 var(--font-ui); color: #ffffff; text-wrap: balance; }
 .skills { margin: 0; font: 600 clamp(14px, .8rem + .3vw, 18px)/1.4 var(--font-ui); color: var(--text-2); text-wrap: balance; }
 
-/* ---------------------------------------------------------------- recap cards (HUD) */
-.recall { height: 100%; overflow: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); align-content: center; gap: 12px 16px; padding: 6px; }
-.rcard { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 14px; padding: 10px 16px 10px 10px; border-radius: 12px; color: #fff;
-  background: var(--glass); box-shadow: inset 0 0 0 1.5px var(--holo-line), 0 0 18px rgba(61, 220, 242, .15); }
-.rcard .mini { position: relative; height: 70px; border-radius: 8px; background: rgba(127, 243, 255, .05); box-shadow: inset 0 0 0 1px rgba(127, 243, 255, .25); }
-.rcard b { display: block; font: 700 clamp(16px, .8rem + .35vw, 19px)/1.15 var(--font-ui); color: var(--holo); }
-.rcard p { margin: 4px 0 0; font: 500 clamp(14px, .78rem + .25vw, 16px)/1.35 var(--font-ui); color: #e6f0ff; }
 
 /* ---------------------------------------------------------------- hologram hexagon bursts */
 .fx { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
@@ -268,20 +275,88 @@ button { font: inherit; color: inherit; }
 .is-tall .stage { padding: 14px 12px 12px; row-gap: 10px; }
 .is-tall .caption { column-gap: 12px; padding: 2px 52px 10px 2px; }
 .is-tall .mute { top: calc(var(--sy) + 12px); left: calc(var(--sx) + var(--sw) - 12px - 40px); width: 40px; height: 40px; }
-.is-tall .caption .line { left: 8px; max-width: calc(100% - 16px); }
 .is-tall .voice { width: 54px; height: 38px; gap: 3px; }
 .is-tall .corner { width: 14px; height: 14px; }
-.is-tall .pill { height: 50px; min-width: 84px; font-size: 19px; border-width: 0 25px; border-image: var(--pill) 0 73 fill / 0 25px stretch; padding: 0 2px 3px; }
+.is-tall .pill { --cap: 25px; height: 50px; min-width: 84px; font-size: 19px; padding: 0 calc(var(--cap) + 2px) 3px; }
 .is-tall .back { width: 60px; }
 .is-tall .next { min-width: 130px; }
 .is-tall .view.has-side { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; row-gap: 10px; }
-.is-tall .view.has-side > .side { grid-area: 2 / 1; align-self: stretch; max-height: min(46%, 220px); padding: 12px; }
+.is-tall .view.has-side { grid-template-rows: minmax(0, 1fr) minmax(140px, 40%); }
+.is-tall .view.has-side > .side { grid-area: 2 / 1; align-self: stretch; max-height: none; padding: 12px; }
 .is-tall .cards { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); align-items: stretch; gap: 12px; padding: 2px 6px; }
 .is-tall .cards > span { aspect-ratio: auto; height: 100%; }
-.is-tall .rcard { grid-template-columns: 80px minmax(0, 1fr); gap: 10px; padding: 7px 10px 7px 7px; }
-.is-tall .rcard .mini { height: 56px; }
-.is-tall .recall { align-content: start; gap: 9px; }
 
 @media (prefers-reduced-motion: reduce) {
   .holo--glow, .holo--scan { animation: none !important; }
+  .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
 }
+
+/* ---------------------------------------------------------------- the recall: a hologram drone (Figma AI art)
+   drops each square card (Figma AI art) into the collection; the card being explained glows gold */
+.recall { position: relative; height: 100%; container-type: size; }
+.recall__slots { position: absolute; inset: 96px 0 0; display: grid; align-content: center; justify-content: center; gap: 18px;
+  --cell: min(calc((100cqw - 4 * 18px) / 5), calc(100cqh - 108px), 290px);
+  grid-template-columns: repeat(5, var(--cell)); grid-auto-rows: var(--cell); }
+.rslot { position: relative; }
+.rcard { position: absolute; inset: 0; display: grid; grid-template-rows: 24.6% minmax(0, 1fr); padding: 0 8% 8%; border: 0; border-radius: 12px;
+  container-type: inline-size; color: #fff; font: inherit; text-align: center; cursor: pointer; opacity: 0;
+  background: url(../assets/ui/recall/card.png) center / 100% 100% no-repeat; transition: filter .3s, transform .3s; }
+.rcard:disabled { cursor: default; }
+/* the title sits in the card's header band */
+.rcard b { align-self: center; padding-top: 3%; text-wrap: balance; font: 700 clamp(12px, 7.4cqi, 20px)/1.1 var(--font-ui); color: var(--holo); text-shadow: 0 0 10px rgba(127, 243, 255, .45); }
+.rcard__fig { position: relative; min-height: 0; margin-top: 4%; }
+.rcard.in { opacity: 1; }
+.rcard.in::after { content: ''; position: absolute; left: 3%; right: 3%; top: 0; height: 34%; pointer-events: none; border-radius: 12px;
+  background: linear-gradient(180deg, transparent, rgba(127, 243, 255, .4), transparent); animation: card-scan .9s ease-out .1s both; }
+@keyframes card-scan { from { transform: translateY(-60%); opacity: 1; } to { transform: translateY(300%); opacity: 0; } }
+.rcard.is-on { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 0 16px rgba(255, 224, 102, .55)); }
+.rcard.is-on b { color: #ffe9a8; }
+@media (hover: hover) { .rcard:not(:disabled):not(.is-on):hover { transform: translateY(-3px); filter: drop-shadow(0 0 14px rgba(127, 243, 255, .5)); } }
+.rcard:focus-visible { outline: 3px solid var(--holo); outline-offset: 3px; }
+/* the drone */
+.drone { position: absolute; left: 0; top: 0; z-index: 5; width: clamp(120px, 12cqw, 190px); pointer-events: none;
+  transition: transform .75s cubic-bezier(.45, 0, .25, 1); }
+.drone__img { display: block; width: 100%; height: auto; animation: drone-bob 1.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 12px rgba(127, 243, 255, .35)); }
+@keyframes drone-bob { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+/* its screen: the voice's mouth (bars, as in the narration bar), bobbing with the drone */
+.drone__screen { position: absolute; left: 40.5%; top: 28.5%; width: 20%; height: 26%; display: flex; align-items: center; justify-content: center; gap: 7%;
+  animation: drone-bob 1.4s ease-in-out infinite alternate; }
+.drone__screen i { width: 7%; height: 12%; border-radius: 2px; background: linear-gradient(180deg, #ffffff, var(--holo)); box-shadow: 0 0 5px rgba(127, 243, 255, .9); }
+.is-talking .drone__screen i { animation: drone-talk .42s ease-in-out infinite alternate; }
+.is-talking .drone__screen i:nth-child(1), .is-talking .drone__screen i:nth-child(7) { --amp: 34%; animation-delay: -.3s; }
+.is-talking .drone__screen i:nth-child(2), .is-talking .drone__screen i:nth-child(6) { --amp: 58%; animation-delay: -.1s; }
+.is-talking .drone__screen i:nth-child(3), .is-talking .drone__screen i:nth-child(5) { --amp: 76%; animation-delay: -.25s; }
+.is-talking .drone__screen i:nth-child(4) { --amp: 88%; animation-delay: -.05s; }
+@keyframes drone-talk { from { height: 12%; } to { height: var(--amp, 60%); } }
+.caption.mouth-on-drone .voice { visibility: hidden; }
+.drone__beam { position: absolute; left: 50%; top: 92%; width: var(--bw, 120px); height: var(--bh, 120px); opacity: 0;
+  transform: translateX(-50%) scaleY(0); transform-origin: 50% 0; clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(127, 243, 255, .6), rgba(127, 243, 255, .06)); transition: transform .3s ease-out, opacity .3s; }
+.drone.beam .drone__beam { opacity: 1; transform: translateX(-50%) scaleY(1); }
+.is-tall .recall__slots { inset: 60px 0 0; gap: 12px;
+  --cell: min(calc((100cqw - 12px) / 2), calc((100cqh - 60px - 24px) / 3)); grid-template-columns: repeat(2, var(--cell)); }
+.is-tall .rslot:last-child { grid-column: 1 / -1; justify-self: center; width: var(--cell); }
+.is-tall .drone { width: 112px; }
+@media (prefers-reduced-motion: reduce) { .drone { display: none; } .rcard.in, .rcard.in::after { animation: none; } }
+
+/* ---------------------------------------------------------------- the start banner: the satellite HQ in orbit,
+   drifting slowly, and one big play button in the centre */
+.start { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; overflow: hidden; background: rgb(3, 10, 36); }
+.start__pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; transform: scale(1.06);
+  animation: start-drift 20s ease-in-out infinite alternate; }
+@keyframes start-drift { from { transform: scale(1.06); } to { transform: scale(1.12) translateY(-1.2%); } }
+.start::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(2, 6, 24, .55) 100%); }
+.start__play { position: relative; z-index: 1; width: clamp(124px, 19vmin, 196px); aspect-ratio: 353 / 360; padding: 0; border: 0; border-radius: 50%;
+  background: none; cursor: pointer; filter: drop-shadow(0 12px 26px rgba(0, 0, 0, .55)) drop-shadow(0 0 28px rgba(127, 243, 255, .45));
+  animation: play-breathe 2.2s ease-in-out infinite; }
+.start__play img { display: block; width: 100%; height: 100%; pointer-events: none; }
+.start__play::before, .start__play::after { content: ''; position: absolute; inset: -4%; border-radius: 50%; border: 3px solid rgba(127, 243, 255, .75);
+  pointer-events: none; animation: play-ring 2.2s ease-out infinite; }
+.start__play::after { animation-delay: 1.1s; }
+@keyframes play-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes play-ring { from { transform: scale(.95); opacity: .9; } to { transform: scale(1.45); opacity: 0; } }
+.start__play:active { transform: scale(.93); animation: none; }
+.start__play:focus-visible { outline: 3px solid var(--holo); outline-offset: 10px; }
+.start.is-going { pointer-events: none; }
+.start.is-going .start__play::before, .start.is-going .start__play::after { display: none; }
+@media (prefers-reduced-motion: reduce) { .start__pic, .start__play, .start__play::before, .start__play::after { animation: none; } }

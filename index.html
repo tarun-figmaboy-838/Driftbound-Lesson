@@ -22,6 +22,11 @@
     <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="on" d="M4 9h4l5-4v14l-5-4H4z M16 8.5c1.6 1.8 1.6 5.2 0 7 M18.6 6c3 3.3 3 8.7 0 12" /><path class="off" d="M4 9h4l5-4v14l-5-4H4z M16.5 9.5l5 5 M21.5 9.5l-5 5" /></svg>
   </button>
 
+  <!-- the start banner (Figma AI art): the satellite HQ in orbit, and one play button in the centre -->
+  <div class="start" id="start">
+    <img class="start__pic" src="assets/ui/start/banner.jpg" alt="" draggable="false" />
+    <button class="start__play" id="play" type="button" aria-label="Play"><img src="assets/ui/start/play.png" alt="" draggable="false" /></button>
+  </div>
   <main class="hq">
     <!-- the lesson screen: a big digital display laid over the picture's screen -->
     <section class="screen" id="screen" aria-labelledby="caption">
@@ -30,12 +35,11 @@
       <i class="holo holo--scan" aria-hidden="true"></i>
       <i class="corner c1" aria-hidden="true"></i><i class="corner c2" aria-hidden="true"></i><i class="corner c3" aria-hidden="true"></i><i class="corner c4" aria-hidden="true"></i>
       <div class="stage" id="glass-in">
-        <!-- the narration: read aloud; the wave is the voice's mouth; instructions and hints show below it -->
+        <!-- the narration: one line, said aloud word by word; the bars are the voice's mouth -->
         <div class="caption" id="narration">
           <span class="voice" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
           <div class="caption__text">
-            <h1 id="caption" aria-live="polite"></h1>
-            <p class="line"></p>
+            <h1 id="caption"></h1>
           </div>
         </div>
         <div class="view" id="view">
