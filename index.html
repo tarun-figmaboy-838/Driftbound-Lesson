@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Driftbound Briefing</title>
+  <meta name="description" content="Angle training before the Driftbound mission: a strategy meeting on the ship." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Inter:wght@400;600;700;800&family=Lilita+One&display=swap" />
+  <link rel="stylesheet" href="src/style.css" />
+  <link rel="preload" as="image" href="assets/ui/opt.png" />
+  <link rel="preload" as="image" href="assets/ui/opt-ok.png" />
+  <link rel="preload" as="image" href="assets/ui/opt-bad.png" />
+</head>
+<body>
+  <!-- the briefing room on the ship, softly out of focus behind the holo-table -->
+  <div class="room" aria-hidden="true"></div>
+
+  <header class="top">
+    <nav class="dots" id="dots" aria-label="Lesson progress"></nav>
+    <h1 class="scene-title" id="scene-title"></h1>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="qbar hidden" id="qbar"><span class="text" id="qtext"></span><span class="timer"><i id="qtimer"></i></span></div>
+    <div class="holo" id="holo">
+      <div class="radar" id="radar"></div>
+      <div class="warden-holo hidden" id="warden-holo" aria-hidden="true"><img src="assets/ui/face-warden.webp" alt="" draggable="false" /></div>
+    </div>
+    <div class="readout" id="readout"></div>
+    <div class="controls" id="controls"></div>
+  </main>
+
+  <footer class="comms-row">
+    <button class="nav-btn back" id="back" type="button" aria-label="Back">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8" /></svg>
+    </button>
+    <p class="sr-only" id="dialog-sr" role="status" aria-live="polite"></p>
+    <div class="dialog" id="dialog" data-face="crew">
+      <div class="portrait"><img src="assets/ui/face-crew.webp" alt="" draggable="false" /></div>
+      <div class="talk"><b class="name"></b><p class="line"></p></div>
+      <i class="more" aria-hidden="true"></i>
+    </div>
+    <button class="next-btn" id="next" type="button"><span>Next</span></button>
+  </footer>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

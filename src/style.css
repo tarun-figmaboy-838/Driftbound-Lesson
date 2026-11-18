@@ -1,0 +1,236 @@
+/* Driftbound Briefing: the same art direction as the game. Deep navy space, cyan holograms carry
+   information, warm gold is the action colour, Lilita One for display, Fredoka for buttons and
+   dialogue, Inter for sentences. */
+:root {
+  --text: #eef4fa;
+  --muted: rgba(226, 236, 246, 0.62);
+  --accent: #6fe3ff;
+  --gold: #ffe066;
+  --ink: #0b1430;
+  --bg: #02030a;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --font-game: 'Lilita One', 'Inter', system-ui, sans-serif;
+  --ink-outline: 0 2px 0 var(--ink), 1.5px 0 0 var(--ink), -1.5px 0 0 var(--ink), 0 -1.5px 0 var(--ink),
+    1px 1px 0 var(--ink), -1px 1px 0 var(--ink), 1px -1px 0 var(--ink), -1px -1px 0 var(--ink), 0 3px 0 var(--ink);
+  --c-cyan: #38d6ff; --c-red: #ff5a4a; --c-orange: #ffa62b; --c-green: #5dff8a;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg); }
+html, body { margin: 0; height: 100%; overflow: hidden; color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+/* minmax(0, 1fr): nothing (not even a long dialogue line) can make the page wider than the screen */
+body { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; height: 100dvh; }
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.radar-svg:focus-visible { outline: none; }
+.radar-svg .focus-ring { opacity: 0; }
+.radar-svg:focus-visible .focus-ring { opacity: 0.85; }
+
+/* ---------------------------------------------------------------- the briefing room */
+.room { position: fixed; inset: -24px; z-index: -2; background: url(../assets/ui/cockpit.webp) center 40% / cover no-repeat;
+  filter: blur(7px) brightness(0.34) saturate(1.15); }
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(4, 10, 30, 0.15), rgba(2, 4, 12, 0.75)); }
+
+/* ---------------------------------------------------------------- header: progress + title */
+.top { display: grid; justify-items: center; gap: 6px; padding: calc(12px + env(safe-area-inset-top)) 16px 2px; }
+.dots { display: flex; gap: 7px; align-items: center; }
+.dots button { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 999px; cursor: pointer; background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 2px rgba(6, 10, 28, 0.8); transition: width 0.25s var(--spring), background 0.2s; }
+.dots button.seen { background: var(--accent); }
+.dots button.now { width: 28px; background: var(--gold); }
+.scene-title { margin: 0; font: 400 clamp(22px, 2.6vw, 30px) var(--font-game); letter-spacing: 0.03em; color: var(--gold); text-shadow: var(--ink-outline); text-align: center; }
+
+/* ---------------------------------------------------------------- stage: radar + readout + controls */
+.stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 0; padding: 4px 16px; }
+/* the radar stays square and shrinks to the room left, so it sits right next to its controls */
+.holo { position: relative; flex: 0 1 auto; min-height: 0; width: 100%; max-width: 640px; aspect-ratio: 1; }
+.holo::after { content: ''; position: absolute; left: 50%; bottom: 0; width: min(78%, 520px); height: 15%; translate: -50% 38%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(56, 214, 255, 0.26), rgba(56, 214, 255, 0)); pointer-events: none; z-index: -1; }
+.radar { position: absolute; inset: 0; }
+.radar-svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 18px rgba(56, 214, 255, 0.18)); }
+.radar-svg.drag { cursor: grab; touch-action: none; }
+.radar-svg.drag:active { cursor: grabbing; }
+.radar-svg .lbl { font: 400 13px 'Lilita One', sans-serif; paint-order: stroke; stroke: var(--ink); stroke-width: 2.6px; stroke-linejoin: round; letter-spacing: 0.02em; }
+.radar-svg .lbl.big { font-size: 17px; }
+.radar-svg .lbl-x { font: italic 700 19px 'Cambria Math', Cambria, 'Times New Roman', serif; stroke-width: 3px; }
+.radar-svg .part { transition: opacity 0.25s; }
+.radar-svg .dim { opacity: 0.28; }
+.radar-svg .hl { animation: hl 0.9s ease-in-out infinite; }
+@keyframes hl { 50% { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); } }
+
+/* the Warden's hologram over the table (scene 1) */
+.warden-holo { position: absolute; left: 50%; top: 50%; width: 42%; aspect-ratio: 1; translate: -50% -52%; border-radius: 50%; overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(197, 139, 255, 0.9), 0 0 40px rgba(170, 100, 255, 0.55); animation: flicker 3.2s steps(1) infinite, holo-in 0.7s var(--spring) both; }
+.warden-holo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.6) hue-rotate(-12deg) brightness(1.1); opacity: 0.82; -webkit-user-drag: none; }
+.warden-holo::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(150, 90, 255, 0.18) 0 2px, transparent 2px 5px);
+  mix-blend-mode: screen; animation: scan 2.4s linear infinite; }
+@keyframes flicker { 0%, 100% { opacity: 1; } 47% { opacity: 0.86; } 48% { opacity: 1; } 72% { opacity: 0.9; } 73% { opacity: 1; } }
+@keyframes scan { to { background-position: 0 40px; } }
+@keyframes holo-in { from { scale: 0.4; opacity: 0; } to { scale: 1; opacity: 1; } }
+
+/* live sums under the radar, coloured like the arcs */
+.readout { flex: none; display: flex; align-items: baseline; justify-content: center; gap: 0.32em; flex-wrap: wrap;
+  font: 400 clamp(22px, 2.6vw, 30px) var(--font-game); letter-spacing: 0.02em; color: #fff; text-shadow: var(--ink-outline); }
+.readout:empty { display: none; }
+.readout .o { color: var(--c-orange); }
+.readout .c { color: var(--c-cyan); }
+.readout .g { color: var(--c-green); }
+.readout .x { font: italic 700 1.15em 'Cambria Math', Cambria, 'Times New Roman', serif; color: #fff; }
+.readout .op { color: rgba(255, 255, 255, 0.85); }
+
+.controls { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 14px; max-width: 920px; }
+.controls:empty { display: none; }
+
+/* the game's question bar (prompt + time bar), for the practice screens */
+.qbar { flex: none; position: relative; display: flex; align-items: center; gap: 10px; padding: 10px 22px 14px; border-radius: 14px; overflow: hidden;
+  background: rgba(8, 16, 38, 0.88); border: 2px solid rgba(255, 181, 71, 0.9); box-shadow: 0 0 24px rgba(255, 160, 60, 0.22);
+  font: 700 clamp(16px, 1.7vw, 20px)/1.25 'Inter', sans-serif; text-align: center; max-width: 92vw; }
+.qbar .find { font: 400 1.15em var(--font-game); letter-spacing: 0.03em; color: var(--gold); text-shadow: var(--ink-outline); margin-right: 0.35em; }
+.qbar .timer { position: absolute; left: 10px; right: 10px; bottom: 4px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.12); }
+.qbar .timer i { display: block; height: 100%; width: 100%; border-radius: 2px; background: #6fe3ff; transform-origin: left; }
+.qbar .timer.run i { animation: drain 9s linear infinite; }
+@keyframes drain { 0% { transform: scaleX(1); background: #6fe3ff; } 55% { background: #6fe3ff; } 56% { background: #ffb547; } 78% { background: #ffb547; } 79% { background: #ff5a4f; } 100% { transform: scaleX(0); background: #ff5a4f; } }
+.qbar.ok { border-color: #4dff88; box-shadow: 0 0 26px rgba(77, 255, 136, 0.45); }
+.qbar.bad { border-color: #ff6a4f; box-shadow: 0 0 26px rgba(255, 90, 60, 0.45); }
+.qbar.hl { animation: qhl 0.9s ease-in-out infinite; }
+@keyframes qhl { 50% { box-shadow: 0 0 0 3px #fff, 0 0 26px rgba(255, 255, 255, 0.6); } }
+
+/* ---------------------------------------------------------------- buttons */
+/* answer capsules from the game (POLYGON kit): gold acts, green and red are verdicts */
+.opt { position: relative; width: clamp(118px, 12.5vw, 168px); aspect-ratio: 420 / 153; padding: 0; border: 0; cursor: pointer;
+  background: url(../assets/ui/opt.png) center / contain no-repeat; display: grid; place-items: center;
+  transition: transform 0.16s var(--spring), filter 0.12s; animation: opt-in 0.45s var(--spring) both; }
+@keyframes opt-in { from { opacity: 0; transform: translateY(20px) scale(0.85); } to { opacity: 1; transform: none; } }
+.opt span { position: relative; font: 700 clamp(22px, 2.2vw, 30px)/1 'Fredoka', 'Inter', sans-serif; color: #4a2400; text-shadow: 0 1px 0 rgba(255, 244, 200, 0.6); transform: translateY(-2%); pointer-events: none; }
+.opt.word span { font-size: clamp(17px, 1.6vw, 21px); }
+.opt.correct { background-image: url(../assets/ui/opt-ok.png); transform: scale(1.06); }
+.opt.wrong { background-image: url(../assets/ui/opt-bad.png); animation: opt-shake 0.4s ease both; }
+.opt.correct span { color: #fff; text-shadow: 0 2px 0 #1d6b12, 1.5px 0 0 #1d6b12, -1.5px 0 0 #1d6b12, 0 -1.5px 0 #1d6b12; }
+.opt.wrong span { color: #fff; text-shadow: 0 2px 0 #8e1414, 1.5px 0 0 #8e1414, -1.5px 0 0 #8e1414, 0 -1.5px 0 #8e1414; }
+.opt:disabled { cursor: default; }
+@media (hover: hover) { .opt:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.1); } }
+.opt:active:not(:disabled) { transform: translateY(3px) scale(0.95); }
+@keyframes opt-shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+/* the big call to action at the end: Launch mission */
+.launch { width: clamp(240px, 26vw, 320px); }
+.launch span { font-size: clamp(22px, 2.2vw, 28px); }
+.launch:not(:disabled) { animation: opt-in 0.45s var(--spring) both, breathe 1.8s ease-in-out 0.6s infinite; }
+@keyframes breathe { 50% { scale: 1.05; } }
+
+/* chips: legend for the radar parts, the two habits, the extra-training tabs */
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 8px; border-radius: 999px; cursor: pointer; border: 0;
+  font: 600 16px 'Fredoka', sans-serif; color: #fff; background: linear-gradient(180deg, #1d2a5c, #0b1230);
+  box-shadow: 0 0 0 2px #060a1c, 0 3px 0 2px #060a1c, inset 0 0 0 1.5px var(--chip, var(--accent)); transition: transform 0.15s var(--spring); }
+.chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--chip, var(--accent)); box-shadow: 0 0 8px var(--chip, var(--accent)); }
+.chip.on { transform: translateY(-2px); box-shadow: 0 0 0 2px #060a1c, 0 3px 0 2px #060a1c, inset 0 0 0 2px var(--chip, var(--accent)), 0 0 16px var(--chip, var(--accent)); }
+.chip.static { cursor: default; }
+.chip b { font: 400 18px var(--font-game); color: var(--gold); }
+
+/* rule recap cards (ready check) */
+.rule-card { display: inline-grid; justify-items: center; gap: 2px; padding: 10px 18px 12px; border-radius: 16px; background: linear-gradient(180deg, #1d2a5c, #0b1230);
+  box-shadow: 0 0 0 2px #060a1c, 0 4px 0 2px #060a1c, inset 0 0 0 2px var(--accent); }
+.rule-card b { font: 400 15px var(--font-game); letter-spacing: 0.06em; color: var(--accent); }
+.rule-card span { font: 400 22px var(--font-game); color: #fff; text-shadow: var(--ink-outline); }
+.rule-card .x { font: italic 700 1.1em 'Cambria Math', Cambria, 'Times New Roman', serif; }
+
+/* stars, as in the game */
+.stars { display: inline-flex; gap: 12px; filter: drop-shadow(0 2px 0 var(--ink)) drop-shadow(0 0 1.5px var(--ink)); }
+.stars i { display: block; width: clamp(54px, 6vw, 76px); aspect-ratio: 1; background: rgba(40, 52, 86, 0.9);
+  clip-path: polygon(50% 0, 61.8% 35.4%, 100% 35.4%, 69.1% 57.3%, 80.9% 92.7%, 50% 70.8%, 19.1% 92.7%, 30.9% 57.3%, 0 35.4%, 38.2% 35.4%); }
+.stars i:nth-child(2) { width: clamp(64px, 7.2vw, 92px); translate: 0 -12px; }
+.stars i.on { background: linear-gradient(180deg, #fff6b0, #ffd23f 45%, #ff9d1c); animation: star-pop 0.45s var(--spring) both; }
+@keyframes star-pop { from { scale: 0.2; rotate: -40deg; } 70% { scale: 1.25; } to { scale: 1; rotate: 0deg; } }
+
+/* ---------------------------------------------------------------- footer: Back, comms, Next */
+.comms-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr); align-items: end; gap: 14px; min-height: 142px;
+  padding: 8px 20px calc(16px + env(safe-area-inset-bottom)); }
+.nav-btn { justify-self: start; width: 54px; height: 54px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 30%, #5aa8ff, #1a4fc4 70%); box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0b1a4a, 0 5px 0 4px #0b1a4a;
+  transition: transform 0.15s var(--spring), opacity 0.2s; margin-bottom: 8px; }
+.nav-btn svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.3)); }
+.nav-btn:active { transform: translateY(3px) scale(0.94); }
+.nav-btn.gone { visibility: hidden; }
+.next-btn { justify-self: end; position: relative; width: 168px; aspect-ratio: 420 / 152; padding: 0; border: 0; cursor: pointer;
+  background: url(../assets/ui/btn-next.png) center / contain no-repeat; display: grid; place-items: center; margin-bottom: 6px;
+  transition: transform 0.16s var(--spring), filter 0.2s; }
+.next-btn span { font: 700 25px/1 'Fredoka', 'Inter', sans-serif; color: #fff; transform: translateY(-3%);
+  text-shadow: 0 2px 0 #0c2f86, 1.5px 0 0 #0c2f86, -1.5px 0 0 #0c2f86, 0 -1.5px 0 #0c2f86; }
+.next-btn.ready { animation: breathe 1.6s ease-in-out infinite; }
+.next-btn.gone { visibility: hidden; }
+@media (hover: hover) { .next-btn:hover, .nav-btn:hover { filter: brightness(1.1); } }
+.next-btn:active { transform: translateY(3px) scale(0.95); }
+
+/* comms box, built like the game's: ink outline, a rim in the speaker's colour, gradient face, gloss
+   and lip; the portrait overhangs the top edge and a ribbon nameplate tags the box. It hugs its text
+   (the untyped rest is laid out invisibly, so it never grows while typing). */
+.dialog { --rim: #4fd8ff; --plate1: #74e8ff; --plate2: #1679c9; --face-top: #1d2a5c; --face-bot: #0b1230;
+  position: relative; justify-self: center; width: max-content; max-width: min(100%, 640px); margin-top: 34px;
+  display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0 16px; padding: 14px 34px 16px 14px; border-radius: 22px;
+  background: linear-gradient(180deg, var(--face-top) 0%, #111a3d 55%, var(--face-bot) 100%);
+  box-shadow: 0 0 0 3px #060a1c, 0 6px 0 3px #060a1c, 0 16px 34px rgba(0, 0, 0, 0.55), inset 0 0 0 2px var(--rim), inset 0 -5px 0 rgba(0, 0, 0, 0.28);
+  opacity: 0; translate: 0 14px; cursor: pointer; transition: opacity 0.2s ease, translate 0.35s var(--spring); }
+.dialog::before { content: ''; position: absolute; left: 16px; right: 16px; top: 5px; height: 36%; border-radius: 16px 16px 50% 50% / 16px 16px 100% 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0)); pointer-events: none; }
+.dialog.show { opacity: 1; translate: 0 0; animation: dlg-pop 0.42s var(--spring) both; }
+@keyframes dlg-pop { from { scale: 0.6; rotate: -4deg; } 60% { rotate: 1.2deg; } to { scale: 1; rotate: 0deg; } }
+.dialog[data-face='warden'] { --rim: #b26bff; --plate1: #c690ff; --plate2: #6a23c9; }
+.dialog[data-face='raider'] { --rim: #ff5a46; --plate1: #ff7d5e; --plate2: #cf2519; }
+.dialog .portrait { position: relative; align-self: start; width: 72px; height: 72px; margin: -32px 0 -6px; border-radius: 50%; overflow: hidden;
+  background: var(--face-bot); box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--rim), 0 0 0 9px #060a1c, 0 8px 16px rgba(0, 0, 0, 0.5); }
+.dialog .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 90%; -webkit-user-drag: none; }
+.dialog .talk { min-width: 0; }
+.dialog .name { display: inline-block; margin: -30px 0 6px; padding: 4px 14px 5px; border-radius: 999px; rotate: -3deg;
+  font: 400 14px var(--font-game); letter-spacing: 0.07em; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, var(--plate1), var(--plate2)); box-shadow: 0 0 0 2.5px #060a1c, 0 3px 0 2.5px #060a1c, inset 0 2px 0 rgba(255, 255, 255, 0.35); }
+.dialog .line { margin: 0; font: 600 clamp(16px, 1.6vw, 20px)/1.3 'Fredoka', 'Inter', sans-serif; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); }
+.dialog .line .rest { color: transparent; text-shadow: none; }
+.dialog .more { position: absolute; right: 12px; bottom: 11px; width: 0; height: 0; border-left: 10px solid var(--gold); border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent; opacity: 0; filter: drop-shadow(0 1px 0 #060a1c); }
+.dialog.done .more { opacity: 1; animation: more 0.7s ease-in-out infinite; }
+@keyframes more { 50% { transform: translateX(4px); } }
+.dialog.typing .portrait img { animation: talk 0.16s ease-in-out infinite alternate; }
+@keyframes talk { to { transform: translateY(-3px) scale(1.05) rotate(-2deg); } }
+.dialog.show[data-mood='taunt'] { animation: dlg-pop 0.42s var(--spring) both, taunt 0.9s ease-in-out 0.42s 2; }
+.dialog.show[data-mood='laugh'] { animation: dlg-pop 0.42s var(--spring) both, laugh 0.3s ease-in-out 0.4s 4; }
+.dialog.show[data-mood='panic'] { animation: dlg-pop 0.35s var(--spring) both, panic 0.1s linear 0.3s 8; }
+.dialog.show[data-mood='cheer'] { animation: dlg-pop 0.42s var(--spring) both, cheer 0.5s var(--spring) 0.42s 2; }
+@keyframes taunt { 50% { transform: rotate(-1.5deg) scale(1.03); } }
+@keyframes laugh { 50% { transform: translateY(-5px) rotate(1deg); } }
+@keyframes panic { 25% { transform: translateX(-5px) rotate(-1deg); } 75% { transform: translateX(5px) rotate(1deg); } }
+@keyframes cheer { 50% { transform: translateY(-7px); } }
+
+/* ---------------------------------------------------------------- phones and narrow windows */
+@media (max-width: 700px), (max-aspect-ratio: 4/5) {
+  .top { gap: 4px; padding-top: calc(10px + env(safe-area-inset-top)); }
+  .dots { gap: 5px; }
+  .dots button { width: 8px; height: 8px; }
+  .dots button.now { width: 22px; }
+  .scene-title { font-size: 22px; }
+  .stage { gap: 8px; padding: 2px 12px; }
+  .controls { gap: 8px 10px; }
+  .opt { width: calc(50vw - 24px); max-width: 170px; }
+  .opt.word { width: calc(33vw - 14px); }
+  .opt.word span { font-size: 16px; }
+  .comms-row { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: 'dlg dlg dlg' 'back . next'; min-height: 0; gap: 4px 10px;
+    padding: 4px 12px calc(10px + env(safe-area-inset-bottom)); }
+  .dialog { grid-area: dlg; margin-top: 30px; padding: 10px 26px 12px 10px; gap: 0 12px; min-height: 0; }
+  .dialog .portrait { width: 56px; height: 56px; margin: -26px 0 -4px; }
+  .dialog .name { font-size: 12px; margin: -24px 0 4px; padding: 3px 11px 4px; }
+  .dialog .line { font-size: 15px; }
+  .dialog .more { right: 9px; bottom: 8px; }
+  .nav-btn { grid-area: back; width: 46px; height: 46px; margin: 4px 0 0 6px; }
+  .next-btn { grid-area: next; width: 140px; margin: 4px 0 0; }
+  .next-btn span { font-size: 21px; }
+  .readout { font-size: 22px; }
+  .chip { font-size: 14px; padding: 6px 11px 7px; }
+  .rule-card span { font-size: 18px; }
+  .launch { width: min(82vw, 300px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
