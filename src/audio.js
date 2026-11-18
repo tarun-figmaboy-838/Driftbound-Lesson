@@ -1,22 +1,36 @@
 // Small synthesized sounds (no files): talk blips, taps, right / wrong, pops, stamps and the launch.
-// The audio context starts on the first tap or key press (browsers require a gesture).
+// The audio context starts on the first tap or key press (browsers require a gesture); unlock() is
+// called from the Play button so every browser (Safari included) lets the sound and the voice play.
 
 export class Sound {
   constructor() {
     this.ctx = null;
     this.muted = false;
     this.lastBlip = 0;
-    const start = () => {
-      if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
-      try {
+    const start = () => this.unlock();
+    ['pointerdown', 'touchend', 'click', 'keydown'].forEach((e) => window.addEventListener(e, start, { passive: true }));
+  }
+
+  // make (or wake) the audio context inside a user gesture, and play a silent sample: that is what
+  // lets the sound start in every browser
+  unlock() {
+    try {
+      if (!this.ctx) {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.out = this.ctx.createGain();
         this.out.gain.value = 0.5;
         this.out.connect(this.ctx.destination);
-      } catch { this.ctx = null; }
-    };
-    window.addEventListener('pointerdown', start, { passive: true });
-    window.addEventListener('keydown', start);
+      }
+      if (this.ctx.state !== 'running') this.ctx.resume?.();
+      if (!this.woke) {
+        const s = this.ctx.createBufferSource();
+        s.buffer = this.ctx.createBuffer(1, 1, 22050);
+        s.connect(this.ctx.destination);
+        s.start(0);
+        this.woke = true;
+      }
+    } catch { /* no audio on this device */ }
+    return this.ctx;
   }
 
   ok() { return this.ctx && this.ctx.state === 'running' && !this.muted; }

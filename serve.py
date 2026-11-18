@@ -1,7 +1,7 @@
 """Local server for the Driftbound Briefing (the angle lesson).
 
 Same as `python3 -m http.server`, but it serves this folder no matter where it is started from
-and tells the browser not to cache anything, so a normal reload always runs the latest code.
+and tells the browser to check every file for changes, so a normal reload always runs the latest code.
 
 usage: python3 serve.py [port]
 """
@@ -12,7 +12,7 @@ import sys
 
 class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
-        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Cache-Control', 'no-cache')
         super().end_headers()
 
 

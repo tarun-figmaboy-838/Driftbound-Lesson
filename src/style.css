@@ -207,7 +207,6 @@ button { font: inherit; color: inherit; }
 .pill { --cap: 27px;
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .35em; height: 54px; min-width: 112px; margin: 0; padding: 0 calc(var(--cap) + 6px) 3px; cursor: pointer;
   border: 0;
-  background: url(../assets/ui/polygon/pill-gold-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-gold-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-gold-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat;
   font: 700 clamp(19px, .9rem + .4vw, 23px)/1 var(--font-ui); color: #4a2600; letter-spacing: .01em;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), filter .15s ease, opacity .2s ease; }
 .pill > * { pointer-events: none; }
@@ -215,9 +214,8 @@ button { font: inherit; color: inherit; }
 .pill:active:not(:disabled):not([aria-disabled="true"]) { transform: translateY(2px) scale(.97); transition-duration: 60ms; }
 .pill:focus-visible { outline: 3px solid var(--holo); outline-offset: 4px; border-radius: 999px; }
 .pill--blue, .pill.is-right, .pill.is-wrong { color: #ffffff; text-shadow: 0 2px 0 rgba(0, 20, 70, .45); }
-.pill--blue { background: url(../assets/ui/polygon/pill-blue-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-blue-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-blue-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat; }
-.pill.is-right { background: url(../assets/ui/polygon/pill-green-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-green-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-green-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat; pointer-events: none; animation: pop 420ms ease-out; }
-.pill.is-wrong { background: url(../assets/ui/polygon/pill-red-l.png) left top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-red-r.png) right top / var(--cap) 100% no-repeat, url(../assets/ui/polygon/pill-red-m.png) center top / calc(100% - 2 * var(--cap) + 2px) 100% no-repeat; opacity: .85; cursor: default; }
+.pill.is-right { pointer-events: none; animation: pop 420ms ease-out; }
+.pill.is-wrong { opacity: .85; cursor: default; }
 .pill.is-off { opacity: .4; pointer-events: none; }
 .pill .ico { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .back { min-width: 0; width: 66px; padding: 0; }

@@ -18,7 +18,8 @@ five summary cards and the mouth moves to the drone's screen.
   and a tall one for phones. `src/scene.js` scales the picture to fill the window and centres the
   picture's own screen behind the lesson screen.
 - Buttons: the capsule buttons from the POLYGON Figma file (`assets/ui/polygon/`), cut into a left cap,
-  a stretching middle and a right cap so they fit any label.
+  a stretching middle and a right cap so they fit any label. The art is built into `src/pills.css`
+  (`python3 tools/ui/inline_pills.py`), so a button never shows without its capsule.
 - Start banner, play button, recall drone and card, hint hand: made with Figma AI (`assets/ui/start/`,
   `assets/ui/recall/`).
 - Voice-over: made with Kokoro (Kokoro-82M, free and open source, Apache 2.0, runs on your Mac), with
@@ -58,6 +59,7 @@ src/ui.js             DOM helper and hexagon bursts
 src/tokens.css        colours, type, radii, motion
 src/components.css    shared component styles and motion utilities
 src/style.css         layout, the hologram screen, buttons and lesson styles
+src/pills.css         the capsule button art, inside the stylesheet (made by tools/ui/inline_pills.py)
 assets/ui/bg/         HQ background pictures (Figma AI): hq-wide.png, hq-tall.png
 assets/ui/polygon/    button art from the POLYGON Figma file (gold, blue, green, red; caps and middles)
 assets/ui/start/      start banner and play button (Figma AI)

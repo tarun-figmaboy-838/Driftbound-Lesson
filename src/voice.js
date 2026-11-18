@@ -63,10 +63,14 @@ export class Voice {
     const ctx = this.ctx, k = hash(text), line = this.lines[k];
     if (!ctx || !line) return false;
     const want = this.want = {};
-    this.load(k).then((buf) => {
+    this.load(k).then(async (buf) => {
       if (this.want !== want) return;                     // cut off before it started
       if (!buf) { onend?.(); return; }                    // this browser can't play the file
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state !== 'running') {                      // try to wake the audio (a moment at most)
+        try { await Promise.race([ctx.resume(), new Promise((r) => setTimeout(r, 400))]); } catch { /* blocked */ }
+      }
+      if (this.want !== want) return;
+      if (ctx.state !== 'running') { onend?.(); return; } // the browser keeps the audio off: words fill in at reading pace
       const src = ctx.createBufferSource();
       src.buffer = buf;
       src.connect(this.out());

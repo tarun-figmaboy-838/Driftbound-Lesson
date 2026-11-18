@@ -563,8 +563,6 @@ window.addEventListener('keydown', (e) => {
 
 // ---------------------------------------------------------------- the HQ backdrop and the screen layout
 const scene = createScene($('room-pic'));
-// the button art, loaded up front so no button ever shows without its capsule
-['gold', 'blue', 'green', 'red'].forEach((c) => ['l', 'm', 'r'].forEach((p) => { new Image().src = `assets/ui/polygon/pill-${c}-${p}.png`; }));
 
 // start once the fonts used on the figures are ready (or after a short wait)
 const params = new URLSearchParams(location.search);
@@ -591,6 +589,8 @@ else {
   $('play').addEventListener('click', () => {
     if (banner.classList.contains('is-going')) return;
     banner.classList.add('is-going');
+    sound.unlock();                                      // inside the tap: lets the voice play in every browser
+    warm();
     sound.tap();
     sound.whoosh();
     begin();
