@@ -7,7 +7,7 @@ It shares the game's characters, radar, notation and buttons, and lives outside 
 ## Run it
 
 ```
-python3 serve.py
+python3 serve.py` (or on a Mac, double-click `start.command`)
 ```
 
 Then open http://127.0.0.1:8124. (Any static file server works; `serve.py` turns off caching so a reload always shows the latest version.)
