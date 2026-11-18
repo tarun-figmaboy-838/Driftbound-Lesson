@@ -1,0 +1,220 @@
+/* Lines & Angles: shared components, built the "toy" way: ink outline, gradient face (light top),
+   a 3D lip in a darker shade of the same hue, a gloss highlight, a soft tinted drop shadow.
+   Light always comes from the top. Values come from tokens.css. */
+
+.ico { width: 1em; height: 1em; display: inline-block; flex: none; overflow: visible; }
+
+/* ---------- Pushable button: <button class="btn"><span class="btn__face"><span>Label</span></span></button> */
+.btn {
+  --face-top: var(--sun-300);
+  --face-bottom: var(--sun-500);
+  --edge: var(--sun-700);
+  --lift: var(--lip);
+  --sx: 1;
+  --sy: 1;
+  position: relative;
+  display: inline-block;
+  margin-top: var(--lip);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--edge);
+  box-shadow: 0 0 0 var(--stroke) var(--ink), var(--drop-md);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  transition: filter var(--t-fast) var(--ease-out), opacity var(--t-base) var(--ease-out);
+}
+.btn__face {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45em;
+  padding: .55em 1.5em .6em;
+  border-radius: inherit;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--face-top) 0%, var(--face-bottom) 100%);
+  box-shadow: 0 0 0 var(--stroke) var(--ink), inset 0 3px 0 rgba(255, 255, 255, .55), inset 0 -5px 0 rgba(0, 0, 0, .14);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  line-height: 1;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  text-shadow: var(--text-outline-sm);
+  transform: translateY(calc(var(--lift) * -1)) scale(var(--sx), var(--sy));
+  transition: transform var(--t-base) var(--ease-spring);
+}
+.btn__face > * { position: relative; z-index: 1; }
+.btn__face .ico { font-size: 1.05em; }
+.btn__face::before {
+  content: "";
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 7%;
+  height: 40%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .7), rgba(255, 255, 255, .05));
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .btn:hover:not(:disabled):not([aria-disabled="true"]) { --lift: calc(var(--lip) + 2px); --sx: 1.03; --sy: 1.03; filter: brightness(1.06) saturate(1.05); }
+}
+.btn:active:not(:disabled):not([aria-disabled="true"]) { --lift: 1px; --sx: 1.04; --sy: .95; }
+.btn:active .btn__face { transition-duration: 50ms; }
+.btn:focus-visible { outline: 3px solid var(--aqua-300); outline-offset: 6px; }
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  --face-top: #d3cff0; --face-bottom: #a39dcf; --edge: #645c98; --lift: 3px;
+  cursor: not-allowed; filter: none;
+}
+
+.btn--sun    { --face-top: var(--sun-300);    --face-bottom: var(--sun-500);    --edge: var(--sun-700); }
+.btn--aqua   { --face-top: var(--aqua-300);   --face-bottom: var(--aqua-500);   --edge: var(--aqua-700); }
+.btn--lime   { --face-top: var(--lime-300);   --face-bottom: var(--lime-500);   --edge: var(--lime-700); }
+.btn--violet { --face-top: var(--violet-300); --face-bottom: var(--violet-500); --edge: var(--violet-700); }
+.btn--coral  { --face-top: var(--coral-300);  --face-bottom: var(--coral-500);  --edge: var(--coral-700); }
+/* pearl: the ship-console white, with ink text instead of outlined white text */
+.btn--pearl  { --face-top: #ffffff; --face-bottom: var(--pearl-400); --edge: var(--pearl-700); }
+.btn--pearl .btn__face { color: var(--ink); text-shadow: none; }
+
+.btn--sm { --lip: 4px; }
+.btn--sm .btn__face { font-size: var(--fs-md); padding: .5em 1.15em .55em; }
+.btn--xl { --lip: 9px; box-shadow: 0 0 0 var(--stroke-lg) var(--ink), var(--drop-lg); }
+.btn--xl .btn__face {
+  font-size: clamp(1.7rem, 1.1rem + 2vw, 2.5rem);
+  padding: .45em 1.4em .5em;
+  box-shadow: 0 0 0 var(--stroke-lg) var(--ink), inset 0 4px 0 rgba(255, 255, 255, .55), inset 0 -7px 0 rgba(0, 0, 0, .14);
+  text-shadow: var(--text-outline);
+}
+
+/* shine sweep: a glint passing every few seconds (only on the ready call to action) */
+.btn--shine .btn__face::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: -45%;
+  width: 28%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .75), transparent);
+  transform: skewX(-20deg);
+  animation: shine 3.4s var(--ease-out) .8s infinite;
+  pointer-events: none;
+}
+@keyframes shine { 0% { left: -45%; } 30%, 100% { left: 135%; } }
+
+/* ---------- Round icon button (ink lip) */
+.btn-round {
+  --bg-top: #ffffff;
+  --bg-bottom: var(--pearl-500);
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 28%, var(--bg-top), var(--bg-bottom) 82%);
+  box-shadow: 0 0 0 var(--stroke) var(--ink), 0 5px 0 var(--stroke) var(--ink), inset 0 3px 0 rgba(255, 255, 255, .6), var(--drop-md);
+  color: var(--ink);
+  font-size: 28px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--t-base) var(--ease-spring), box-shadow var(--t-fast) var(--ease-out), opacity var(--t-base);
+}
+@media (hover: hover) { .btn-round:hover { transform: translateY(-2px) scale(1.06) rotate(-6deg); } }
+.btn-round:active {
+  transform: translateY(4px) scale(1.05, .95);
+  box-shadow: 0 0 0 var(--stroke) var(--ink), 0 1px 0 var(--stroke) var(--ink), inset 0 3px 0 rgba(255, 255, 255, .6);
+  transition-duration: 50ms;
+}
+.btn-round:focus-visible { outline: 3px solid var(--aqua-300); outline-offset: 5px; }
+.btn-round--sm { width: 44px; height: 44px; font-size: 22px; }
+
+/* ---------- Ribbon */
+.ribbon {
+  --rib-top: var(--aqua-300);
+  --rib-bottom: var(--aqua-500);
+  display: inline-block;
+  padding: .32em 1.1em .38em;
+  border-radius: var(--r-sm);
+  background: linear-gradient(180deg, var(--rib-top), var(--rib-bottom));
+  box-shadow: 0 0 0 var(--stroke) var(--ink), 0 5px 0 var(--stroke) var(--ink), inset 0 3px 0 rgba(255, 255, 255, .55);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  line-height: 1;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: var(--text-outline-sm);
+  white-space: nowrap;
+}
+.ribbon--sun { --rib-top: var(--sun-300); --rib-bottom: var(--sun-500); }
+.ribbon--pink { --rib-top: var(--pink-300); --rib-bottom: var(--pink-500); }
+.ribbon--lime { --rib-top: var(--lime-300); --rib-bottom: var(--lime-500); }
+.ribbon--violet { --rib-top: var(--violet-300); --rib-bottom: var(--violet-500); }
+.ribbon--sm { font-size: var(--fs-sm); padding: .42em .95em .46em; }
+
+/* ---------- Gradient logo: <p class="logo"><span class="logo__text" data-text="Name">Name</span></p> */
+.logo {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  font-weight: 400;
+  line-height: .95;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+.logo__text {
+  position: relative;
+  display: block;
+  padding: 0 .08em;
+  background: linear-gradient(180deg, var(--sun-200) 12%, var(--sun-300) 40%, var(--sun-400) 62%, var(--sun-500) 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.logo__text::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: inherit;
+  color: var(--ink);
+  -webkit-text-stroke: .14em var(--ink);
+  text-shadow: 0 .06em 0 var(--ink), 0 .11em 0 var(--ink), 0 .2em .25em rgba(6, 3, 24, .45);
+}
+
+/* ---------- Motion utilities (put entrance classes on wrappers, never on the .btn itself) */
+.enter { animation: enter-pop var(--t-hero) var(--ease-wobble) both; animation-delay: calc(var(--i, 0) * var(--stagger) + 60ms); }
+@keyframes enter-pop { from { opacity: 0; transform: translateY(22px) scale(.84); } to { opacity: 1; transform: none; } }
+.enter-drop { animation: enter-drop .9s var(--ease-out) both; animation-delay: calc(var(--i, 0) * var(--stagger) + 60ms); }
+@keyframes enter-drop {
+  0%   { opacity: 0; transform: translateY(-70px) scale(.9, 1.15); }
+  45%  { opacity: 1; transform: translateY(0) scale(1.1, .88); }
+  62%  { transform: translateY(-9px) scale(.96, 1.05); }
+  78%  { transform: translateY(0) scale(1.03, .97); }
+  100% { opacity: 1; transform: none; }
+}
+.idle-breathe { animation: breathe 2.6s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+@keyframes wiggle { 0%, 100% { transform: none; } 20% { transform: rotate(-7deg) scale(1.06); } 45% { transform: rotate(6deg); } 70% { transform: rotate(-3deg); } }
+@keyframes shake { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+.pop { animation: pop 420ms var(--ease-out); }
+@keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.25, .84); } 60% { transform: scale(.92, 1.1); } 80% { transform: scale(1.04, .97); } 100% { transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

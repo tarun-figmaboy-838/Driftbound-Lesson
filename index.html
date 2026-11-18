@@ -3,47 +3,64 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Driftbound Briefing</title>
-  <meta name="description" content="Angle training before the Driftbound mission: a strategy meeting on the ship." />
+  <title>Lines &amp; Angles · Driftbound flight training</title>
+  <meta name="description" content="Lines & Angles, class 2: adjacent angles, linear pairs and vertically opposite angles, trained on the ship before the Driftbound mission." />
+  <meta name="theme-color" content="#0b1030" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Inter:wght@400;600;700;800&family=Lilita+One&display=swap" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Math&text=%E2%88%A0%E2%88%92&display=swap" />
+  <link rel="stylesheet" href="src/tokens.css" />
+  <link rel="stylesheet" href="src/components.css" />
   <link rel="stylesheet" href="src/style.css" />
-  <link rel="preload" as="image" href="assets/ui/opt.png" />
-  <link rel="preload" as="image" href="assets/ui/opt-ok.png" />
-  <link rel="preload" as="image" href="assets/ui/opt-bad.png" />
 </head>
 <body>
-  <!-- the briefing room on the ship, softly out of focus behind the holo-table -->
-  <div class="room" aria-hidden="true"></div>
+  <!-- the ship's strategy HQ (a picture made with Figma AI); the lesson plays on its big screen -->
+  <div class="room" aria-hidden="true"><img class="room__pic" id="room-pic" alt="" draggable="false" /></div>
 
-  <header class="top">
-    <nav class="dots" id="dots" aria-label="Lesson progress"></nav>
-    <h1 class="scene-title" id="scene-title"></h1>
-  </header>
+  <button class="mute" id="mute" type="button" aria-label="Sound on" aria-pressed="true">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="on" d="M4 9h4l5-4v14l-5-4H4z M16 8.5c1.6 1.8 1.6 5.2 0 7 M18.6 6c3 3.3 3 8.7 0 12" /><path class="off" d="M4 9h4l5-4v14l-5-4H4z M16.5 9.5l5 5 M21.5 9.5l-5 5" /></svg>
+  </button>
 
-  <main class="stage" id="stage">
-    <div class="qbar hidden" id="qbar"><span class="text" id="qtext"></span></div>
-    <div class="holo" id="holo">
-      <div class="radar" id="radar"></div>
-      <div class="warden-holo hidden" id="warden-holo" aria-hidden="true"><img src="assets/ui/face-warden.webp" alt="" draggable="false" /></div>
+  <main class="hq">
+    <!-- the lesson screen: a big digital display laid over the picture's screen -->
+    <section class="screen" id="screen" aria-labelledby="caption">
+      <i class="holo holo--hex" aria-hidden="true"></i>
+      <i class="holo holo--glow" aria-hidden="true"></i>
+      <i class="holo holo--scan" aria-hidden="true"></i>
+      <i class="corner c1" aria-hidden="true"></i><i class="corner c2" aria-hidden="true"></i><i class="corner c3" aria-hidden="true"></i><i class="corner c4" aria-hidden="true"></i>
+      <div class="stage" id="glass-in">
+        <!-- the narration: read aloud; the wave is the voice's mouth; instructions and hints show below it -->
+        <div class="caption" id="narration">
+          <span class="voice" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <div class="caption__text">
+            <h1 id="caption" aria-live="polite"></h1>
+            <p class="line"></p>
+          </div>
+        </div>
+        <div class="view" id="view">
+          <div class="fig" id="fig"></div>
+          <div class="custom" id="custom"></div>
+          <aside class="side" id="side"></aside>
+        </div>
+        <div class="readout" id="readout" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- under the screen, aligned to its edges: Back, the answers, Next -->
+    <div class="bar">
+      <button class="pill pill--blue back" id="back" type="button" aria-label="Back">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+      </button>
+      <div class="controls" id="controls"></div>
+      <div class="next-wrap" id="next-wrap">
+        <button class="pill pill--blue next" id="next" type="button"><span class="lbl">Next</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l9 7-9 7z" /></svg></button>
+      </div>
     </div>
-    <div class="readout" id="readout"></div>
-    <div class="controls" id="controls"></div>
   </main>
+  <p class="sr-only" id="sr" role="status" aria-live="polite"></p>
 
-  <footer class="comms-row">
-    <button class="nav-btn back" id="back" type="button" aria-label="Back">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8" /></svg>
-    </button>
-    <p class="sr-only" id="dialog-sr" role="status" aria-live="polite"></p>
-    <div class="dialog" id="dialog" data-face="crew">
-      <div class="portrait"><img src="assets/ui/face-crew.webp" alt="" draggable="false" /></div>
-      <div class="talk"><b class="name"></b><p class="line"></p></div>
-      <i class="more" aria-hidden="true"></i>
-    </div>
-    <button class="next-btn" id="next" type="button"><span>Next</span></button>
-  </footer>
-
+  <div class="fx" id="fx" aria-hidden="true"></div>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
