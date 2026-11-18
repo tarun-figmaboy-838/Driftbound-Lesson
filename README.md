@@ -6,8 +6,12 @@ It shares the game's characters, radar, notation and buttons, and lives outside 
 
 ## Run it
 
+On a Mac, double-click `start.command`: it starts a local server and opens the lesson in your browser.
+
+Or run it yourself:
+
 ```
-python3 serve.py` (or on a Mac, double-click `start.command`)
+python3 serve.py
 ```
 
 Then open http://127.0.0.1:8124. (Any static file server works; `serve.py` turns off caching so a reload always shows the latest version.)
