@@ -60,7 +60,7 @@ function linearFig(b, s) {
   pointsAOB(b, s);
   if (s.c > 0.95) b.label('nc', at(O, t, 122), 'C', t + (s.handle ? 0 : 0), s.handle ? 36 : 25);
   if (s.right != null) b.text('vr', at(O, t / 2, labelR(t)), s.right, { size: 26, color: TXT.orange });
-  if (s.left != null) b.text('vl', at(O, (t + 180) / 2, labelR(180 - t)), s.left, { size: 26, color: TXT.aqua });
+  if (s.left != null) b.text('vl', at(O, (t + 180) / 2, labelR(180 - t)), s.left, { size: s.left === 'x' ? 30 : 26, color: TXT.aqua, font: s.left === 'x' ? 'x' : 'num' });
   if (s.handle) b.handle('hc', 'c', at(O, t, 122), { label: 'Point C. Drag it, or use the arrow keys, to move ray OC.', now: t, min: 15, max: 165, hint: s.hint });
 }
 
@@ -79,7 +79,7 @@ function crossFig(b, s) {
   W.forEach(([a, z], k) => {
     const f = s.fill?.[k];
     if (s.names?.[k]) b.text(`n${k}`, at(O, mid(a, z), 64), `∠${k + 1}`, { font: 'name', size: 21, color: TXT[f] || '#fff' });
-    if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: 26, color: TXT[f] || '#fff', cls: s.vcls?.[k] || '' });
+    if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: s.vals[k] === 'x' ? 30 : 26, color: TXT[f] || '#fff', cls: s.vcls?.[k] || '', font: s.vals[k] === 'x' ? 'x' : 'num' });
     if (s.taps) b.tap(`t${k}`, `∠${k + 1}`, { o: O, a: a + 3, b: z - 3, r: 96 }, `Angle ${k + 1}`);
   });
   if (s.handle) b.handle('hp', 'p', at(O, t, 126), { label: 'The end of the line. Drag it, or use the arrow keys, to rotate the line.', now: t, min: 20, max: 160, hint: s.hint });
@@ -531,7 +531,7 @@ export const STEPS = [
       await c.wait(300);
       v.set({ prot: null });
       c.caption('What do the two angles add up to?');
-      c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('', '?')}`);
+      c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('x', 'x')}`);
       await c.choose({
         options: [170, 180, 190], answer: 180, fmt: deg,
         why: {
@@ -602,7 +602,7 @@ export const STEPS = [
     id: 'linearFind', ch: 2, gate: true, title: 'Find the missing angle', lockHint: 'Pick the missing angle to go on.',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 1, c: 1, w: 1, t: 52, right: '52°', left: '?' }, linearFig);
+      const v = c.view({ l: 1, c: 1, w: 1, t: 52, right: '52°', left: 'x' }, linearFig);
       c.caption('Find the missing angle in this linear pair.');
       await c.choose({
         options: [118, 128, 138], answer: 128, fmt: deg,
@@ -847,7 +847,7 @@ export const STEPS = [
     id: 'findThree', ch: 4, gate: true, title: 'Find all four', lockHint: 'Find the angle on the screen to go on.',
     async run(c) {
       c.fig.box(...CROSS_BOX);
-      const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', '?', '?', '?'], vcls: [] }, crossFig);
+      const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', null, null, null], vcls: [] }, crossFig);
       c.caption('Can you find the other three angles if ∠1 is 68°?');
       const QS = [
         { k: 2, name: '∠3', fill: 'orange', opts: [22, 68, 112], ans: 68, why: { 22: 'That’s 90° − 68°. ∠3 is opposite ∠1, so they’re equal.', 112: '112° would make a linear pair with ∠1. But ∠3 is opposite ∠1.' } },
@@ -856,6 +856,7 @@ export const STEPS = [
       ];
       for (const Q of QS) {
         v.s.fill[Q.k] = 'sun';
+        v.s.vals[Q.k] = 'x';
         v.s.vcls = [];
         v.s.vcls[Q.k] = 'blink';
         v.draw();
