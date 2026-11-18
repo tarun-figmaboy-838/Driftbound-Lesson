@@ -25,8 +25,9 @@ whole lesson plays on that screen: the caption bar at the top, the diagram in th
 sums and labels at the bottom. Back, the answers and Next sit in one row under the screen. On phones
 the answers sit above Back and Next.
 
-The narration is one line at the top of the screen, beside the AI mouth (the voice indicator). Each
-word lights up as the voice says it, and the mouth moves with the voice. An instruction (for example
+The narration is one line at the top of the screen, beside the AI mouth (the voice indicator). It is a
+recorded voice, the game's co-pilot (Kokoro's af_heart voice with a light robot sound). Each word
+lights up at the moment the voice says it, and the mouth's bars follow the voice. An instruction (for example
 "Drag B.") is said after the caption, in the same line; a wrong-answer hint takes the line while it is
 said, then the caption comes back. Answer buttons appear once the question has been said. There is no
 character, no progress bar and no other text.
@@ -103,7 +104,9 @@ Kept to what the interactions need:
 
 ## Production notes
 
-- The start banner, play button, recall drone and recall card are Figma AI pictures
+- The voice-over is made with Kokoro (free, open source, runs locally) by `tools/vo/make_vo.py`, in the
+  game's co-pilot voice; each line stores its word timings.
+- The start banner, title, play button, recall drone, recall card and hint hand are Figma AI pictures
   (`assets/ui/start/`, `assets/ui/recall/`).
 - The HQ background is two pictures made with Figma AI (`assets/ui/bg/`): a wide one for landscape
   screens and a tall one for phones. `src/scene.js` lines up the picture's own screen behind the

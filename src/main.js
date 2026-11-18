@@ -6,6 +6,7 @@
 // found, and every miss explains the mistake, so no student is ever stuck.
 import { Figure, at, angleOf } from './figure.js';
 import { Dialogue } from './dialogue.js';
+import { Voice } from './voice.js';
 import { Sound } from './audio.js';
 import { h, burst, burstAt, esc, angles } from './ui.js';
 import { CHAPTERS, STEPS } from './steps.js';
@@ -26,10 +27,16 @@ const els = {
 const sound = new Sound();
 // the narration: one line beside the AI mouth, said aloud word by word (speech synthesis, when the
 // device has a voice and the sound is on); the mouth moves while it talks
+// the recorded voice (the game's co-pilot, made with Kokoro): its lines are decoded once the audio starts
+const vo = new Voice(sound);
+const warm = () => vo.ready.then(() => vo.preload());
+window.addEventListener('pointerdown', warm, { once: true });
+window.addEventListener('keydown', warm, { once: true });
 const dialogue = new Dialogue($('narration'), {
   text: els.caption,
   mouth: document.querySelector('#narration .voice'),
-  voice: () => sound.blip('crew'),
+  speaker: vo,
+  blip: () => sound.blip('crew'),
   sr: $('sr'),
   reduced,
   muted: () => sound.muted,

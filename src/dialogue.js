@@ -1,8 +1,8 @@
 // The narration: one line of text beside the voice (the AI mouth), read aloud, word by word.
 //
-// Everything the voice says appears in that one line, each word lighting up as it is spoken (the
-// browser's word timing when the voice reports it, an even pace when it doesn't or the sound is off),
-// and the mouth bumps on every word.
+// Everything the voice says appears in that one line. The voice is recorded (src/voice.js): each word
+// lights up at the moment the recording says it, and the mouth's bars follow the voice itself. With the
+// sound off (or a line without a recording) the words fill in at reading pace.
 //   caption      the step's sentence from the deck: replaces the line
 //   instruction  ("Drag B."): said after the caption, it follows it in the same line
 //   hint         (a wrong answer, Next too early): takes the line at once while it is said, then the
@@ -10,22 +10,19 @@
 // Pieces are said in order: a new caption waits for the one before it to be said.
 // Tapping the line finishes it. Screen readers get each whole piece once, through the sr element.
 
-const PACE_VOICE = 14.5;   // characters a second the voice says, when it reports no word timing
-const PACE_QUIET = 19;     // characters a second the line fills in with the sound off
+const PACE = 17;           // characters a second the line fills in without a voice
 const BACK = 2.4;          // seconds a hint stays after it has been said
-const START_WAIT = 0.8;    // seconds to wait for a voice to start before filling in without it
+const START_WAIT = 2;      // seconds to wait for a recording to start before filling in without it
 
 import { esc, angles } from './ui.js';
 
-// how the voice should say a word: maths symbols as words
-const sayable = (w) => w.replace(/∠/g, 'angle ').replace(/°/g, ' degrees').replace(/−/g, ' minus ');
-
 export class Dialogue {
-  constructor(root, { text, mouth = null, voice = null, sr = null, reduced = () => false, muted = () => false } = {}) {
+  constructor(root, { text, mouth = null, speaker = null, blip = null, sr = null, reduced = () => false, muted = () => false } = {}) {
     this.root = root;
     this.text = text;          // the narration line
     this.mouth = mouth;
-    this.voice = voice;        // a tiny blip per word when there is no voice
+    this.speaker = speaker;    // the recorded voice (src/voice.js)
+    this.blip = blip;          // a tiny blip per word when there is no voice
     this.sr = sr;
     this.reduced = reduced;
     this.muted = muted;
@@ -37,15 +34,6 @@ export class Dialogue {
     this.gen = 0;              // bumped when speech is cut off, so late events from old speech are ignored
     this.waiters = [];
     root.addEventListener('pointerdown', () => this.skip());
-    this.synth = window.speechSynthesis || null;
-    this.voicePick = null;
-    const pickVoice = () => {
-      const vs = this.synth?.getVoices?.() || [];
-      const en = vs.filter((v) => /^en(-|_|$)/i.test(v.lang));
-      const prefer = ['Samantha', 'Google UK English Female', 'Karen', 'Moira', 'Tessa', 'Google US English', 'Microsoft Aria', 'Microsoft Jenny'];
-      this.voicePick = prefer.map((n) => en.find((v) => v.name.includes(n))).find(Boolean) || en[0] || null;
-    };
-    if (this.synth) { pickVoice(); this.synth.addEventListener?.('voiceschanged', pickVoice); }
   }
 
   get speech() { return this.speaking > 0; }
@@ -90,9 +78,10 @@ export class Dialogue {
 
   hush() {
     this.gen++;
-    try { this.synth?.cancel(); } catch { /* no voice */ }
+    this.speaker?.stop();
     this.speaking = 0;
     this.talkClass();
+    this.lips(null);
   }
 
   // tapping the line: show the rest of what is being said
@@ -141,15 +130,15 @@ export class Dialogue {
     const parts = p.text.split(/(\s+)/).filter(Boolean);
     const nodes = [];
     const words = [];
-    let spoken = '';
+    let at = 0;
     for (const part of parts) {
-      if (/^\s+$/.test(part)) { nodes.push(document.createTextNode(' ')); spoken += ' '; continue; }
+      if (/^\s+$/.test(part)) { nodes.push(document.createTextNode(' ')); at += 1; continue; }
       const el = document.createElement('span');
       el.className = 'w';
       el.innerHTML = angles(esc(part));
       nodes.push(el);
-      words.push({ el, at: spoken.length });
-      spoken += sayable(part);
+      words.push({ el, at });
+      at += part.length;
     }
     if (p.kind === 'line' && this.base) {
       this.text.append(document.createTextNode(' '), ...nodes);
@@ -159,44 +148,54 @@ export class Dialogue {
       if (p.kind === 'caption') this.base = p.text;
     }
     if (p.kind === 'line' && !this.base) this.base = p.text;
-    Object.assign(p, { words, k: 0, t: 0, waited: 0, started: false, heard: false, bound: false, ended: false, voiced: false });
+    Object.assign(p, { words, k: 0, t: 0, age: 0, waited: 0, started: false, heard: false, timing: null, ended: false, voiced: false });
     this.root.dataset.mood = p.kind === 'hint' ? 'hint' : '';
     if (this.sr) this.sr.textContent = p.text;
     if (this.reduced()) this.reveal(p, Infinity);
-    p.voiced = this.speak(p, spoken);
+    p.voiced = this.speak(p);
     if (!p.voiced) p.started = true;
     this.talkClass();
   }
 
-  speak(p, spoken) {
-    if (!this.synth || this.muted()) return false;
-    try {
-      const u = new SpeechSynthesisUtterance(spoken);
-      if (this.voicePick) u.voice = this.voicePick;
-      u.rate = 1.0;
-      u.pitch = 1.3;
-      const g = this.gen;
-      let on = false, over = false;
-      const end = () => {
-        if (over) return;
-        over = true;
-        if (on && g === this.gen) this.speaking = Math.max(0, this.speaking - 1);
-        p.ended = true;
-        if (this.cur === p) this.reveal(p, Infinity);
+  // say a piece with its recording; the words then follow the recording's own timing
+  speak(p) {
+    if (!this.speaker || this.muted() || !this.speaker.has(p.text)) return false;
+    const g = this.gen;
+    let on = false, over = false;
+    const end = () => {
+      if (over) return;
+      over = true;
+      if (on && g === this.gen) this.speaking = Math.max(0, this.speaking - 1);
+      p.ended = true;
+      if (this.cur === p) this.reveal(p, Infinity);
+      this.talkClass();
+      if (!this.speaking) this.lips(null);
+    };
+    return this.speaker.say(p.text, {
+      onstart: ({ words }) => {
+        if (g !== this.gen) return;
+        on = true;
+        this.speaking += 1;
+        p.started = p.heard = true;
+        if (words.length === p.words.length) p.timing = words;
         this.talkClass();
-      };
-      u.onstart = () => { if (g !== this.gen) return; on = true; this.speaking += 1; p.started = true; p.heard = true; this.talkClass(); };
-      u.onboundary = (e) => { if (e.name && e.name !== 'word') return; p.bound = true; if (this.cur === p) this.reveal(p, e.charIndex); };
-      u.onend = end;
-      u.onerror = end;
-      this.synth.speak(u);
-      return true;
-    } catch {
-      return false;
-    }
+      },
+      onend: end,
+    });
   }
 
-  // light up every word that starts at or before spoken position `upTo`
+  // the mouth follows the voice: each bar's height comes from the sound (null puts it back at rest)
+  lips(bands) {
+    const on = !!bands;
+    document.documentElement.classList.toggle('lipsync', on);
+    if (!on && !this.lipBars) return;
+    this.lipBars = this.lipBars || [];
+    if (on) this.lipBars = [...document.querySelectorAll('#narration .voice i, .drone__screen i')];
+    this.lipBars.forEach((el, i) => { if (on) el.style.setProperty('--lv', bands[i % 7].toFixed(3)); else el.style.removeProperty('--lv'); });
+    if (!on) this.lipBars = null;
+  }
+
+  // light up every word that starts at or before position `upTo` in the line
   reveal(p, upTo) {
     let n = 0;
     while (p.k < p.words.length && p.words[p.k].at <= upTo) {
@@ -206,7 +205,7 @@ export class Dialogue {
       p.k++; n++;
     }
     if (n) {
-      if (!p.voiced) this.voice?.();
+      if (!p.heard) this.blip?.();
       this.bump();
       this.talkClass();
     }
@@ -242,15 +241,22 @@ export class Dialogue {
       if (!p) { this.wake(); return false; }
       this.begin(p);
     }
-    // the voice can be slow to start, or never start (no voice, or the browser blocks it)
+    p.age += dt;
+    // the recording can take a moment to start, or never start (no file, or the browser can't play it)
     if (!p.started) { p.waited += dt; if (p.waited > START_WAIT) p.started = true; }
-    if (p.started && !p.bound && p.k < p.words.length) {
+    if (p.timing) {                                    // each word as the recording says it
+      const t = this.speaker.elapsed();
+      let k = p.k;
+      while (k < p.words.length && p.timing[k] <= t) k++;
+      if (k > p.k) this.reveal(p, p.words[k - 1].at);
+    } else if (p.started && p.k < p.words.length) {    // no timing: an even reading pace
       p.t += dt;
-      this.reveal(p, p.t * (p.voiced ? PACE_VOICE : PACE_QUIET));
+      this.reveal(p, p.t * PACE);
     }
+    if (this.speaking) this.lips(this.speaker.bands(7));
     const allShown = p.k >= p.words.length;
-    // done when the voice has finished; or it never started (no voice); or after 14 s at most
-    const voiceDone = !p.voiced || p.ended || (!p.heard && allShown) || p.waited + p.t > 14;
+    // done when the voice has finished; or it never started (no voice); or after 20 s at most
+    const voiceDone = !p.voiced || p.ended || (!p.heard && allShown) || p.age > 20;
     if (!allShown || !voiceDone) return true;
     // said: a hint stays a moment, then the line goes back to the caption
     if (p.kind === 'hint') {

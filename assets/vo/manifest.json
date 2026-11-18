@@ -1,0 +1,1648 @@
+{
+ "files": [
+  "00626aeb",
+  "01aae066",
+  "04ed37ec",
+  "04ee6ea5",
+  "0640014d",
+  "0693b5bd",
+  "06c021cf",
+  "070ee1a6",
+  "08088006",
+  "08088065",
+  "0d0efa4c",
+  "0d237326",
+  "0ea047b4",
+  "0ee9fe4a",
+  "0fb281f8",
+  "0fe7eb11",
+  "11f37764",
+  "11fcf620",
+  "14b29ab7",
+  "15c94af9",
+  "1a597baa",
+  "1aa94bb5",
+  "1ad0abc7",
+  "22647022",
+  "25098e15",
+  "29e4058b",
+  "2b28395c",
+  "2cf4f447",
+  "2f72cdaf",
+  "3a58934b",
+  "4682a805",
+  "4abdfcab",
+  "4d83384c",
+  "51168216",
+  "52461f03",
+  "537df1a9",
+  "545c66af",
+  "5522ae0a",
+  "57df3792",
+  "590ce065",
+  "5ae1ab66",
+  "5c119884",
+  "5dfd388c",
+  "639d68c7",
+  "63e345b5",
+  "675b76dc",
+  "6768f75a",
+  "6e627c6c",
+  "7001ec75",
+  "70eff148",
+  "728236f6",
+  "72a600b7",
+  "74394897",
+  "7b968a0c",
+  "89096cbf",
+  "90aa4d3e",
+  "94a23352",
+  "97fcf9fe",
+  "98be6b57",
+  "98d6eb94",
+  "9b4c4912",
+  "9e405912",
+  "a150421f",
+  "a5304083",
+  "a9a9bab5",
+  "ab9d2cdf",
+  "af335174",
+  "afae6d65",
+  "b12fffcc",
+  "b3249849",
+  "b38bcdd9",
+  "b6429102",
+  "ba6de2e0",
+  "c16faeef",
+  "c453ce50",
+  "c7c2d907",
+  "c96f98e0",
+  "ca159985",
+  "ca40d7c6",
+  "cbf563d4",
+  "cc025747",
+  "ccf0f604",
+  "cd9319a1",
+  "d5890e2b",
+  "d8559081",
+  "d86968d4",
+  "d8aa0710",
+  "dac1f606",
+  "dc0a064d",
+  "df42bd2f",
+  "df5ca2a0",
+  "e01487aa",
+  "e426976f",
+  "e63b93ea",
+  "e6a56cb9",
+  "e7d11940",
+  "e7f310af",
+  "ea8e3859",
+  "ee14c459",
+  "f589ab63",
+  "f5ab0b14",
+  "f8336056",
+  "fe6d4e5f"
+ ],
+ "lines": {
+  "dac1f606": {
+   "text": "Do you remember how an angle is formed?",
+   "seconds": 2.88,
+   "words": [
+    0.35,
+    0.445,
+    0.564,
+    1.016,
+    1.147,
+    1.278,
+    1.659,
+    1.802
+   ]
+  },
+  "a150421f": {
+   "text": "Two rays starting from the same point form an angle.",
+   "seconds": 3.76,
+   "words": [
+    0.373,
+    0.576,
+    1.076,
+    1.469,
+    1.6,
+    1.695,
+    1.992,
+    2.314,
+    2.6,
+    2.719
+   ]
+  },
+  "98be6b57": {
+   "text": "Which pair is complementary?",
+   "seconds": 2.45,
+   "words": [
+    0.35,
+    0.611,
+    0.85,
+    0.992
+   ]
+  },
+  "d86968d4": {
+   "text": "What if these two angles share a point and an arm?",
+   "seconds": 3.41,
+   "words": [
+    0.35,
+    0.457,
+    0.588,
+    0.826,
+    1.016,
+    1.445,
+    1.671,
+    1.766,
+    2.195,
+    2.314,
+    2.409
+   ]
+  },
+  "6768f75a": {
+   "text": "They have the same vertex.",
+   "seconds": 2.31,
+   "words": [
+    0.35,
+    0.492,
+    0.695,
+    0.814,
+    1.111
+   ]
+  },
+  "14b29ab7": {
+   "text": "They also have one common arm.",
+   "seconds": 2.62,
+   "words": [
+    0.35,
+    0.492,
+    0.897,
+    1.088,
+    1.326,
+    1.683
+   ]
+  },
+  "cd9319a1": {
+   "text": "The two angles do not overlap.",
+   "seconds": 2.69,
+   "words": [
+    0.35,
+    0.469,
+    0.719,
+    1.159,
+    1.266,
+    1.469
+   ]
+  },
+  "cbf563d4": {
+   "text": "We call these adjacent angles.",
+   "seconds": 2.6,
+   "words": [
+    0.35,
+    0.469,
+    0.707,
+    0.945,
+    1.457
+   ]
+  },
+  "4682a805": {
+   "text": "Which pair is adjacent?",
+   "seconds": 2.24,
+   "words": [
+    0.373,
+    0.564,
+    0.802,
+    0.921
+   ]
+  },
+  "04ee6ea5": {
+   "text": "What happens if a ray starts from a point on a straight line?",
+   "seconds": 4.05,
+   "words": [
+    0.35,
+    0.492,
+    1.076,
+    1.195,
+    1.29,
+    1.647,
+    1.98,
+    2.1,
+    2.159,
+    2.54,
+    2.647,
+    2.707,
+    2.992
+   ]
+  },
+  "0640014d": {
+   "text": "We get a pair of adjacent angles.",
+   "seconds": 2.76,
+   "words": [
+    0.35,
+    0.445,
+    0.576,
+    0.635,
+    0.992,
+    1.088,
+    1.623
+   ]
+  },
+  "7b968a0c": {
+   "text": "As both angles lie on a straight line, we call them a linear pair.",
+   "seconds": 4.83,
+   "words": [
+    0.35,
+    0.54,
+    0.885,
+    1.314,
+    1.635,
+    1.742,
+    1.802,
+    2.088,
+    2.826,
+    2.969,
+    3.171,
+    3.302,
+    3.409,
+    3.802
+   ]
+  },
+  "cc025747": {
+   "text": "Let’s measure both angles.",
+   "seconds": 2.38,
+   "words": [
+    0.373,
+    0.635,
+    0.969,
+    1.254
+   ]
+  },
+  "a5304083": {
+   "text": "What do the two angles add up to?",
+   "seconds": 2.62,
+   "words": [
+    0.35,
+    0.457,
+    0.552,
+    0.647,
+    0.885,
+    1.326,
+    1.552,
+    1.719
+   ]
+  },
+  "90aa4d3e": {
+   "text": "What happens if we move the ray?",
+   "seconds": 2.55,
+   "words": [
+    0.35,
+    0.469,
+    0.992,
+    1.123,
+    1.254,
+    1.504,
+    1.588
+   ]
+  },
+  "04ed37ec": {
+   "text": "The angles change, but their total stays 180°.",
+   "seconds": 4.88,
+   "words": [
+    0.326,
+    0.457,
+    0.897,
+    1.73,
+    1.873,
+    2.076,
+    2.469,
+    2.838
+   ]
+  },
+  "b12fffcc": {
+   "text": "A linear pair always adds to 180°.",
+   "seconds": 4.12,
+   "words": [
+    0.373,
+    0.445,
+    0.826,
+    1.361,
+    1.79,
+    2.111,
+    2.23
+   ]
+  },
+  "df5ca2a0": {
+   "text": "If a ray stands on a straight line, the two adjacent angles formed add up to 180°.",
+   "seconds": 7.24,
+   "words": [
+    0.326,
+    0.469,
+    0.588,
+    0.98,
+    1.338,
+    1.433,
+    1.504,
+    1.802,
+    2.635,
+    2.778,
+    3.076,
+    3.647,
+    4.123,
+    4.766,
+    5.004,
+    5.159,
+    5.278
+   ]
+  },
+  "ccf0f604": {
+   "text": "Find the missing angle in this linear pair.",
+   "seconds": 3.14,
+   "words": [
+    0.373,
+    0.623,
+    0.707,
+    1.028,
+    1.504,
+    1.623,
+    1.802,
+    2.183
+   ]
+  },
+  "11fcf620": {
+   "text": "Which pair is supplementary?",
+   "seconds": 2.48,
+   "words": [
+    0.373,
+    0.647,
+    0.897,
+    1.016
+   ]
+  },
+  "70eff148": {
+   "text": "What if these two supplementary angles become adjacent?",
+   "seconds": 4.31,
+   "words": [
+    0.373,
+    0.516,
+    0.659,
+    0.969,
+    1.516,
+    2.195,
+    2.659,
+    2.992
+   ]
+  },
+  "7001ec75": {
+   "text": "Their outer arms lie on a straight line.",
+   "seconds": 2.93,
+   "words": [
+    0.35,
+    0.528,
+    0.85,
+    1.183,
+    1.457,
+    1.552,
+    1.611,
+    1.897
+   ]
+  },
+  "0fe7eb11": {
+   "text": "Adjacent angles that add to 180° form a linear pair.",
+   "seconds": 5.43,
+   "words": [
+    0.35,
+    0.98,
+    1.469,
+    1.623,
+    1.85,
+    1.969,
+    3.611,
+    3.945,
+    4.04,
+    4.421
+   ]
+  },
+  "9e405912": {
+   "text": "Which pair must form a linear pair?",
+   "seconds": 2.67,
+   "words": [
+    0.35,
+    0.516,
+    0.754,
+    0.992,
+    1.219,
+    1.278,
+    1.635
+   ]
+  },
+  "675b76dc": {
+   "text": "What happens when two straight lines cross?",
+   "seconds": 3.0,
+   "words": [
+    0.35,
+    0.469,
+    0.909,
+    1.088,
+    1.302,
+    1.588,
+    1.945
+   ]
+  },
+  "728236f6": {
+   "text": "Four angles are formed.",
+   "seconds": 2.29,
+   "words": [
+    0.397,
+    0.647,
+    1.064,
+    1.195
+   ]
+  },
+  "08088006": {
+   "text": "Which angle is opposite ∠1?",
+   "seconds": 2.86,
+   "words": [
+    0.35,
+    0.564,
+    0.945,
+    1.111,
+    1.6
+   ]
+  },
+  "08088065": {
+   "text": "Which angle is opposite ∠2?",
+   "seconds": 2.91,
+   "words": [
+    0.35,
+    0.564,
+    0.945,
+    1.1,
+    1.576
+   ]
+  },
+  "01aae066": {
+   "text": "These are vertically opposite angle pairs.",
+   "seconds": 3.29,
+   "words": [
+    0.397,
+    0.707,
+    0.873,
+    1.361,
+    1.85,
+    2.23
+   ]
+  },
+  "e426976f": {
+   "text": "Let’s measure the angles.",
+   "seconds": 2.22,
+   "words": [
+    0.373,
+    0.635,
+    0.933,
+    1.076
+   ]
+  },
+  "2f72cdaf": {
+   "text": "Vertically opposite angles are equal.",
+   "seconds": 3.14,
+   "words": [
+    0.397,
+    0.969,
+    1.433,
+    1.909,
+    2.064
+   ]
+  },
+  "537df1a9": {
+   "text": "Does that still happen if we rotate a line?",
+   "seconds": 3.26,
+   "words": [
+    0.35,
+    0.516,
+    0.778,
+    1.04,
+    1.528,
+    1.671,
+    1.802,
+    2.171,
+    2.23
+   ]
+  },
+  "afae6d65": {
+   "text": "Let’s see why it happens.",
+   "seconds": 2.26,
+   "words": [
+    0.373,
+    0.611,
+    0.802,
+    1.004,
+    1.088
+   ]
+  },
+  "4abdfcab": {
+   "text": "Can you find the other three angles if ∠1 is 68°?",
+   "seconds": 5.22,
+   "words": [
+    0.35,
+    0.469,
+    0.623,
+    0.909,
+    0.992,
+    1.29,
+    1.528,
+    2.361,
+    2.564,
+    3.242,
+    3.421
+   ]
+  },
+  "c453ce50": {
+   "text": "Recall",
+   "seconds": 1.72,
+   "words": [
+    0.492
+   ]
+  },
+  "15c94af9": {
+   "text": "Drag B.",
+   "seconds": 1.79,
+   "words": [
+    0.469,
+    0.778
+   ]
+  },
+  "63e345b5": {
+   "text": "Tap the point both angles share.",
+   "seconds": 2.57,
+   "words": [
+    0.35,
+    0.576,
+    0.659,
+    0.921,
+    1.207,
+    1.564
+   ]
+  },
+  "1ad0abc7": {
+   "text": "Tap the arm both angles share.",
+   "seconds": 2.64,
+   "words": [
+    0.35,
+    0.576,
+    0.707,
+    0.969,
+    1.254,
+    1.647
+   ]
+  },
+  "5c119884": {
+   "text": "Trace from B to A.",
+   "seconds": 2.17,
+   "words": [
+    0.373,
+    0.683,
+    0.873,
+    1.064,
+    1.219
+   ]
+  },
+  "af335174": {
+   "text": "Drag point C.",
+   "seconds": 1.98,
+   "words": [
+    0.445,
+    0.754,
+    1.04
+   ]
+  },
+  "ba6de2e0": {
+   "text": "Turn the copy of ∠1 half a turn round O.",
+   "seconds": 3.81,
+   "words": [
+    0.35,
+    0.552,
+    0.635,
+    0.957,
+    1.076,
+    1.969,
+    2.219,
+    2.278,
+    2.564,
+    2.873
+   ]
+  },
+  "0d0efa4c": {
+   "text": "Drag the line.",
+   "seconds": 1.98,
+   "words": [
+    0.445,
+    0.742,
+    0.85
+   ]
+  },
+  "5dfd388c": {
+   "text": "They have the same vertex. They also have one common arm. The two angles do not overlap.",
+   "seconds": 6.62,
+   "words": [
+    0.35,
+    0.492,
+    0.695,
+    0.814,
+    1.135,
+    2.04,
+    2.207,
+    2.564,
+    2.79,
+    3.052,
+    3.445,
+    4.159,
+    4.29,
+    4.528,
+    4.992,
+    5.135,
+    5.35
+   ]
+  },
+  "b38bcdd9": {
+   "text": "Tap a name for the angle to go on.",
+   "seconds": 2.95,
+   "words": [
+    0.35,
+    0.635,
+    0.73,
+    1.111,
+    1.219,
+    1.361,
+    1.73,
+    1.826,
+    1.992
+   ]
+  },
+  "29e4058b": {
+   "text": "Which type of angle is this?",
+   "seconds": 2.41,
+   "words": [
+    0.35,
+    0.552,
+    0.814,
+    0.933,
+    1.302,
+    1.445
+   ]
+  },
+  "e6a56cb9": {
+   "text": "What type is it now?",
+   "seconds": 2.1,
+   "words": [
+    0.397,
+    0.588,
+    0.873,
+    1.016,
+    1.135
+   ]
+  },
+  "ab9d2cdf": {
+   "text": "And what type is this?",
+   "seconds": 2.14,
+   "words": [
+    0.35,
+    0.492,
+    0.719,
+    1.04,
+    1.183
+   ]
+  },
+  "9b4c4912": {
+   "text": "Tap the card with the complementary pair.",
+   "seconds": 3.12,
+   "words": [
+    0.35,
+    0.611,
+    0.707,
+    1.207,
+    1.338,
+    1.421,
+    2.135
+   ]
+  },
+  "639d68c7": {
+   "text": "Do what the screen asks to go on.",
+   "seconds": 2.57,
+   "words": [
+    0.35,
+    0.433,
+    0.552,
+    0.635,
+    0.992,
+    1.326,
+    1.421,
+    1.611
+   ]
+  },
+  "0693b5bd": {
+   "text": "Tap the adjacent pair to go on.",
+   "seconds": 2.74,
+   "words": [
+    0.35,
+    0.611,
+    0.754,
+    1.254,
+    1.492,
+    1.588,
+    1.778
+   ]
+  },
+  "4d83384c": {
+   "text": "Add the two angles and pick the total.",
+   "seconds": 2.91,
+   "words": [
+    0.397,
+    0.576,
+    0.671,
+    0.885,
+    1.433,
+    1.564,
+    1.802,
+    1.897
+   ]
+  },
+  "ca40d7c6": {
+   "text": "Drag point C to go on.",
+   "seconds": 2.26,
+   "words": [
+    0.373,
+    0.683,
+    0.945,
+    1.1,
+    1.171,
+    1.326
+   ]
+  },
+  "98d6eb94": {
+   "text": "Pick the missing angle to go on.",
+   "seconds": 2.6,
+   "words": [
+    0.35,
+    0.564,
+    0.683,
+    1.028,
+    1.397,
+    1.492,
+    1.683
+   ]
+  },
+  "ca159985": {
+   "text": "Tap the card with the supplementary pair.",
+   "seconds": 3.12,
+   "words": [
+    0.35,
+    0.611,
+    0.707,
+    1.207,
+    1.338,
+    1.457,
+    2.111
+   ]
+  },
+  "00626aeb": {
+   "text": "Tap “Join them” to go on.",
+   "seconds": 2.33,
+   "words": [
+    0.35,
+    0.635,
+    0.909,
+    1.088,
+    1.183,
+    1.373
+   ]
+  },
+  "3a58934b": {
+   "text": "Tap the pair that must form a linear pair.",
+   "seconds": 3.02,
+   "words": [
+    0.35,
+    0.576,
+    0.659,
+    0.969,
+    1.1,
+    1.338,
+    1.6,
+    1.659,
+    2.04
+   ]
+  },
+  "c16faeef": {
+   "text": "Find the opposite angle to go on.",
+   "seconds": 2.83,
+   "words": [
+    0.373,
+    0.623,
+    0.754,
+    1.219,
+    1.588,
+    1.683,
+    1.897
+   ]
+  },
+  "dc0a064d": {
+   "text": "Turn the copy of ∠1 round O to go on.",
+   "seconds": 3.57,
+   "words": [
+    0.35,
+    0.552,
+    0.635,
+    0.98,
+    1.1,
+    1.897,
+    2.183,
+    2.373,
+    2.469,
+    2.635
+   ]
+  },
+  "97fcf9fe": {
+   "text": "Drag the line to go on.",
+   "seconds": 2.26,
+   "words": [
+    0.373,
+    0.671,
+    0.754,
+    1.04,
+    1.135,
+    1.326
+   ]
+  },
+  "06c021cf": {
+   "text": "Tap “Next step” to finish the proof.",
+   "seconds": 2.93,
+   "words": [
+    0.35,
+    0.707,
+    1.004,
+    1.421,
+    1.54,
+    1.802,
+    1.897
+   ]
+  },
+  "f589ab63": {
+   "text": "∠1 and ∠2 form a linear pair.",
+   "seconds": 3.64,
+   "words": [
+    0.373,
+    1.1,
+    1.242,
+    1.992,
+    2.242,
+    2.302,
+    2.659
+   ]
+  },
+  "d5890e2b": {
+   "text": "∠2 and ∠3 form another linear pair.",
+   "seconds": 4.1,
+   "words": [
+    0.373,
+    1.147,
+    1.29,
+    2.088,
+    2.397,
+    2.754,
+    3.111
+   ]
+  },
+  "070ee1a6": {
+   "text": "Both totals include the same ∠2.",
+   "seconds": 3.17,
+   "words": [
+    0.373,
+    0.635,
+    1.04,
+    1.361,
+    1.48,
+    1.814
+   ]
+  },
+  "0ee9fe4a": {
+   "text": "So ∠1 and ∠3 must be equal.",
+   "seconds": 3.74,
+   "words": [
+    0.373,
+    0.552,
+    1.445,
+    1.6,
+    2.302,
+    2.528,
+    2.671
+   ]
+  },
+  "d8aa0710": {
+   "text": "Find the angle on the screen to go on.",
+   "seconds": 2.93,
+   "words": [
+    0.373,
+    0.623,
+    0.742,
+    1.183,
+    1.29,
+    1.373,
+    1.73,
+    1.826,
+    1.992
+   ]
+  },
+  "11f37764": {
+   "text": "45° + 55° = 100°. Complementary angles make exactly 90°.",
+   "seconds": 9.29,
+   "words": [
+    0.373,
+    1.623,
+    1.921,
+    3.397,
+    3.79,
+    5.528,
+    6.29,
+    6.838,
+    7.064,
+    7.671
+   ]
+  },
+  "1a597baa": {
+   "text": "35° + 65° = 100°. That’s 10° too many.",
+   "seconds": 7.33,
+   "words": [
+    0.373,
+    1.588,
+    1.873,
+    3.171,
+    3.54,
+    5.1,
+    5.433,
+    6.123,
+    6.326
+   ]
+  },
+  "2b28395c": {
+   "text": "Point A is on one angle only. Find the point where both angles start.",
+   "seconds": 5.22,
+   "words": [
+    0.326,
+    0.6,
+    0.933,
+    1.052,
+    1.242,
+    1.492,
+    1.826,
+    2.659,
+    2.957,
+    3.04,
+    3.29,
+    3.457,
+    3.79,
+    4.183
+   ]
+  },
+  "fe6d4e5f": {
+   "text": "Point B is on one angle only. Find the point where both angles start.",
+   "seconds": 5.12,
+   "words": [
+    0.326,
+    0.564,
+    0.85,
+    0.957,
+    1.147,
+    1.397,
+    1.73,
+    2.564,
+    2.861,
+    2.945,
+    3.195,
+    3.361,
+    3.695,
+    4.088
+   ]
+  },
+  "e7f310af": {
+   "text": "C is on the shared arm, but both angles start at the corner. Tap the corner.",
+   "seconds": 5.26,
+   "words": [
+    0.397,
+    0.659,
+    0.766,
+    0.885,
+    1.016,
+    1.302,
+    1.73,
+    1.873,
+    2.195,
+    2.588,
+    2.838,
+    2.909,
+    2.992,
+    3.838,
+    4.111,
+    4.207
+   ]
+  },
+  "51168216": {
+   "text": "OA is an arm of one angle only.",
+   "seconds": 3.05,
+   "words": [
+    0.397,
+    0.683,
+    0.79,
+    0.909,
+    1.23,
+    1.373,
+    1.623,
+    1.969
+   ]
+  },
+  "a9a9bab5": {
+   "text": "OB is an arm of one angle only.",
+   "seconds": 3.07,
+   "words": [
+    0.373,
+    0.838,
+    0.957,
+    1.076,
+    1.338,
+    1.445,
+    1.683,
+    2.016
+   ]
+  },
+  "5ae1ab66": {
+   "text": "They share a vertex and an arm, but the orange angle covers the blue one: they overlap.",
+   "seconds": 6.33,
+   "words": [
+    0.35,
+    0.516,
+    0.766,
+    0.826,
+    1.469,
+    1.576,
+    1.695,
+    2.373,
+    2.504,
+    2.659,
+    3.076,
+    3.48,
+    3.873,
+    3.969,
+    4.23,
+    4.909,
+    5.088
+   ]
+  },
+  "e7d11940": {
+   "text": "Same vertex, but no common arm: there’s a gap between the two angles.",
+   "seconds": 5.07,
+   "words": [
+    0.397,
+    0.683,
+    1.254,
+    1.397,
+    1.623,
+    1.992,
+    2.707,
+    2.885,
+    2.98,
+    3.326,
+    3.623,
+    3.719,
+    3.933
+   ]
+  },
+  "89096cbf": {
+   "text": "Not quite. 60 + 110 = 170, and 5 + 5 = 10 more.",
+   "seconds": 7.79,
+   "words": [
+    0.373,
+    0.635,
+    1.564,
+    1.992,
+    2.254,
+    3.195,
+    3.564,
+    4.933,
+    5.111,
+    5.54,
+    5.826,
+    6.207,
+    6.564,
+    6.802
+   ]
+  },
+  "df42bd2f": {
+   "text": "A bit too much. 60 + 110 = 170, and 5 + 5 = 10 more.",
+   "seconds": 7.98,
+   "words": [
+    0.35,
+    0.421,
+    0.647,
+    0.85,
+    1.79,
+    2.254,
+    2.516,
+    3.409,
+    3.778,
+    5.123,
+    5.302,
+    5.73,
+    6.016,
+    6.397,
+    6.754,
+    6.992
+   ]
+  },
+  "f8336056": {
+   "text": "118° + 52° = 170°. A linear pair must make exactly 180°.",
+   "seconds": 10.33,
+   "words": [
+    0.35,
+    1.957,
+    2.254,
+    3.659,
+    4.04,
+    6.159,
+    6.29,
+    6.695,
+    7.195,
+    7.433,
+    7.635,
+    8.266
+   ]
+  },
+  "e01487aa": {
+   "text": "138° + 52° = 190°. That’s more than a straight line.",
+   "seconds": 8.22,
+   "words": [
+    0.35,
+    2.028,
+    2.338,
+    3.707,
+    4.088,
+    6.123,
+    6.445,
+    6.659,
+    6.766,
+    6.85,
+    7.159
+   ]
+  },
+  "590ce065": {
+   "text": "85° + 85° = 170°. Supplementary angles make exactly 180°.",
+   "seconds": 10.41,
+   "words": [
+    0.373,
+    1.671,
+    2.016,
+    3.564,
+    3.969,
+    6.076,
+    6.766,
+    7.445,
+    7.683,
+    8.314
+   ]
+  },
+  "52461f03": {
+   "text": "100° + 70° = 170°. That’s 10° short.",
+   "seconds": 7.1,
+   "words": [
+    0.373,
+    1.373,
+    1.659,
+    2.766,
+    3.135,
+    5.1,
+    5.433,
+    6.088
+   ]
+  },
+  "e63b93ea": {
+   "text": "65° + 115° = 180°, but they aren’t adjacent: no shared vertex, no shared arm.",
+   "seconds": 10.6,
+   "words": [
+    0.373,
+    1.54,
+    1.802,
+    3.385,
+    3.766,
+    5.683,
+    5.826,
+    5.992,
+    6.183,
+    7.421,
+    7.73,
+    8.04,
+    8.921,
+    9.266,
+    9.588
+   ]
+  },
+  "0fb281f8": {
+   "text": "They’re adjacent, but 65° + 95° = 160°, so the outer arms don’t make a straight line.",
+   "seconds": 10.1,
+   "words": [
+    0.35,
+    0.54,
+    1.516,
+    1.707,
+    2.945,
+    3.254,
+    4.85,
+    5.23,
+    7.147,
+    7.29,
+    7.445,
+    7.802,
+    8.29,
+    8.504,
+    8.671,
+    8.73,
+    9.04
+   ]
+  },
+  "74394897": {
+   "text": "∠2 is next to ∠1: they share an arm. Opposite angles only share the vertex.",
+   "seconds": 6.83,
+   "words": [
+    0.373,
+    1.076,
+    1.23,
+    1.48,
+    1.6,
+    2.588,
+    2.754,
+    3.04,
+    3.135,
+    4.016,
+    4.492,
+    4.98,
+    5.302,
+    5.552,
+    5.635
+   ]
+  },
+  "545c66af": {
+   "text": "∠4 is next to ∠1: they share an arm. Look straight across the vertex.",
+   "seconds": 6.0,
+   "words": [
+    0.373,
+    1.1,
+    1.254,
+    1.504,
+    1.623,
+    2.564,
+    2.73,
+    3.004,
+    3.088,
+    3.885,
+    4.111,
+    4.385,
+    4.707,
+    4.802
+   ]
+  },
+  "72a600b7": {
+   "text": "∠1 is next to ∠2: they share an arm. Look straight across O.",
+   "seconds": 5.29,
+   "words": [
+    0.373,
+    0.969,
+    1.111,
+    1.361,
+    1.469,
+    2.302,
+    2.469,
+    2.742,
+    2.826,
+    3.552,
+    3.754,
+    4.028,
+    4.48
+   ]
+  },
+  "1aa94bb5": {
+   "text": "∠3 is next to ∠2: they share an arm. Look straight across O.",
+   "seconds": 5.43,
+   "words": [
+    0.373,
+    1.052,
+    1.207,
+    1.457,
+    1.564,
+    2.421,
+    2.588,
+    2.861,
+    2.945,
+    3.671,
+    3.873,
+    4.147,
+    4.6
+   ]
+  },
+  "57df3792": {
+   "text": "That’s 90° − 68°. ∠3 is opposite ∠1, so they’re equal.",
+   "seconds": 7.48,
+   "words": [
+    0.35,
+    0.647,
+    1.469,
+    2.421,
+    3.54,
+    4.314,
+    4.492,
+    4.957,
+    5.957,
+    6.159,
+    6.35
+   ]
+  },
+  "25098e15": {
+   "text": "112° would make a linear pair with ∠1. But ∠3 is opposite ∠1.",
+   "seconds": 7.69,
+   "words": [
+    0.373,
+    1.85,
+    1.98,
+    2.147,
+    2.242,
+    2.647,
+    3.04,
+    3.219,
+    4.469,
+    4.623,
+    5.54,
+    5.73,
+    6.326
+   ]
+  },
+  "c7c2d907": {
+   "text": "∠2 is next to ∠1, not opposite. Together they make a linear pair: 180°.",
+   "seconds": 7.86,
+   "words": [
+    0.373,
+    1.147,
+    1.302,
+    1.564,
+    1.695,
+    2.564,
+    2.778,
+    3.861,
+    4.326,
+    4.469,
+    4.647,
+    4.742,
+    5.135,
+    5.814
+   ]
+  },
+  "f5ab0b14": {
+   "text": "68° + 122° = 190°. A linear pair makes exactly 180°.",
+   "seconds": 10.17,
+   "words": [
+    0.373,
+    1.48,
+    1.754,
+    3.54,
+    3.933,
+    6.111,
+    6.242,
+    6.647,
+    7.23,
+    7.516,
+    8.147
+   ]
+  },
+  "0ea047b4": {
+   "text": "∠4 is opposite ∠2, not ∠1.",
+   "seconds": 4.24,
+   "words": [
+    0.373,
+    1.04,
+    1.195,
+    1.647,
+    2.659,
+    2.933
+   ]
+  },
+  "0d237326": {
+   "text": "68° + 132° = 200°. ∠1 and ∠4 make a linear pair: 180°.",
+   "seconds": 11.19,
+   "words": [
+    0.373,
+    1.445,
+    1.707,
+    3.6,
+    4.016,
+    5.826,
+    6.754,
+    6.957,
+    7.707,
+    7.897,
+    8.004,
+    8.397,
+    9.171
+   ]
+  },
+  "ee14c459": {
+   "text": "A right angle is exactly 90°, a square corner. This one is smaller than that.",
+   "seconds": 6.41,
+   "words": [
+    0.373,
+    0.457,
+    0.79,
+    1.183,
+    1.326,
+    1.921,
+    3.064,
+    3.159,
+    3.469,
+    4.361,
+    4.576,
+    4.707,
+    4.85,
+    5.302,
+    5.445
+   ]
+  },
+  "b3249849": {
+   "text": "Obtuse angles are bigger than 90°. This one is smaller than a square corner.",
+   "seconds": 6.07,
+   "words": [
+    0.35,
+    0.873,
+    1.35,
+    1.516,
+    1.873,
+    2.04,
+    3.457,
+    3.683,
+    3.897,
+    4.064,
+    4.564,
+    4.671,
+    4.73,
+    5.04
+   ]
+  },
+  "b6429102": {
+   "text": "Acute angles are smaller than 90°. This one makes a perfect square corner.",
+   "seconds": 6.07,
+   "words": [
+    0.35,
+    0.707,
+    1.171,
+    1.361,
+    1.873,
+    2.04,
+    3.48,
+    3.707,
+    3.873,
+    4.123,
+    4.219,
+    4.73,
+    5.04
+   ]
+  },
+  "6e627c6c": {
+   "text": "Obtuse angles are bigger than 90°. This one is exactly a square corner.",
+   "seconds": 6.22,
+   "words": [
+    0.35,
+    0.897,
+    1.397,
+    1.564,
+    1.921,
+    2.111,
+    3.552,
+    3.778,
+    3.992,
+    4.135,
+    4.754,
+    4.85,
+    5.183
+   ]
+  },
+  "ea8e3859": {
+   "text": "Acute angles are smaller than 90°. This one opens wider than a square corner.",
+   "seconds": 6.43,
+   "words": [
+    0.35,
+    0.707,
+    1.195,
+    1.385,
+    1.897,
+    2.064,
+    3.528,
+    3.754,
+    3.98,
+    4.48,
+    4.897,
+    5.004,
+    5.064,
+    5.397
+   ]
+  },
+  "5522ae0a": {
+   "text": "A right angle is exactly 90°. This one opens wider than that.",
+   "seconds": 5.74,
+   "words": [
+    0.373,
+    0.457,
+    0.79,
+    1.219,
+    1.373,
+    2.004,
+    3.385,
+    3.611,
+    3.814,
+    4.254,
+    4.659,
+    4.802
+   ]
+  },
+  "22647022": {
+   "text": "That’s ∠1 itself. Find the angle facing it across O.",
+   "seconds": 4.69,
+   "words": [
+    0.35,
+    0.671,
+    1.183,
+    2.064,
+    2.361,
+    2.48,
+    2.861,
+    3.266,
+    3.338,
+    3.754
+   ]
+  },
+  "d8559081": {
+   "text": "That’s ∠2 itself. Find the angle facing it across O.",
+   "seconds": 4.74,
+   "words": [
+    0.35,
+    0.647,
+    1.207,
+    2.052,
+    2.338,
+    2.457,
+    2.838,
+    3.219,
+    3.29,
+    3.742
+   ]
+  },
+  "c96f98e0": {
+   "text": "That’s ∠3 itself. Find the angle facing it across O.",
+   "seconds": 4.79,
+   "words": [
+    0.35,
+    0.671,
+    1.302,
+    2.171,
+    2.457,
+    2.576,
+    2.957,
+    3.361,
+    3.433,
+    3.85
+   ]
+  },
+  "2cf4f447": {
+   "text": "That’s ∠4 itself. Find the angle facing it across O.",
+   "seconds": 4.76,
+   "words": [
+    0.35,
+    0.647,
+    1.278,
+    2.159,
+    2.457,
+    2.576,
+    2.957,
+    3.338,
+    3.409,
+    3.826
+   ]
+  },
+  "94a23352": {
+   "text": "Answer the question to go on.",
+   "seconds": 2.5,
+   "words": [
+    0.373,
+    0.695,
+    0.778,
+    1.278,
+    1.373,
+    1.564
+   ]
+  }
+ }
+}

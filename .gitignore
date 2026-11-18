@@ -1,2 +1,4 @@
 .DS_Store
-tools/
+# a local Blender install (large; not part of the lesson)
+tools/Blender.app/
+__pycache__/

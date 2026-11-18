@@ -355,27 +355,26 @@ button { font: inherit; color: inherit; }
 @keyframes start-drift { from { transform: scale(1.06); } to { transform: scale(1.12) translateY(-1.2%); } }
 .start::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(2, 6, 24, .55) 100%); }
 .start__play { position: relative; z-index: 1; width: clamp(124px, 19vmin, 196px); aspect-ratio: 353 / 360; padding: 0; border: 0; border-radius: 50%;
-  background: none; cursor: pointer; filter: drop-shadow(0 12px 26px rgba(0, 0, 0, .55)) drop-shadow(0 0 28px rgba(127, 243, 255, .45));
+  background: none; cursor: pointer; filter: drop-shadow(0 0 10px rgba(160, 248, 255, .95)) drop-shadow(0 0 26px rgba(61, 220, 242, .7)) drop-shadow(0 12px 24px rgba(0, 0, 0, .45));
   animation: play-breathe 2.2s ease-in-out infinite; }
 .start__play img { display: block; width: 100%; height: 100%; pointer-events: none; }
 @keyframes play-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 .start__play:active { transform: scale(.93); animation: none; }
 .start__play:focus-visible { outline: 3px solid var(--holo); outline-offset: 10px; }
 .start.is-going { pointer-events: none; }
-/* the game title: the chunky gold logo, a light sweeping across it now and then, and the lesson's name
-   on a hologram tag under it */
-.start__title { position: absolute; z-index: 1; top: max(5vh, 22px); left: 0; right: 0; display: grid; justify-items: center; gap: clamp(8px, 1.4vh, 14px);
-  padding: 0 16px; text-align: center; pointer-events: none; }
-.start__logo { font-size: clamp(46px, 9vw, 118px); letter-spacing: .03em; filter: drop-shadow(0 0 22px rgba(255, 197, 49, .35));
-  animation: ghost-in .9s cubic-bezier(.22, 1, .36, 1) .15s both; }
-.start__logo .logo__text {
-  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, .9) 50%, transparent 58%) 160% 0 / 260% 100% no-repeat,
-    linear-gradient(180deg, var(--sun-200) 12%, var(--sun-300) 40%, var(--sun-400) 62%, var(--sun-500) 92%);
-  -webkit-background-clip: text; background-clip: text; animation: logo-shine 4.5s ease-in-out 1.2s infinite; }
-@keyframes logo-shine { 0% { background-position: 160% 0, 0 0; } 35%, 100% { background-position: -60% 0, 0 0; } }
-.start__sub { margin: 0; padding: .45em 1.3em .5em; border-radius: 999px; font: 700 clamp(14px, 1.6vw, 22px)/1 var(--font-ui); letter-spacing: .22em;
-  text-transform: uppercase; color: #e8fbff; background: rgba(5, 18, 58, .78);
-  box-shadow: inset 0 0 0 1.5px var(--holo), 0 0 22px rgba(61, 220, 242, .4); text-shadow: 0 0 10px rgba(127, 243, 255, .7);
-  animation: ghost-in .8s cubic-bezier(.22, 1, .36, 1) .45s both; }
-.start.is-going .start__title { transition: opacity .35s ease-in, transform .35s ease-in; opacity: 0; transform: translateY(-16px); }
-@media (prefers-reduced-motion: reduce) { .start__pic, .start__play, .start__logo, .start__logo .logo__text, .start__sub { animation: none; } }
+/* the game title (Figma AI logo): drifts in like a ghost, then floats gently */
+.start__title { position: absolute; z-index: 1; top: max(3vh, 14px); left: 0; right: 0; width: min(88vw, 88vh, 720px); margin: 0 auto;
+  pointer-events: none; animation: ghost-in .9s cubic-bezier(.22, 1, .36, 1) .15s both; }
+.start__title img { display: block; width: 100%; height: auto; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .5)); animation: title-float 4s ease-in-out 1.1s infinite alternate; }
+@keyframes title-float { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+/* the play button glows: a soft aqua aura behind it that breathes */
+.start__play::before { content: ''; position: absolute; z-index: -1; inset: -34%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle closest-side, rgba(170, 250, 255, .95) 52%, rgba(61, 220, 242, .6) 66%, rgba(61, 220, 242, .18) 84%, rgba(61, 220, 242, 0) 100%);
+  animation: play-glow 2.2s ease-in-out infinite; }
+@keyframes play-glow { 0%, 100% { transform: scale(.88); opacity: .7; } 50% { transform: scale(1.08); opacity: 1; } }
+.start.is-going .start__title { transition: opacity .35s ease-in; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .start__pic, .start__play, .start__play::before, .start__title, .start__title img { animation: none; } }
+
+/* lip sync: while the recorded voice plays, each mouth bar's height follows the sound (--lv, 0..1) */
+.lipsync .caption .voice i { animation: none; height: calc(4px + var(--lv, 0) * 26px); transition: height 60ms linear; }
+.lipsync .drone__screen i { animation: none; height: calc(12% + var(--lv, 0) * 78%); transition: height 60ms linear; }
