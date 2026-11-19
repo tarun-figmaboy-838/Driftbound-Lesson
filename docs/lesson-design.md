@@ -58,21 +58,21 @@ and every drag task has a pulsing handle and also works with the arrow keys.
 |---|---|---|---|---|
 | 1 | 2–3 | Do you remember how an angle is formed? / Two rays starting from the same point form an angle. | Watches arm OB turn away from OA; drags B to open and close the angle | |
 | 2 | 4–6 | Which type of angle is this? / What type is it now? / And what type is this? | Picks Acute, Right or Obtuse three times; arm OB turns between questions | yes |
-| 3 | 7 | Which pair is complementary? | Taps one of three cards; the right pair slides together into a right angle | yes |
-| 4 | 8–12 | What if these two angles share a point and an arm? / They have the same vertex. / They also have one common arm. / The two angles do not overlap. / We call these adjacent angles. | Taps the shared point, then the shared arm; the two angles blink side by side | yes |
+| 3 | 7 | Complementary angles add up to 90°. / Which pair is complementary? | Taps one of three cards; the right pair slides together into a right angle | yes |
+| 4 | 8–12 | What if these two angles share a point and an arm? / They have the same vertex. / They also have one common arm. / The two angles do not overlap. / We call these adjacent angles. | Taps the point where both angles start, then the shared arm; the two angles blink side by side | yes |
 | 5 | 13 | Which pair is adjacent? | Taps one of three cards | yes |
 | 6 | 14–16 | What happens if a ray starts from a point on a straight line? / We get a pair of adjacent angles. / As both angles lie on a straight line, we call them a linear pair. | Watches line AB and ray OC draw in | |
-| 7 | 17–18 | Let's measure both angles. / What do the two angles add up to? | Watches a protractor measure 65° and 115°; picks the total; traces the arc from B over to A (half a turn, 180°) | yes |
+| 7 | 17–18 | Let's measure both angles. / What do the two angles add up to? | Taps each angle to measure it with the protractor (65° and 115°); picks the total; traces the arc from B over to A (half a turn, 180°) | yes |
 | 8 | 19–20 | What happens if we move the ray? / The angles change, but their total stays 180°. | Drags C; the two angles change, the sum stays 180° | yes |
 | 9 | 21–22 | A linear pair always adds to 180°. / If a ray stands on a straight line, the two adjacent angles formed add up to 180°. | Watches the half turn sweep from B to A | |
 | 10 | 23 | Find the missing angle in this linear pair. | Picks 118°, 128° or 138° | yes |
-| 11 | 24 | Which pair is supplementary? | Taps one of three cards | yes |
-| 12 | 25–27 | What if these two supplementary angles become adjacent? / Their outer arms lie on a straight line. / Adjacent angles that add to 180° form a linear pair. | Taps Join them; the 110° and 70° angles slide together and their outer arms snap into line AB | yes |
+| 11 | 24 | Supplementary angles add up to 180°. / Which pair is supplementary? | Taps one of three cards | yes |
+| 12 | 25–27 | What if these two supplementary angles become adjacent? / Their outer arms lie on a straight line. / Adjacent angles that add to 180° form a linear pair. | Drags the 110° angle onto the 70° angle (it slides and turns as it goes, and snaps when close); their outer arms make a straight line | yes |
 | 13 | 28 | Which pair must form a linear pair? | Taps one of three cards | yes |
 | 14 | 29–30 | What happens when two straight lines cross? / Four angles are formed. | Watches a second line cross AB; the four angles light up one by one round O | |
 | 15 | 31–33 | Which angle is opposite ∠1? / Which angle is opposite ∠2? / These are vertically opposite angle pairs. | Taps the opposite angle (on the diagram or a button), twice | yes |
-| 16 | 34–35 | Let's measure the angles. / Vertically opposite angles are equal. | Watches a protractor measure ∠1 and ∠3 (55° each); turns a copy of ∠1 half a turn round O and sees it land exactly on ∠3 | yes |
-| 17 | 36 | Does that still happen if we rotate a line? | Drags the line; ∠1 and ∠3 stay equal at every position | yes |
+| 16 | 34–35 | Let's measure the angles. / Vertically opposite angles are equal. | Taps each of the four angles to measure it (∠1 = ∠3 = 55°, ∠2 = ∠4 = 125°); turns a copy of ∠1 half a turn round O and sees it land exactly on ∠3 | yes |
+| 17 | 36 | Does that still happen if we rotate a line? / Yes: vertically opposite angles stay equal. | Drags the line; all four angles update live, and ∠1 = ∠3 and ∠2 = ∠4 at every position | yes |
 | 18 | 37–41 | Let's see why it happens. / ∠1 and ∠2 form a linear pair. / ∠2 and ∠3 form another linear pair. / Both totals include the same ∠2. / So ∠1 and ∠3 must be equal. | Taps Next step four times; each linear pair sweeps its half turn; the working under the figure merges line by line (the two 180° totals merge, ∠2 is struck out on both sides) into ∠1 = ∠3 | yes |
 | 19 | 42 | Can you find the other three angles if ∠1 is 68°? | Finds ∠3, ∠2 and ∠4 in turn | yes |
 | 20 | 43 | Recall | For each of the five cards the deck lists (angles definition, adjacent angles, linear pair, linear pair converse, vertically opposite angles), a drone flies in and stops in the middle, projects the card as a hologram in its beam, the diagram animates the idea while the drone says the deck's sentence, and the card flies down into the tray. While the drone works, the collected cards wait at the sides (two left, two right, level with the card in the middle). When the drone has gone the cards grow into the collection, the line says "You learned all about angles!" and Launch mission arrives. Tapping a card brings the drone back to explain it again. Next is Launch mission and opens the game | |
