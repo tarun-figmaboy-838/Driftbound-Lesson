@@ -20,6 +20,8 @@ five summary cards and the mouth moves to the drone's screen.
 - Buttons: the capsule buttons from the POLYGON Figma file (`assets/ui/polygon/`), cut into a left cap,
   a stretching middle and a right cap so they fit any label. The art is built into `src/pills.css`
   (`python3 tools/ui/inline_pills.py`), so a button never shows without its capsule.
+- Intro (gate, corridor, the hall's walls for the full turn): made with Figma AI (`assets/ui/intro/`),
+  played by `src/intro.js`.
 - Start banner, play button, recall drone and card, hint hand: made with Figma AI (`assets/ui/start/`,
   `assets/ui/recall/`).
 - Voice-over: made with Kokoro (Kokoro-82M, free and open source, Apache 2.0, runs on your Mac), with
@@ -65,6 +67,7 @@ assets/ui/polygon/    button art from the POLYGON Figma file (gold, blue, green,
 assets/ui/start/      start banner and play button (Figma AI)
 assets/ui/recall/     recall drone and card (Figma AI)
 assets/ui/hint/       the hint hand (Figma AI)
+assets/ui/intro/      the intro (Figma AI): gate frame and door halves, corridor, the hall all the way round
 assets/vo/            the voice-over: one .m4a per line, and manifest.json (lines and word timings)
 tools/vo/make_vo.py   makes the voice-over with Kokoro
 LESSON_DESIGN.md      the lesson design: flow, mapping to the deck and the game

@@ -937,10 +937,10 @@ export const STEPS = [
   },
 
   // ============================================================ RECALL (the last step launches the game)
-  // deck slide 43: recall. For each of the five cards, a drone flies in and stops in the middle, projects
-  // the card as a hologram in its beam, and the card's diagram shows the idea while the voice says the
-  // deck's sentence; then the card flies down into the tray. With all five collected the tray opens into
-  // the collection, and tapping a card brings the drone back to explain it again.
+  // deck slide 43: recall. A drone flies in and stops in the middle; it projects the five cards one by one
+  // as holograms in its beam, each card's diagram shows the idea while the voice says the deck's sentence,
+  // and the card flies down into the tray. When all five are collected the drone leaves and the tray
+  // opens into the collection; tapping a card brings the drone back to explain it again.
   {
     id: 'recall', quiet: true, ch: 5, title: 'Recall', next: 'Launch mission', launch: true,
     async run(c) {
@@ -1054,8 +1054,10 @@ export const STEPS = [
         await c.wait(450);
       };
 
-      // each card: the drone flies in and stops in the middle, projects the card, explains it; the card
-      // flies down into the tray while the drone leaves for the next one
+      // the drone flies in once and stops in the middle; it projects each card in turn, the card is
+      // explained, then flies down into the tray. The drone leaves when all five are collected.
+      stage.appendChild(cards[0].el);
+      if (!c.reduced) await flyIn(hoverOver(stage));
       for (const k of cards) {
         stage.appendChild(k.el);
         if (!k.v) {                                       // the card's diagram, drawn once it has a size
@@ -1063,16 +1065,16 @@ export const STEPS = [
           const f = c.mini(k.el.querySelector('.rcard__fig'), k.R.box, () => {}, { kMin: 0.5, kMax: 1.7, pad: 10 });
           k.v = c.view({ ...k.R.start }, k.R.draw, f);
         }
-        if (!c.reduced) await flyIn(hoverOver(stage));
         beamOn(stage);
         c.sound.pop();
         await release(k.el);
         await explain(k);
-        beamOff();                                       // the light goes back into the emitter, then the drone leaves
-        await c.wait(c.reduced ? 0 : 320);
-        if (!c.reduced) flyOut();
+        beamOff();                                       // the light goes back into the emitter
+        await c.wait(c.reduced ? 0 : 280);
         await collect(k);
+        await c.wait(c.reduced ? 0 : 200);
       }
+      if (!c.reduced) flyOut();
 
       // all five collected: the tray opens up into the collection
       const grid = cards.map((k) => k.el.getBoundingClientRect());

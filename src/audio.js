@@ -73,4 +73,35 @@ export class Sound {
   star(i) { const f = [784, 988, 1319][i] || 1319; this.tone('triangle', f, f, 0.35, 0.32); this.tone('sine', f * 2, f * 2, 0.25, 0.1, 0.04); }
   whoosh() { this.tone('sawtooth', 120, 900, 0.45, 0.1, 0, 1800); }
   launch() { this.tone('sawtooth', 80, 1500, 1.1, 0.16, 0, 2200); [523, 659, 784, 1047].forEach((f, i) => this.tone('triangle', f, f, 0.26, 0.24, 0.12 + i * 0.08)); }
+
+  // filtered noise (air, hiss, a footstep's scuff); the noise is made once and reused
+  noise(dur, { f = 1200, f1 = f, q = 0.8, peak = 0.1, t = 0, attack = 0.01 } = {}) {
+    if (!this.ok()) return;
+    const c = this.ctx, at = c.currentTime + t;
+    if (!this.noiseBuf) {
+      this.noiseBuf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
+      const d = this.noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = this.noiseBuf;
+    bp.type = 'bandpass'; bp.Q.value = q;
+    bp.frequency.setValueAtTime(f, at);
+    if (f1 !== f) bp.frequency.exponentialRampToValueAtTime(f1, at + dur);
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.linearRampToValueAtTime(peak, at + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    src.connect(bp); bp.connect(g); g.connect(this.out);
+    src.start(at, Math.random());
+    src.stop(at + dur + 0.05);
+  }
+
+  // the intro: footsteps, the gate (beeps, unlock, clunk, the doors' air), the drone and the screen
+  step() { this.tone('sine', 95, 55, 0.11, 0.16); this.noise(0.06, { f: 2600, q: 1.2, peak: 0.025 }); }
+  beep(i = 0) { const f = [988, 1319][i % 2]; this.tone('triangle', f, f, 0.07, 0.12); }
+  unlatch() { this.tone('triangle', 784, 784, 0.12, 0.16); this.tone('triangle', 1175, 1175, 0.2, 0.16, 0.09); }
+  clunk() { this.tone('sine', 120, 45, 0.28, 0.4); this.noise(0.12, { f: 600, q: 0.7, peak: 0.08 }); }
+  hiss() { this.noise(1.2, { f: 2400, f1: 700, q: 0.6, peak: 0.11, attack: 0.04 }); this.tone('sine', 70, 60, 1.0, 0.1, 0.05); }
+  hum() { this.tone('sawtooth', 140, 210, 0.9, 0.05, 0, 900); this.noise(0.9, { f: 500, f1: 900, q: 0.9, peak: 0.05, attack: 0.25 }); }
+  materialize() { this.tone('sine', 260, 1300, 0.7, 0.12); [1047, 1319, 1568].forEach((f, i) => this.tone('triangle', f, f, 0.18, 0.1, 0.45 + i * 0.07)); }
 }

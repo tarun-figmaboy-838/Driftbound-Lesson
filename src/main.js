@@ -11,6 +11,7 @@ import { Sound } from './audio.js';
 import { h, burst, burstAt, esc, angles } from './ui.js';
 import { CHAPTERS, STEPS } from './steps.js';
 import { createScene } from './scene.js';
+import { playIntro } from './intro.js';
 
 const GAME_URL = 'https://zathura-teal.vercel.app';
 const CANCEL = Symbol('cancel');
@@ -586,8 +587,9 @@ const fonts = ['400 20px "Lilita One"', '600 18px "Fredoka"', '400 18px "Noto Sa
 const fontsIn = Promise.race([Promise.all(fonts.map((f) => document.fonts?.load(f, '∠1°−'))), new Promise((r) => setTimeout(r, 1500))]).catch(() => {});
 const ready = Promise.race([Promise.all([fontsIn, scene.loaded]), new Promise((r) => setTimeout(r, 4000))]);
 
-// the start banner: the lesson begins when the play button is tapped (that tap also lets the browser
-// start the voice). A link to a given step (?step=N) skips it.
+// the start banner: the play button starts the intro (src/intro.js: into the satellite, through its gate,
+// down the corridor into the hall, where a drone brings the screen), then the lesson. The tap also lets
+// the browser start the voice. A link to a given step (?step=N) skips both.
 const banner = $('start');
 function begin() {
   ready.finally(() => { document.body.classList.add('is-on'); go(start); });
@@ -606,14 +608,13 @@ else {
     sound.unlock();                                      // inside the tap: lets the voice play in every browser
     warm();
     sound.tap();
-    sound.whoosh();
-    begin();
-    const done = () => banner.remove();
-    if (reduced()) { done(); return; }
-    // fly in: the banner zooms towards the station and fades into the HQ
-    banner.querySelector('.start__pic').animate([{ transform: 'scale(1.06)', opacity: 1 }, { transform: 'scale(1.7)', opacity: 0 }], { duration: 900, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' });
+    if (reduced()) {                                     // no film: straight into the lesson
+      begin();
+      banner.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).onfinish = () => banner.remove();
+      return;
+    }
     $('play').animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.6)', opacity: 0 }], { duration: 350, easing: 'ease-in', fill: 'forwards' });
-    banner.animate([{ backgroundColor: 'rgba(3,10,36,1)' }, { backgroundColor: 'rgba(3,10,36,0)' }], { duration: 900, fill: 'forwards' }).onfinish = done;
+    playIntro({ banner, sound }).then(begin);
   });
 }
 

@@ -100,8 +100,9 @@ class Builder {
     let svg = `<text class="t t-${font}" ${at} fill="${color}" stroke-width="${n(Math.max(2.5, fs * 0.24))}">${esc(str)}</text>`;
     // the borrowed angle sign is thin: draw it once more on top, stroked in its own colour
     if (String(str).includes('∠')) {
-      const parts = String(str).split('∠').map((p) => `<tspan fill="transparent">${esc(p)}</tspan>`);
-      svg += `<text class="t-${font} t-ang" ${at}>${parts.join(`<tspan fill="${color}" stroke="${color}" stroke-width="${n(fs * 0.07)}">∠</tspan>`)}</text>`;
+      // (each piece repeats the centring: Safari does not hand dominant-baseline down to a tspan)
+      const parts = String(str).split('∠').map((p) => `<tspan dominant-baseline="central" fill="transparent">${esc(p)}</tspan>`);
+      svg += `<text class="t-${font} t-ang" ${at}>${parts.join(`<tspan dominant-baseline="central" fill="${color}" stroke="${color}" stroke-width="${n(fs * 0.07)}">∠</tspan>`)}</text>`;
     }
     this.push(key, svg, { cls });
   }

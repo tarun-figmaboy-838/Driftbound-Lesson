@@ -16,7 +16,22 @@ opposite angles, then solve missing-angle problems.
 ## Setting
 
 It opens on a start banner: the satellite HQ in orbit above a planet, with one play button in the
-centre. Pressing play flies into the HQ and starts the lesson (and lets the browser start the voice).
+centre. Pressing play (which also lets the browser start the voice) plays the intro, about 20 seconds,
+one continuous camera move with no cuts:
+
+1. The camera flies into the satellite, faster and faster, and arrives at its entry gate.
+2. The gate checks in: its two lights blink, a scan sweeps down the doors, the lights turn green, the
+   latches let go and the doors slide apart under the frame, with light and a puff of air.
+3. The camera walks in at eye height (a step bob, a slight sway and roll, a footstep on each step):
+   through the gate, down the corridor and through its far doorway into the command hall. The gate,
+   the corridor and the hall each stand at their own distance, so near things grow faster than far
+   ones, and the walk stops exactly on the lesson's view of the hall.
+4. It looks all the way round the hall (a full turn), slowing at each wall: the surveillance
+   monitors, the entrance it came through, the map table, and back to the wall screen.
+5. A drone flies in and projects the screen; the screen forms top to bottom like a hologram while the
+   hall's lights go down, and the drone flies off. Then the lesson starts.
+
+Skip (or Escape) goes straight to the lesson; with reduced motion the intro is left out.
 
 The lesson plays in the command HQ inside the ship's satellite: a calm, domed hall with a window band
 onto the planet (a picture made with Figma AI). In front of it is one big, rectangular hologram
@@ -107,6 +122,9 @@ Kept to what the interactions need:
 
 - The voice-over is made with Kokoro (free, open source, runs locally) by `tools/vo/make_vo.py`, in the
   game's co-pilot voice; each line stores its word timings.
+- The intro's gate (cut into its frame and two door halves), corridor (its far doorway cut open) and
+  the hall's right, back and left walls (stitched with the front into one strip for the full turn) are
+  Figma AI pictures (`assets/ui/intro/`).
 - The start banner, title, play button, recall drone, recall card and hint hand are Figma AI pictures
   (`assets/ui/start/`, `assets/ui/recall/`).
 - The HQ background is two pictures made with Figma AI (`assets/ui/bg/`): a wide one for landscape
