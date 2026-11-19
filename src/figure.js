@@ -20,8 +20,8 @@ class Builder {
     this.f = fig;
     this.k = fig.k;
     this.items = [];
-    this.cuePts = [];     // tap targets being hinted: the hint hand visits each of them
-    this.handAt = null;   // a drag handle being hinted: the hint hand shows the drag on it
+    this.cuePts = [];     // tap targets being hinted ({ id, p }); they all pulse
+    this.handAt = null;   // a drag handle being hinted: the hint hand rests on it
   }
 
   P(p) { return [n(this.f.ox + p[0] * this.f.s), n(this.f.oy - p[1] * this.f.s)]; }
@@ -157,13 +157,13 @@ class Builder {
       const [x, y] = this.P(shape.c), R = n((shape.r || 26) * k);
       hit = `<circle class="hit" cx="${x}" cy="${y}" r="${R}"/>`;
       glow = `<circle class="${gc}" cx="${x}" cy="${y}" r="${n(16 * k)}"/>`;
-      if (cue) this.cuePts.push(shape.c);
+      if (cue) this.cuePts.push({ id, p: shape.c });
     } else if (shape.p) {
       const [x1, y1] = this.P(shape.p), [x2, y2] = this.P(shape.q);
       const d = `M${x1} ${y1}L${x2} ${y2}`;
       hit = `<path class="hit-line" d="${d}" stroke-width="${n((shape.w || 30) * k)}"/>`;
       glow = `<path class="${gc} glow-line" d="${d}" stroke-width="${n(6 * k)}"/>`;
-      if (cue) this.cuePts.push([lerp(shape.p[0], shape.q[0], 0.62), lerp(shape.p[1], shape.q[1], 0.62)]);
+      if (cue) this.cuePts.push({ id, p: [lerp(shape.p[0], shape.q[0], 0.62), lerp(shape.p[1], shape.q[1], 0.62)] });
     } else {
       const { o, a, b, r } = shape;
       const R = n(r * this.f.s), [cx, cy] = this.P(o), pa = this.P(at(o, a, r)), pb = this.P(at(o, b, r));
@@ -174,25 +174,14 @@ class Builder {
     this.push(key, glow + hit, { cls: 'tap', attrs: { tabindex: '0', role: 'button', 'aria-label': label, 'data-tap': id } });
   }
 
-  // the hint hand (Figma AI art): taps each hinted target in turn, or shows a drag on a hinted handle
-  hand(key, pts, { drag = false } = {}) {
+  // the hint hand (Figma AI art): rests on the hinted target (the first one) and presses it, with a
+  // ripple where the finger lands. It never travels.
+  hand(key, pts) {
     const H = n(64 * this.k), W = n(H * 0.615);
-    const P = pts.map((p) => this.P(p));
-    const [x0, y0] = P[0];
+    const [x0, y0] = this.P(pts[0]);
     const img = `<image href="assets/ui/hint/hand.png" x="${n(x0 - W * 0.207)}" y="${n(y0 + 6)}" width="${W}" height="${H}"/>`;
-    let move = '';
-    const per = 1.3, dwell = 0.95;
-    if (P.length > 1) {
-      const T = P.length * per, vals = [], times = [];
-      P.forEach(([x, y], i) => {
-        const d = `${n(x - x0)},${n(y - y0)}`;
-        vals.push(d, d);
-        times.push((i * per) / T, (i * per + dwell) / T);
-      });
-      vals.push('0,0'); times.push(1);
-      move = `<animateMotion dur="${T}s" repeatCount="indefinite" values="${vals.join(';')}" keyTimes="${times.map((t) => n(t)).join(';')}"/>`;
-    }
-    this.push(key, `<g class="hint-hand${drag ? ' is-drag' : ''}" style="--per:${per}s;transform-origin:${x0}px ${y0}px">${img}</g>${move}`, { cls: 'hint-hand-wrap' });
+    const ripple = `<circle class="hand-ripple" cx="${x0}" cy="${y0}" r="${n(14 * this.k)}"/>`;
+    this.push(key, `${ripple}<g class="hint-hand" style="transform-origin:${x0}px ${y0}px">${img}</g>`, { cls: 'hint-hand-wrap' });
   }
 
   // a draggable knob (a slider for keyboards and screen readers)
@@ -255,6 +244,7 @@ export class Figure {
     this.onDrag = null;         // (id, unitPoint, phase) => void
     this.onNudge = null;        // (id, delta) => void   arrow keys on a handle
     this.dragAll = null;        // handle id that any press on the figure drags (easier on phones)
+    this.handFor = null;        // with several tap targets: the one the hint hand rests on (set once the student is stuck)
     this.dragging = null;
     this.ro = new ResizeObserver(() => this.render());
     this.ro.observe(host);
@@ -311,8 +301,10 @@ export class Figure {
     if (!this.fn || !this.layout()) return;
     const b = new Builder(this);
     this.fn(b);
-    if (b.cuePts.length) b.hand('zz-hand', b.cuePts);
-    else if (b.handAt) b.hand('zz-hand', [b.handAt], { drag: true });
+    // the hint hand: on the only target, or (with several) on the one handFor names, once the student is stuck
+    const cue = b.cuePts.length === 1 ? b.cuePts[0] : b.cuePts.find((q) => q.id === this.handFor);
+    if (cue) b.hand('zz-hand', [cue.p]);
+    else if (b.handAt) b.hand('zz-hand', [b.handAt]);
     this.commit(b.items);
     this.svg.classList.toggle('draggable', !!(this.onDrag && (this.dragAll || b.items.some((i) => i.attrs?.['data-drag']))));
   }

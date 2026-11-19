@@ -68,5 +68,17 @@
 
   <div class="fx" id="fx" aria-hidden="true"></div>
   <script type="module" src="src/main.js"></script>
+  <script>
+    // opened straight from the folder (file://), the browser blocks the lesson's code: Play says how to open it
+    if (location.protocol === 'file:') {
+      document.getElementById('play').addEventListener('click', () => {
+        if (document.querySelector('.start__note')) return;
+        const p = document.createElement('p');
+        p.className = 'start__note';
+        p.textContent = 'Open start.command to play';
+        document.getElementById('start').appendChild(p);
+      });
+    }
+  </script>
 </body>
 </html>

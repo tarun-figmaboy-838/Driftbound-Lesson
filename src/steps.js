@@ -143,7 +143,7 @@ function lineMini(b, { t = 65, other = 180, right = '', left = '' } = {}) {
 // ---------------------------------------------------------------- the recall (deck slide 43)
 
 // the delivery drone (Figma AI art); its small screen carries the voice's mouth during the recall
-const DRONE = '<img class="drone__img" src="assets/ui/recall/drone.png" alt="" draggable="false"><span class="drone__screen"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="drone__beam"></i>';
+const DRONE = '<img class="drone__img" src="assets/ui/recall/drone.png" alt="" draggable="false"><span class="drone__screen"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="drone__flare"></i>';
 
 const RECALL = [
   {
@@ -271,22 +271,69 @@ const RECALL = [
   },
 ];
 
-// ---------------------------------------------------------------- the proof panel (deck slides 38-41)
-
-function proofPanel() {
-  const el = h('<div><p class="side__tag">Proof via linear pairs</p><ol class="proof"></ol></div>');
-  const ol = el.querySelector('ol');
+// ---------------------------------------------------------------- the proof's working (deck slides 38-41)
+// Written the classic way, one line under another. Each term keeps its key from one step to the next and
+// glides to its new place; a term that leaves either merges into another (glides into it and fades) or
+// folds away where it was.
+function eqnBoard() {
+  const el = h('<div class="eqn"></div>');
+  const toks = new Map();
   return {
     el,
-    add(html, why, { final = false } = {}) {
-      ol.querySelectorAll('li').forEach((li) => li.classList.remove('now'));
-      const li = h(`<li class="now${final ? ' final' : ''}">${why ? '<small></small>' : ''}<span class="m"></span></li>`);
-      if (why) li.querySelector('small').innerHTML = angles(esc(why));
-      li.querySelector('.m').innerHTML = angles(html);
-      ol.appendChild(li);
-      li.animate?.([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.22,1,.36,1)' });
-      li.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
-      return li;
+    // lines: [[key, text, cls], ...] per line; merge: { leavingKey: keyItMergesInto }
+    show(lines, { merge = {}, reduced = false } = {}) {
+      const before = new Map([...toks].map(([k, t]) => [k, t.getBoundingClientRect()]));
+      const w0 = el.isConnected ? el.getBoundingClientRect().width : 0;   // measured before the terms move into new lines
+      const keep = new Set();
+      const rows = lines.map((line) => {
+        const row = document.createElement('div');
+        row.className = 'eqn__line';
+        line.forEach(([k, text, cls = '']) => {
+          let t = toks.get(k);
+          if (!t) { t = document.createElement('span'); toks.set(k, t); }
+          t.className = cls;
+          t.innerHTML = angles(esc(text));
+          row.appendChild(t);
+          keep.add(k);
+        });
+        return row;
+      });
+      const gone = [...toks.keys()].filter((k) => !keep.has(k));
+      el.replaceChildren(...rows);
+      if (reduced) { gone.forEach((k) => toks.delete(k)); return Promise.resolve(); }
+      const box = el.getBoundingClientRect();
+      const anims = [];
+      // the box glides to its new width: it grows before the terms move in, and shrinks only once they have
+      if (w0 && box.width > w0 + 1) {
+        anims.push(el.animate([{ width: `${w0}px` }, { width: `${box.width}px` }], { duration: 420, easing: 'cubic-bezier(.22,1,.36,1)' }));
+      } else if (w0 && box.width < w0 - 1) {
+        anims.push(el.animate([{ width: `${w0}px` }, { width: `${w0}px`, offset: 0.66 }, { width: `${box.width}px` }], { duration: 1150, easing: 'ease-in-out' }));
+      }
+      keep.forEach((k) => {
+        const t = toks.get(k), r = t.getBoundingClientRect(), o = before.get(k);
+        if (o) {
+          if (Math.abs(o.left - r.left) + Math.abs(o.top - r.top) > 0.5) {
+            anims.push(t.animate([{ transform: `translate(${o.left - r.left}px, ${o.top - r.top}px)` }, { transform: 'none' }], { duration: 750, easing: 'cubic-bezier(.65,0,.35,1)' }));
+          }
+        } else {
+          anims.push(t.animate([{ opacity: 0, transform: 'translateY(8px) scale(.7)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.22,1,.36,1)' }));
+        }
+      });
+      gone.forEach((k) => {
+        const t = toks.get(k), o = before.get(k);
+        toks.delete(k);
+        if (!o) return;
+        t.classList.add('eqn__ghost');
+        t.style.left = `calc(50% + ${o.left - (box.left + box.width / 2)}px)`;   // from the centre: steady while the box resizes
+        t.style.top = `${o.top - box.top}px`;
+        el.appendChild(t);
+        const to = merge[k] && toks.get(merge[k])?.getBoundingClientRect();
+        const end = to ? `translate(${to.left + to.width / 2 - (o.left + o.width / 2)}px, ${to.top + to.height / 2 - (o.top + o.height / 2)}px) scale(.5)` : 'scale(.3)';
+        const a = t.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: end }], { duration: 750, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
+        a.finished.then(() => t.remove(), () => t.remove());
+        anims.push(a);
+      });
+      return Promise.all(anims.map((a) => a.finished.catch(() => {})));
     },
   };
 }
@@ -774,7 +821,10 @@ export const STEPS = [
       c.readout(`${S('o', '∠1 = ∠3')}${OP('•')}${S('a', '∠2 = ∠4')}`);
       await c.wait(800);
       c.talk(crew('Turn the copy of ∠1 half a turn round O.'));
-      await c.spin(v, { a: 0, b: 55, r: 38, len: 118, hr: 70, auto: null });
+      const vals = [...v.s.vals];
+      v.set({ vals: [null, null, null, null] });           // the readout keeps the values: the turn needs the room
+      await c.spin(v, { a: 0, b: 55, r: 38, len: 118, hr: 92, auto: null });
+      v.set({ vals });
     },
   },
 
@@ -813,31 +863,47 @@ export const STEPS = [
     async run(c) {
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['dim', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], glow: null, sweep: null }, crossFig);
-      const proof = proofPanel();
-      c.side(proof.el);
+      const eq = eqnBoard();
+      const show = (lines, merge) => c.until(eq.show(lines, { merge, reduced: c.reduced }));
+      // the terms; each keeps its key, so it glides from one line of the working to the next
+      const L1 = [['a1', '∠1', 'o'], ['p1', '+', 'op'], ['b1', '∠2', 'a'], ['e1', '=', 'op'], ['t1', '180°', 'g']];
+      const L2 = [['b2', '∠2', 'a'], ['p2', '+', 'op'], ['c2', '∠3', 'o'], ['e2', '=', 'op'], ['t2', '180°', 'g']];
+      const BOTH = [L1[0], L1[1], L1[2], L1[3], L2[0], L2[1], L2[2]];
       c.caption('Let’s see why it happens.');
       const PLAN = [
-        { cap: '∠1 and ∠2 form a linear pair.', fill: ['orange', 'aqua', null, null], glow: 'ab', arc: [0, 180], m: '∠1 + ∠2 = 180°', why: 'Step 1 · Straight line' },
-        { cap: '∠2 and ∠3 form another linear pair.', fill: [null, 'aqua', 'orange', null], glow: 'pq', arc: [55, 235], m: '∠2 + ∠3 = 180°', why: 'Two linear pairs' },
-        { cap: 'Both totals include the same ∠2.', fill: ['orange', 'aqua', 'orange', null], glow: null, arc: null, m: '∠1 + ∠2 = ∠2 + ∠3', why: 'Equal to the same 180°' },
-        { cap: 'So ∠1 and ∠3 must be equal.', fill: ['orange', null, 'orange', null], glow: null, arc: null, m: '∠1 + <s>∠2</s> = <s>∠2</s> + ∠3', why: 'Subtract ∠2 from both sides.' },
+        { cap: '∠1 and ∠2 form a linear pair.', fill: ['orange', 'aqua', null, null], glow: 'ab', arc: [0, 180],
+          go: () => show([L1]) },
+        { cap: '∠2 and ∠3 form another linear pair.', fill: [null, 'aqua', 'orange', null], glow: 'pq', arc: [55, 235],
+          go: () => show([L1, L2]) },
+        // both lines equal the same 180°: the two totals merge, and ∠2 + ∠3 moves up beside ∠1 + ∠2
+        { cap: 'Both totals include the same ∠2.', fill: ['orange', 'aqua', 'orange', null], glow: null, arc: null,
+          go: () => show([BOTH], { t1: 'e1', t2: 'e1', e2: 'e1' }) },
+        // ∠2 is struck out on both sides, folds away, and ∠1 and ∠3 slide together
+        { cap: 'So ∠1 and ∠3 must be equal.', fill: ['orange', null, 'orange', null], glow: null, arc: null,
+          go: async () => {
+            await show([BOTH.map(([k, t, cls]) => [k, t, k === 'b1' || k === 'b2' ? `${cls} cut` : cls])]);
+            await c.wait(750);
+            await show([[L1[0], L1[3], L2[2]]]);
+          } },
       ];
-      for (const [k, P] of PLAN.entries()) {
+      for (const P of PLAN) {
         await c.button('Next step');
         c.caption(P.cap);
         v.set({ fill: P.fill, glow: P.glow, sweep: null });
-        proof.add(P.m, P.why);
+        if (!eq.el.isConnected) c.els.readout.replaceChildren(eq.el);
+        const working = P.go();
+        working.catch(() => {});                           // a step left mid-way: its working stops quietly
         if (P.arc) {                                       // the half turn each linear pair fills
           const [a, z] = P.arc;
           v.s.sweep = { r: 100, from: a, at: a, label: '' };
           await c.tween(1000, (e) => { v.s.sweep.at = lerp(a, z, e); v.s.sweep.label = deg(180 * e); v.draw(); }, 'inOut');
         }
+        await working;
       }
       c.ready();
-      await c.wait(700);
-      proof.add('∠1 = ∠3', '', { final: true });
+      eq.el.classList.add('done');
       c.sound.right();
-      c.burst(c.els.side, { count: 16 });
+      c.burst(c.els.readout, { count: 16 });
       await c.wait(800);
     },
   },
@@ -871,107 +937,179 @@ export const STEPS = [
   },
 
   // ============================================================ RECALL (the last step launches the game)
-  // deck slide 43: recall. A hologram drone drops the five cards into the collection one by one; as each
-  // card lands, its diagram shows the idea while the voice says the deck's sentence. After that, tapping
-  // a card shows it again.
+  // deck slide 43: recall. For each of the five cards, a drone flies in and stops in the middle, projects
+  // the card as a hologram in its beam, and the card's diagram shows the idea while the voice says the
+  // deck's sentence; then the card flies down into the tray. With all five collected the tray opens into
+  // the collection, and tapping a card brings the drone back to explain it again.
   {
     id: 'recall', quiet: true, ch: 5, title: 'Recall', next: 'Launch mission', launch: true,
     async run(c) {
       c.caption('Recall');
-      const root = h(`<div class="recall"><div class="recall__slots"></div><div class="drone" aria-hidden="true">${DRONE}<i class="drone__beam"></i></div></div>`);
+      const root = h(`<div class="recall"><div class="recall__beam" aria-hidden="true"><i></i></div><div class="recall__stage"></div><div class="recall__slots"></div><div class="drone" aria-hidden="true">${DRONE}</div></div>`);
       const slots = root.querySelector('.recall__slots');
+      const stage = root.querySelector('.recall__stage');
+      const beam = root.querySelector('.recall__beam');
       const drone = root.querySelector('.drone');
       c.stage(root);
       // while the drone is here, it is the one talking: the mouth moves to its screen
       const bar = document.getElementById('narration');
       bar.classList.add('mouth-on-drone');
       c.later(() => bar.classList.remove('mouth-on-drone'));
+      // the tray's five places (invisible until a card lands); each card waits off stage until the drone brings it
       const cards = RECALL.map((R) => {
-        const slot = h('<div class="rslot"><button type="button" class="rcard" disabled><b></b><span class="rcard__fig" aria-hidden="true"></span></button></div>');
-        const el = slot.querySelector('.rcard');
+        const slot = h('<div class="rslot"></div>');
+        const el = h('<button type="button" class="rcard" disabled><b></b><span class="rcard__fig" aria-hidden="true"></span></button>');
         el.querySelector('b').textContent = R.term;
         el.setAttribute('aria-label', `${R.term}: ${R.rule}`);
         slots.appendChild(slot);
         return { R, slot, el };
       });
-      await c.wait(60);                                   // let the grid lay out before drawing in it
-      cards.forEach((k) => {
-        const f = c.mini(k.el.querySelector('.rcard__fig'), k.R.box, () => {}, { kMin: 0.5, kMax: 1.7, pad: 10 });
-        k.v = c.view({ ...k.R.start }, k.R.draw, f);
-      });
 
-      // the drone: flies over a slot, beams the card down into it
-      const place = (x, y) => { drone.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`; };
-      const over = (slot) => {
-        const rr = root.getBoundingClientRect(), sr = slot.getBoundingClientRect();
-        const dw = drone.offsetWidth, dh = drone.offsetHeight;
-        drone.style.setProperty('--bw', `${sr.width}px`);
-        drone.style.setProperty('--bh', `${sr.height + dh * 0.1 + 4}px`);    // from the emitter to the bottom of the card
-        return [sr.left - rr.left + sr.width / 2 - dw / 2, sr.top - rr.top - dh - 4];
+      // ---- the drone: flies in from the left, hovers, flies out to the right
+      const W = () => root.clientWidth;
+      const place = (x, y, { now = false, tilt = 0 } = {}) => {
+        if (now) drone.style.transition = 'none';
+        drone.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+        drone.style.setProperty('--tilt', `${tilt}deg`);
+        if (now) { void drone.offsetWidth; drone.style.transition = ''; }
       };
-      drone.style.transition = 'none';
-      place(-140, -10);
-      void drone.offsetWidth;
-      drone.style.transition = '';
+      const hoverOver = (el) => {                         // where the drone hovers to project onto el
+        const rr = root.getBoundingClientRect(), r = el.getBoundingClientRect();
+        return [r.left - rr.left + r.width / 2 - drone.offsetWidth / 2, Math.max(0, r.top - rr.top - drone.offsetHeight - 40)];
+      };
+      const flyIn = async (to) => {
+        place(-drone.offsetWidth - 40, to[1], { now: true, tilt: 9 });
+        c.sound.whoosh();
+        place(to[0], to[1], { tilt: 9 });
+        await c.wait(650);
+        drone.style.setProperty('--tilt', '0deg');
+        await c.wait(250);
+      };
+      const flyOut = () => {
+        const y = parseFloat(drone.style.transform.split(',')[1]) || 0;
+        place(W() + 40, y, { tilt: 9 });
+      };
 
-      // the card starts small at the drone's emitter, grows as it falls down the beam and lands in its place
-      const drop = (el) => {
-        el.classList.add('in');
+      // ---- the projection: a cone of light from the drone's emitter down over the card
+      const beamOn = (el) => {
+        const rr = root.getBoundingClientRect(), d = drone.getBoundingClientRect(), r = el.getBoundingClientRect();
+        const top = d.top - rr.top + d.height * 0.8;     // starts inside the drone's body, so it always meets the emitter
+        const pad = r.width * 0.12;
+        Object.assign(beam.style, {
+          left: `${r.left - rr.left - pad}px`, width: `${r.width + 2 * pad}px`,
+          top: `${top}px`, height: `${r.bottom - rr.top + pad * 2.2 - top}px`,
+        });
+        beam.style.setProperty('--e', `${d.width * 0.16}px`);
+        root.classList.add('beam-on');
+        drone.classList.add('beam');
+      };
+      const beamOff = () => { root.classList.remove('beam-on'); drone.classList.remove('beam'); };
+
+      // ---- the card forms in the light: from a speck at the emitter, growing down the beam, flickering in
+      const release = async (el) => {
+        el.classList.add('in', 'is-holo');
         if (c.reduced) return;
         const d = drone.getBoundingClientRect(), r = el.getBoundingClientRect();
         const dx = d.left + d.width / 2 - (r.left + r.width / 2);
-        const dy = d.top + d.height * 0.95 - (r.top + r.height / 2);
-        el.animate([
-          { transform: `translate(${dx}px, ${dy}px) scale(.08)`, opacity: 0, filter: 'brightness(2.2)' },
-          { transform: `translate(${dx}px, ${dy + 8}px) scale(.16)`, opacity: 1, filter: 'brightness(2)', offset: 0.15 },
-          { transform: 'translate(0, -6px) scale(1.02)', opacity: 1, filter: 'brightness(1.3)', offset: 0.8 },
+        const dy = d.top + d.height * 0.92 - (r.top + r.height / 2);
+        await c.until(el.animate([
+          { transform: `translate(${dx}px, ${dy}px) scale(.04, .02)`, opacity: 0, filter: 'brightness(3) saturate(0)' },
+          { transform: `translate(${dx * 0.6}px, ${dy * 0.6}px) scale(.3, .12)`, opacity: 0.9, filter: 'brightness(2.6) saturate(.2)', offset: 0.3 },
+          { transform: 'scale(1.02, .9)', opacity: 0.55, filter: 'brightness(1.8) saturate(.5)', offset: 0.62 },
+          { transform: 'scale(1)', opacity: 0.95, filter: 'brightness(1.3)', offset: 0.78 },
+          { transform: 'none', opacity: 0.7, offset: 0.86 },
           { transform: 'none', opacity: 1, filter: 'none' },
-        ], { duration: 620, easing: 'cubic-bezier(.35, .6, .3, 1)' });
+        ], { duration: 900, easing: 'cubic-bezier(.3, .6, .3, 1)' }).finished.catch(() => {}));
       };
 
-      let busy = true;
+      // ---- the card flies down into its slot in the tray and is collected
+      const collect = async (k) => {
+        const el = k.el;
+        el.classList.remove('is-holo', 'is-on');
+        // its place opens in the tray: the row stays centred, the cards already there slide over
+        const there = cards.filter((o) => o.slot.classList.contains('got')).map((o) => [o.el, o.el.getBoundingClientRect()]);
+        k.slot.classList.add('got');
+        if (!c.reduced) {
+          there.forEach(([e, r0]) => {
+            const r1 = e.getBoundingClientRect();
+            e.animate([{ transform: `translate(${r0.left - r1.left}px, 0)` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+          });
+          const a = el.getBoundingClientRect(), b = k.slot.getBoundingClientRect();
+          await c.until(el.animate([
+            { transform: 'none', transformOrigin: '0 0' },
+            { transform: `translate(${(b.left - a.left) * 0.5}px, ${(b.top - a.top) * 0.35}px) scale(${lerp(1, b.width / a.width, 0.5)})`, transformOrigin: '0 0', offset: 0.45 },
+            { transform: `translate(${b.left - a.left}px, ${b.top - a.top}px) scale(${b.width / a.width})`, transformOrigin: '0 0' },
+          ], { duration: 720, easing: 'cubic-bezier(.55, 0, .3, 1)', fill: 'forwards' }).finished.catch(() => {}));
+          el.getAnimations().forEach((an) => an.cancel());
+        }
+        k.slot.appendChild(el);
+        c.sound.snap();
+        if (!c.reduced) c.burst(k.slot, { count: 10, spread: 70 });
+      };
+
       const explain = async (k) => {
-        cards.forEach((o) => o.el.classList.toggle('is-on', o === k));
+        k.el.classList.add('is-on');
         c.caption(k.R.rule, true);
         await Promise.all([k.R.play(k.v, c), c.said()]);
-        await c.wait(400);
-        k.el.classList.remove('is-on');
-      };
-      // tapping a card later: the drone flies back over it, scans it and explains it again
-      const revisit = async (k) => {
-        place(...over(k.slot));
-        c.sound.whoosh();
-        await c.wait(700);
-        drone.classList.add('beam');
-        k.el.classList.remove('in'); void k.el.offsetWidth; k.el.classList.add('in');
-        await c.wait(420);
-        drone.classList.remove('beam');
-        await explain(k);
+        await c.wait(450);
       };
 
+      // each card: the drone flies in and stops in the middle, projects the card, explains it; the card
+      // flies down into the tray while the drone leaves for the next one
       for (const k of cards) {
-        place(...over(k.slot));
-        c.sound.whoosh();
-        await c.wait(780);
-        drone.classList.add('beam');
-        await c.wait(300);
-        drop(k.el);                                      // the card leaves the drone's emitter and drops into place
+        stage.appendChild(k.el);
+        if (!k.v) {                                       // the card's diagram, drawn once it has a size
+          await c.wait(30);
+          const f = c.mini(k.el.querySelector('.rcard__fig'), k.R.box, () => {}, { kMin: 0.5, kMax: 1.7, pad: 10 });
+          k.v = c.view({ ...k.R.start }, k.R.draw, f);
+        }
+        if (!c.reduced) await flyIn(hoverOver(stage));
+        beamOn(stage);
         c.sound.pop();
-        await c.wait(560);
-        c.burst(k.el, { count: 10, spread: 90 });
-        drone.classList.remove('beam');
+        await release(k.el);
         await explain(k);
+        beamOff();                                       // the light goes back into the emitter, then the drone leaves
+        await c.wait(c.reduced ? 0 : 320);
+        if (!c.reduced) flyOut();
+        await collect(k);
       }
-      place(root.clientWidth - drone.offsetWidth - 6, 4);   // the drone parks in the corner, clear of the cards
-      c.caption('Recall');
-      busy = false;
+
+      // all five collected: the tray opens up into the collection
+      const grid = cards.map((k) => k.el.getBoundingClientRect());
+      root.classList.add('is-done');
+      if (!c.reduced) {
+        cards.forEach((k, i) => {
+          const a = grid[i], b = k.el.getBoundingClientRect();
+          k.el.animate([
+            { transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width})`, transformOrigin: '0 0' },
+            { transform: 'none', transformOrigin: '0 0' },
+          ], { duration: 650, delay: i * 50, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' });
+        });
+      }
+      c.caption('You learned all about angles!');
+      c.sound.right();
+      await c.wait(700);
+
+      // tapping a card later: the drone flies back, projects onto it and explains it again
+      let busy = false;
       cards.forEach((k) => {
         k.el.disabled = false;
         k.el.addEventListener('click', () => {
           if (busy) return;
           busy = true;
           c.sound.tap();
-          c.spawn(async () => { try { await revisit(k); } finally { busy = false; } });
+          c.spawn(async () => {
+            try {
+              if (!c.reduced) await flyIn(hoverOver(k.el));
+              beamOn(k.el);
+              k.el.classList.add('is-holo');
+              await explain(k);
+              k.el.classList.remove('is-holo', 'is-on');
+              beamOff();
+              await c.wait(c.reduced ? 0 : 320);
+              if (!c.reduced) flyOut();
+            } finally { busy = false; }
+          });
         });
       });
       c.ready();

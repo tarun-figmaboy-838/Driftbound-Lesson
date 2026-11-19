@@ -442,9 +442,16 @@ function makeCtx(i, tk) {
     tapFig({ answer, why = {} }) {
       return guard(new Promise((resolve) => {
         let wrong = 0;
+        // every possible target pulses; the hint hand comes to the right one only once the student is
+        // stuck (a wrong tap, or a while without tapping), so it never gives the answer away at once
+        const showHand = () => { if (!tk.dead && fig.onTap) { fig.handFor = answer; fig.render(); } };
+        const stuck = setTimeout(showHand, 6000);
+        later(() => { clearTimeout(stuck); fig.handFor = null; });
         fig.onTap = (id, el) => {
           if (tk.dead) return;
           if (id === answer) {
+            clearTimeout(stuck);
+            fig.handFor = null;
             fig.onTap = null;
             sound.right();
             burstAt(el, { count: 14, spread: 110 });
@@ -456,6 +463,7 @@ function makeCtx(i, tk) {
             void el.getBoundingClientRect();
             el.classList.add('nope');
             talk(why[id]);
+            showHand();
           }
         };
       }));
@@ -550,6 +558,12 @@ els.mute.addEventListener('click', () => {
   els.mute.setAttribute('aria-pressed', String(!sound.muted));
   els.mute.setAttribute('aria-label', sound.muted ? 'Sound off' : 'Sound on');
   if (sound.muted) dialogue.hush();
+});
+
+// only the tab in front talks: a lesson left open in another tab pauses its voice, and picks up where it was
+document.addEventListener('visibilitychange', () => {
+  if (!sound.ctx) return;
+  if (document.hidden) sound.ctx.suspend?.(); else sound.ctx.resume?.();
 });
 
 // keyboard: → / Enter next, ← back, Space finishes the line being typed (or moves to the next one)

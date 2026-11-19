@@ -66,7 +66,7 @@ export class Voice {
     this.load(k).then(async (buf) => {
       if (this.want !== want) return;                     // cut off before it started
       if (!buf) { onend?.(); return; }                    // this browser can't play the file
-      if (ctx.state !== 'running') {                      // try to wake the audio (a moment at most)
+      if (ctx.state !== 'running' && !document.hidden) {  // try to wake the audio (a moment at most); a hidden tab stays quiet
         try { await Promise.race([ctx.resume(), new Promise((r) => setTimeout(r, 400))]); } catch { /* blocked */ }
       }
       if (this.want !== want) return;

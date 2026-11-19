@@ -56,9 +56,9 @@ and every drag task has a pulsing handle and also works with the arrow keys.
 | 15 | 31–33 | Which angle is opposite ∠1? / Which angle is opposite ∠2? / These are vertically opposite angle pairs. | Taps the opposite angle (on the diagram or a button), twice | yes |
 | 16 | 34–35 | Let's measure the angles. / Vertically opposite angles are equal. | Watches a protractor measure ∠1 and ∠3 (55° each); turns a copy of ∠1 half a turn round O and sees it land exactly on ∠3 | yes |
 | 17 | 36 | Does that still happen if we rotate a line? | Drags the line; ∠1 and ∠3 stay equal at every position | yes |
-| 18 | 37–41 | Let's see why it happens. / ∠1 and ∠2 form a linear pair. / ∠2 and ∠3 form another linear pair. / Both totals include the same ∠2. / So ∠1 and ∠3 must be equal. | Taps Next step four times; each linear pair sweeps its half turn; the proof panel builds up to ∠1 = ∠3 with the deck's labels | yes |
+| 18 | 37–41 | Let's see why it happens. / ∠1 and ∠2 form a linear pair. / ∠2 and ∠3 form another linear pair. / Both totals include the same ∠2. / So ∠1 and ∠3 must be equal. | Taps Next step four times; each linear pair sweeps its half turn; the working under the figure merges line by line (the two 180° totals merge, ∠2 is struck out on both sides) into ∠1 = ∠3 | yes |
 | 19 | 42 | Can you find the other three angles if ∠1 is 68°? | Finds ∠3, ∠2 and ∠4 in turn | yes |
-| 20 | 43 | Recall | A hologram drone drops the five cards the deck lists (angles definition, adjacent angles, linear pair, linear pair converse, vertically opposite angles) into the collection, one by one; as each lands, its diagram animates the idea while the drone says the deck's sentence. Tapping a card brings the drone back to explain it again. Next is Launch mission and opens the game | |
+| 20 | 43 | Recall | For each of the five cards the deck lists (angles definition, adjacent angles, linear pair, linear pair converse, vertically opposite angles), a drone flies in and stops in the middle, projects the card as a hologram in its beam, the diagram animates the idea while the drone says the deck's sentence, and the card flies down into the tray. With all five collected the tray opens into the collection and the line says "You learned all about angles!". Tapping a card brings the drone back to explain it again. Next is Launch mission and opens the game | |
 
 ## Interactions and animations
 
@@ -72,9 +72,10 @@ and every drag task has a pulsing handle and also works with the arrow keys.
 - Each step materializes on the screen from top to bottom, and the scan line sweeps across it.
 - Ghost animation: words, buttons, cards and labels come in see-through and blurred, drift up and
   turn solid.
-- Hints: tap targets glow (a ring round a point, a line along an arm) and pulse while hinted; a
-  pointing hand taps each possible target in turn (so it never gives the answer away), or shows the
-  drag on a handle until the student starts dragging.
+- Hints: tap targets glow (a ring round a point, a line along an arm) and pulse while hinted. The
+  pointing hand never travels: it rests on its target and presses it, with a ripple. With one target
+  or a drag handle it shows at once; with several, it comes only once the student is stuck (a wrong
+  tap or 6 s without tapping) and rests on the right one, so it never gives the answer away at once.
 - Joining two angles: the pair glides to the middle of its card and grows to fill it.
 - Right answers burst into small glowing hexagons.
 
