@@ -980,10 +980,10 @@ export const STEPS = [
       const flyIn = async (to) => {
         place(-drone.offsetWidth - 40, to[1], { now: true, tilt: 9 });
         c.sound.whoosh();
-        place(to[0], to[1], { tilt: 9 });
-        await c.wait(650);
-        drone.style.setProperty('--tilt', '0deg');
-        await c.wait(250);
+        place(to[0], to[1], { tilt: 8 });
+        await c.wait(700);
+        drone.style.setProperty('--tilt', '0deg');         // levels out as it slows into the hover
+        await c.wait(800);
       };
       const flyOut = () => {
         const y = parseFloat(drone.style.transform.split(',')[1]) || 0;
@@ -993,13 +993,13 @@ export const STEPS = [
       // ---- the projection: a cone of light from the drone's emitter down over the card
       const beamOn = (el) => {
         const rr = root.getBoundingClientRect(), d = drone.getBoundingClientRect(), r = el.getBoundingClientRect();
-        const top = d.top - rr.top + d.height * 0.8;     // starts inside the drone's body, so it always meets the emitter
+        const top = d.top - rr.top + d.height * 0.95;    // the emitter: the glowing tip under the drone's body
         const pad = r.width * 0.12;
         Object.assign(beam.style, {
           left: `${r.left - rr.left - pad}px`, width: `${r.width + 2 * pad}px`,
           top: `${top}px`, height: `${r.bottom - rr.top + pad * 2.2 - top}px`,
         });
-        beam.style.setProperty('--e', `${d.width * 0.16}px`);
+        beam.style.setProperty('--e', `${d.width * 0.11}px`);
         root.classList.add('beam-on');
         drone.classList.add('beam');
       };
@@ -1027,7 +1027,7 @@ export const STEPS = [
         const el = k.el;
         el.classList.remove('is-holo', 'is-on');
         // its place opens in the tray: the row stays centred, the cards already there slide over
-        const there = cards.filter((o) => o.slot.classList.contains('got')).map((o) => [o.el, o.el.getBoundingClientRect()]);
+        const there = cards.filter((o) => o !== k && o.slot.classList.contains('got') && o.slot.contains(o.el)).map((o) => [o.el, o.el.getBoundingClientRect()]);
         k.slot.classList.add('got');
         if (!c.reduced) {
           there.forEach(([e, r0]) => {
@@ -1045,6 +1045,33 @@ export const STEPS = [
         k.slot.appendChild(el);
         c.sound.snap();
         if (!c.reduced) c.burst(k.slot, { count: 10, spread: 70 });
+      };
+
+      // move every card at once (fn changes the layout), each gliding from where it was to its new place
+      const relayout = async (fn, { stagger = 50 } = {}) => {
+        const was = cards.map((k) => k.el.getBoundingClientRect());
+        fn();
+        if (c.reduced) return;
+        await Promise.all(cards.map((k, i) => {
+          const a = was[i], b = k.el.getBoundingClientRect();
+          if (!b.width) return null;
+          return k.el.animate([
+            { transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width})`, transformOrigin: '0 0' },
+            { transform: 'none', transformOrigin: '0 0' },
+          ], { duration: 650, delay: i * stagger, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' }).finished.catch(() => {});
+        }));
+      };
+
+      // a collected card rises from the tray back into the drone's light
+      const lift = async (k) => {
+        const el = k.el, a = el.getBoundingClientRect();
+        stage.appendChild(el);
+        if (c.reduced) return;
+        const b = el.getBoundingClientRect();
+        await c.until(el.animate([
+          { transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width})`, transformOrigin: '0 0' },
+          { transform: 'none', transformOrigin: '0 0' },
+        ], { duration: 720, easing: 'cubic-bezier(.45, 0, .2, 1)' }).finished.catch(() => {}));
       };
 
       const explain = async (k) => {
@@ -1074,20 +1101,10 @@ export const STEPS = [
         await collect(k);
         await c.wait(c.reduced ? 0 : 200);
       }
-      if (!c.reduced) flyOut();
+      if (!c.reduced) { flyOut(); await c.wait(1000); }
 
-      // all five collected: the tray opens up into the collection
-      const grid = cards.map((k) => k.el.getBoundingClientRect());
-      root.classList.add('is-done');
-      if (!c.reduced) {
-        cards.forEach((k, i) => {
-          const a = grid[i], b = k.el.getBoundingClientRect();
-          k.el.animate([
-            { transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width})`, transformOrigin: '0 0' },
-            { transform: 'none', transformOrigin: '0 0' },
-          ], { duration: 650, delay: i * 50, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' });
-        });
-      }
+      // all five collected and the drone gone: the tray opens up into the big collection
+      await relayout(() => root.classList.add('is-done'));
       c.caption('You learned all about angles!');
       c.sound.right();
       await c.wait(700);
@@ -1102,14 +1119,20 @@ export const STEPS = [
           c.sound.tap();
           c.spawn(async () => {
             try {
-              if (!c.reduced) await flyIn(hoverOver(k.el));
-              beamOn(k.el);
+              // while the drone is here the cards stay small: the collection folds back into the tray, the
+              // drone comes back, and the card rises into its light; when the drone has gone, all grows back
+              k.el.classList.add('is-on');
+              await relayout(() => root.classList.remove('is-done'), { stagger: 30 });
+              if (!c.reduced) await flyIn(hoverOver(stage));
+              beamOn(stage);
               k.el.classList.add('is-holo');
+              await lift(k);
               await explain(k);
-              k.el.classList.remove('is-holo', 'is-on');
               beamOff();
-              await c.wait(c.reduced ? 0 : 320);
-              if (!c.reduced) flyOut();
+              await c.wait(c.reduced ? 0 : 280);
+              await collect(k);
+              if (!c.reduced) { flyOut(); await c.wait(1000); }
+              await relayout(() => root.classList.add('is-done'), { stagger: 30 });
             } finally { busy = false; }
           });
         });
