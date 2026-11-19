@@ -443,14 +443,18 @@ button { font: inherit; color: inherit; }
 .intro-skip svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .intro-skip:focus-visible { outline: 3px solid var(--holo); outline-offset: 3px; }
 @keyframes skip-in { from { opacity: 0; } }
-/* the drone that brings the screen (the recall's drone), and its beam */
-.intro-drone { position: fixed; z-index: 40; --dw: clamp(120px, 11vw, 180px); }
-.intro-beam { position: fixed; z-index: 39; pointer-events: none; opacity: 0; filter: blur(2px); transform: scaleY(0); transform-origin: 50% 0;
-  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent);
-  transition: transform .35s cubic-bezier(.3, .7, .4, 1), opacity .3s; }
+/* the drone that brings the screen (the recall's drone), its light and the line the screen unfolds from */
+.intro-drone { position: fixed; z-index: 40; --dw: clamp(130px, 12vw, 200px); }
+.intro-drone .drone__img { transition: none; }
+/* a feathered cone of light: the blur softens the cone's sides, the mask fades it out at the edges and
+   lets it melt into the line at the bottom */
+.intro-beam { position: fixed; z-index: 39; pointer-events: none; opacity: 0; transform-origin: 50% 0; filter: blur(9px); mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); }
 .intro-beam i { position: absolute; inset: 0; clip-path: polygon(calc(50% - var(--e, 20px) / 2) 0, calc(50% + var(--e, 20px) / 2) 0, 100% 100%, 0 100%);
-  background: linear-gradient(180deg, rgba(220, 254, 255, .8), rgba(127, 243, 255, .32) 25%, rgba(127, 243, 255, .1) 80%); }
-.intro-beam.on { opacity: 1; transform: none; }
+  background: linear-gradient(180deg, rgba(225, 254, 255, .85), rgba(127, 243, 255, .38) 30%, rgba(127, 243, 255, .2) 85%, rgba(160, 248, 255, .45)); }
+.intro-line { position: fixed; z-index: 39; height: 3px; margin-top: -1.5px; pointer-events: none; opacity: 0; transform: scaleX(0); border-radius: 2px;
+  background: linear-gradient(90deg, rgba(160, 248, 255, 0), #ffffff 12%, #ffffff 88%, rgba(160, 248, 255, 0));
+  box-shadow: 0 0 10px 2px rgba(127, 243, 255, .9), 0 0 34px 8px rgba(61, 220, 242, .45); }
 /* the look round the hall: one long strip of its four walls */
 .intro-pano { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #050b26; }
 .intro-pano img { position: absolute; left: 0; top: 0; display: block; max-width: none; will-change: transform; }

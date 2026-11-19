@@ -100,7 +100,7 @@ export async function playIntro({ banner, sound }) {
   const onKey = (e) => { if (e.key === 'Escape') skip(); };
   window.addEventListener('keydown', onKey);
 
-  let drone = null, beam = null, pano = null;
+  let drone = null, beam = null, pano = null, line = null;
   function finish() {
     if (done) return;
     done = true;
@@ -110,6 +110,8 @@ export async function playIntro({ banner, sound }) {
     drone?.remove();
     beam?.remove();
     pano?.remove();
+    line?.remove();
+    [bar, mute].forEach((el) => { el.style.opacity = ''; });
     room.style.transform = '';
     [screen, bar, mute].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
     body.classList.remove('intro-run');
@@ -315,7 +317,12 @@ export async function playIntro({ banner, sound }) {
     pano.remove();
 
     // ---------------------------------------------------------------- 6. the drone brings the screen
-    await wait(250);
+    // one smooth sequence: the drone glides in on a curve, banking, and settles into a hover; a soft cone of
+    // light opens from its emitter; a line of light draws across where the screen will be; the screen
+    // unfolds from that line while the hall's lights go down; the light fades, the drone lifts away, and
+    // the buttons rise in one after another
+    skipBtn.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).finished.then(() => skipBtn.remove(), () => {});
+    await wait(200);
     const sx = sv('--sx'), sy = sv('--sy'), sw = sv('--sw'), sh = sv('--sh');
     drone = document.createElement('div');
     drone.className = 'drone intro-drone';
@@ -324,39 +331,66 @@ export async function playIntro({ banner, sound }) {
     beam = document.createElement('div');
     beam.className = 'intro-beam';
     beam.innerHTML = '<i></i>';
-    body.append(beam, drone);
+    line = document.createElement('i');
+    line.className = 'intro-line';
+    body.append(beam, line, drone);
     const dw = drone.offsetWidth, dh = drone.offsetHeight;
-    const hover = [sx + sw / 2 - dw / 2, sy + Math.max(8, sh * 0.04)];
-    const put = (x, y, tilt) => { drone.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`; drone.style.setProperty('--tilt', `${tilt}deg`); };
-    put(innerWidth + 40, hover[1] - 30, -9);
+    const hover = [sx + sw / 2 - dw / 2, sy + Math.max(6, sh * 0.03)];
+    const put = (x, y, tilt) => { drone.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`; drone.style.setProperty('--tilt', `${tilt.toFixed(2)}deg`); };
+    const entry = [innerWidth + dw * 0.4, hover[1] - Math.min(110, hover[1] + dh)];
+    put(...entry, -14);
     sound.hum();
-    await run(1000, (e) => put(lerp(innerWidth + 40, hover[0], e), lerp(hover[1] - 30, hover[1], e), -9 * (1 - e)), E.out);
-    // the beam: from the emitter down over the whole screen
-    const ey = hover[1] + dh * 0.8;
-    Object.assign(beam.style, { left: `${sx - sw * 0.02}px`, width: `${sw * 1.04}px`, top: `${ey}px`, height: `${sy + sh + 24 - ey}px` });
-    beam.style.setProperty('--e', `${dw * 0.16}px`);
+    await run(1500, (_, t) => {
+      const k = E.out(t);                              // slows into the hover
+      const x = lerp(entry[0], hover[0], k);
+      const y = lerp(entry[1], hover[1], E.inOut(t)) + 34 * Math.sin(Math.PI * t) * (1 - t);   // a gentle dip on the way in
+      const settle = Math.sin(Math.PI * clamp((t - 0.62) / 0.38, 0, 1));
+      put(x, y, -14 * (1 - E.out(t)) + 4 * settle);   // banks into the turn, levels out with a small settle
+    });
+    put(...hover, 0);
+    await wait(250);
+
+    // the light: a feathered cone from the emitter down to the middle of where the screen will be
+    const midY = sy + sh / 2;
+    const ex = hover[0] + dw / 2, ey = hover[1] + dh * 0.82;
+    const bw = sw * 0.92;
+    Object.assign(beam.style, { left: `${ex - bw / 2}px`, width: `${bw}px`, top: `${ey}px`, height: `${Math.max(40, midY - ey)}px` });
+    beam.style.setProperty('--e', `${dw * 0.14}px`);
+    Object.assign(line.style, { left: `${sx}px`, width: `${sw}px`, top: `${midY}px` });
     drone.classList.add('beam');
-    beam.classList.add('on');
-    await wait(280);
-    // the screen forms in the light, top to bottom, flickering in like a hologram
-    body.classList.remove('intro-run');
     sound.materialize();
-    const appear = screen.animate([
-      { clipPath: 'inset(0 0 100% 0 round 16px)', opacity: 0.4, filter: 'brightness(2.2) saturate(.4)' },
-      { clipPath: 'inset(0 0 45% 0 round 16px)', opacity: 0.9, filter: 'brightness(1.7) saturate(.6)', offset: 0.45 },
-      { opacity: 0.55, offset: 0.62 },
-      { clipPath: 'inset(0 0 0% 0 round 16px)', opacity: 1, filter: 'brightness(1.25)', offset: 0.85 },
-      { clipPath: 'inset(0 0 0% 0 round 16px)', opacity: 1, filter: 'none' },
-    ], { duration: 1100, easing: 'cubic-bezier(.3,.6,.3,1)', fill: 'backwards' });
-    [bar, mute].forEach((el) => el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.6 }, { opacity: 1 }], { duration: 1300, fill: 'backwards' }));
-    await run(1100);
-    appear.cancel();
-    // the light goes back into the drone, and it flies off
-    beam.classList.remove('on');
+    await run(520, (e) => { beam.style.opacity = String(e); beam.style.transform = `scaleY(${(0.05 + 0.95 * e).toFixed(3)})`; }, E.out);
+
+    // the line of light draws out from the middle to both sides
+    await run(480, (e) => { line.style.opacity = String(Math.min(1, e * 3)); line.style.transform = `scaleX(${e.toFixed(3)})`; }, E.inOut);
+
+    // the screen unfolds from the line, up and down at once; the hall's lights go down with it
+    body.classList.remove('intro-run');
+    [bar, mute].forEach((el) => { el.style.opacity = '0'; });
+    const unfold = screen.animate([
+      { clipPath: 'inset(50% 0 50% 0 round 16px)', opacity: 0.5, filter: 'brightness(2) saturate(.5)' },
+      { clipPath: 'inset(8% 0 8% 0 round 16px)', opacity: 0.92, filter: 'brightness(1.5) saturate(.7)', offset: 0.7 },
+      { clipPath: 'inset(0% 0 0% 0 round 16px)', opacity: 0.8, filter: 'brightness(1.25)', offset: 0.85 },
+      { clipPath: 'inset(0% 0 0% 0 round 16px)', opacity: 1, filter: 'none' },
+    ], { duration: 950, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
+    await run(950, (e) => { line.style.opacity = String(1 - E.in(e)); beam.style.opacity = String(1 - 0.35 * e); });
+    unfold.cancel();
+    line.remove(); line = null;
+
+    // the light fades back into the drone, and it lifts away to the upper left
     drone.classList.remove('beam');
-    await wait(300);
     sound.whoosh();
-    await run(800, (e) => put(lerp(hover[0], -dw - 60, e), lerp(hover[1], hover[1] - 50, e), 10 * Math.min(1, e * 3)), E.in);
+    const exit = run(1100, (_, t) => {
+      beam.style.opacity = String(0.65 * (1 - E.out(Math.min(1, t * 2.2))));
+      const k = E.in(t);
+      put(lerp(hover[0], -dw - 80, k), hover[1] - 50 * E.inOut(t) - 40 * k, 13 * E.out(Math.min(1, t * 1.8)));
+    });
+    // the buttons and the sound switch rise into place, one after another
+    const rise = [mute, bar].map((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 520, delay: 250 + i * 160, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }));
+    [bar, mute].forEach((el) => { el.style.opacity = ''; });
+    await exit;
+    await Promise.all(rise.map((a) => a.finished.catch(() => {})));
     finish();
   } catch (e) {
     if (!(e instanceof Skip)) { console.error(e); finish(); }

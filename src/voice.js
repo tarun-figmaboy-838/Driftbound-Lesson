@@ -26,16 +26,23 @@ export class Voice {
 
   get ctx() { return this.sound.ctx; }
 
-  // decode every line once the audio has started (they are small)
+  // decode every line once the audio has started, a few at a time (all at once can make a browser drop
+  // some, and it would compete with the intro's animation); a line needed sooner is loaded at once
   preload() {
-    if (!this.ctx) return;
-    Object.keys(this.lines).forEach((k) => this.load(k));
+    if (!this.ctx || this.preloading) return;
+    this.preloading = true;
+    const keys = Object.keys(this.lines);
+    let i = 0;
+    const next = () => { if (i < keys.length) this.load(keys[i++]).then(next); };
+    for (let n = 0; n < 3; n++) next();
   }
 
   load(k) {
     if (!this.loading.has(k)) {
-      this.loading.set(k, fetch(`assets/vo/${k}.m4a`).then((r) => r.arrayBuffer())
-        .then((b) => this.ctx.decodeAudioData(b)).catch(() => null));
+      const p = fetch(`assets/vo/${k}.m4a`).then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(r.status))))
+        .then((b) => this.ctx.decodeAudioData(b)).catch(() => null);
+      this.loading.set(k, p);
+      p.then((buf) => { if (!buf && this.loading.get(k) === p) this.loading.delete(k); });   // a failed line is tried again when it is said
     }
     return this.loading.get(k);
   }
