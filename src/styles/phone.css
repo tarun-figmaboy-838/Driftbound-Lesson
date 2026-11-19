@@ -1,0 +1,25 @@
+/* Phones (the tall picture): answers under the screen, then Back / Next; reduced motion. */
+
+/* ---------------------------------------------------------------- phones (tall picture): answers under the screen, then Back / Next */
+.is-tall .bar { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ctl ctl ctl" "back . next"; row-gap: 14px; }
+.is-tall .controls { grid-area: ctl; }
+.is-tall .back { grid-area: back; }
+.is-tall .next-wrap { grid-area: next; }
+.is-tall .stage { padding: 14px 12px 12px; row-gap: 10px; }
+.is-tall .caption { column-gap: 12px; padding: 2px 52px 10px 2px; }
+.is-tall .mute { top: calc(var(--sy) + 12px); left: calc(var(--sx) + var(--sw) - 12px - 40px); width: 40px; height: 40px; }
+.is-tall .voice { width: 44px; height: 44px; gap: 2px; }
+.is-tall .corner { width: 14px; height: 14px; }
+.is-tall .pill { --cap: 25px; height: 50px; min-width: 84px; font-size: 19px; padding: 0 calc(var(--cap) + 2px) 3px; }
+.is-tall .back { width: 60px; }
+.is-tall .next { min-width: 130px; }
+.is-tall .cards { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); align-items: stretch; gap: 12px; padding: 2px 6px; }
+.is-tall .cards > span { aspect-ratio: auto; height: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .holo--glow, .holo--scan { animation: none !important; }
+  .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
+  .fig-svg .glow-t.cue { animation: none; opacity: .8; }
+  .fig-svg .hint-hand, .fig-svg .hint-hand-wrap { animation: none; }
+  .fig-svg .hand-ripple { animation: none; opacity: .6; }
+}

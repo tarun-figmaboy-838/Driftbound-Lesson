@@ -11,6 +11,11 @@ import sys
 
 
 class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
+    # newer formats some Python versions do not know yet
+    extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
+                      '.webp': 'image/webp', '.m4a': 'audio/mp4',
+                      '.js': 'text/javascript', '.json': 'application/json'}
+
     def end_headers(self):
         self.send_header('Cache-Control', 'no-cache')
         super().end_headers()

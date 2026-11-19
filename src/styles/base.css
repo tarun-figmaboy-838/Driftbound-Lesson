@@ -1,0 +1,24 @@
+/* Lines & Angles: the training run before Driftbound.
+
+   Design: one focus. The ship's strategy HQ (a picture made with Figma AI) is dimmed behind a big
+   digital screen where the whole lesson plays. Everything on the screen is a hologram display:
+   deep navy glass, a honeycomb grid with a drifting light, a scan line, an aqua edge glow and HUD
+   corner brackets; text is white, the maths is aqua (fixed lines), sun yellow (the moving ray) and
+   orange. Buttons sit under the screen, aligned to its edges, and use the POLYGON capsule kit:
+   gold for answers and actions, blue to move through the lesson, green and red for right and wrong.
+   Spacing follows an 8px grid; type uses one scale (Fredoka for text, Lilita One for numbers).
+
+   The styles are split by area of the page (src/styles/), loaded in this order by index.html: tokens,
+   base, hq, narration, stage, buttons, cards, phone, recall, start, intro, pills. */
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: #050b26; }
+html, body { margin: 0; height: 100%; }
+body { height: 100dvh; overflow: hidden; color: #f4f8ff; font-family: var(--font-ui); -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+button { font: inherit; color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.gone { visibility: hidden; pointer-events: none; }
+.x { font-family: var(--font-x); font-style: italic; font-weight: 700; }
+
+/* icons inside buttons take the text size */
+.ico { width: 1em; height: 1em; display: inline-block; flex: none; overflow: visible; }

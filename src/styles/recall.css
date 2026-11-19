@@ -1,0 +1,87 @@
+/* The recall: the drone, its light, the cards, the side places and the collection. */
+
+/* ---------------------------------------------------------------- the recall: a hologram drone (Figma AI art)
+   projects each square card (Figma AI art) in the middle, then the card flies down into the tray; at the end
+   the tray opens into the collection. --dw / --dh: the drone's size; --big: the projected card; --tray: a slot */
+.recall { position: relative; height: 100%; container-type: size;
+  --dw: clamp(130px, 14cqw, 210px); --dh: calc(var(--dw) * .448);
+  --big: min(calc(100cqh - var(--dh) - 80px), 40cqw, 330px);
+  --gap: 16px;
+  /* a side card: two of them, one above the other, are exactly as tall as the card in the middle */
+  --tray: min(calc((var(--big) - var(--gap)) / 2), calc((100cqw - var(--big)) / 2 - 40px)); }
+.recall__stage { position: absolute; z-index: 3; left: 50%; top: calc(var(--dh) + 52px); pointer-events: none; width: var(--big); height: var(--big); transform: translateX(-50%); }
+/* while the drone works, the collected cards wait at the sides: two on the left, two on the right, in rows
+   level with the top and the bottom of the card in the middle; they line up with the screen's edges */
+.recall__slots { position: absolute; inset: 0; z-index: 2; }
+.rslot { position: absolute; width: var(--tray); height: var(--tray);
+  top: calc(var(--dh) + 52px + var(--row, 0) * (var(--big) - var(--tray))); }
+.rslot[data-pos="0"], .rslot[data-pos="2"] { left: 0; }
+.rslot[data-pos="1"], .rslot[data-pos="3"] { right: 0; }
+.rslot[data-pos="2"], .rslot[data-pos="3"] { --row: 1; }
+/* a place takes room only once its card lands; the card being explained again is up in the light */
+.rslot:not(.got), .rslot.away { display: none; }
+.recall.is-done .recall__stage { display: none; }
+/* the recall uses the whole screen: no readout row under it */
+.stage:has(.recall) > .readout { display: none; }
+/* the drone gone: the cards grow into the big collection, one row */
+.recall.is-done .rslot { position: relative; inset: auto; width: auto; height: auto; }
+.recall.is-done .recall__slots { display: grid; justify-content: center; align-content: center; gap: 18px; grid-auto-flow: row;
+  --cell: min(calc((100cqw - 4 * 18px) / 5), calc(100cqh - 2 * var(--dh) - 104px), 290px);   /* room above a card for the drone */
+  grid-template-columns: repeat(5, var(--cell)); grid-auto-rows: var(--cell); }
+.rcard { position: absolute; inset: 0; display: grid; grid-template-rows: 24.6% minmax(0, 1fr); padding: 0 8% 8%; border: 0; border-radius: 12px;
+  container-type: inline-size; color: #fff; font: inherit; text-align: center; cursor: pointer; opacity: 0;
+  background: url(../../assets/ui/recall/card.webp) center / 100% 100% no-repeat; transition: filter .3s, transform .3s; }
+.rcard:disabled { cursor: default; }
+/* the title sits in the card's header band */
+.rcard b { align-self: center; padding-top: 3%; text-wrap: balance; font: 700 clamp(9px, 7.4cqi, 20px)/1.1 var(--font-ui); color: var(--holo); text-shadow: 0 0 10px rgba(127, 243, 255, .45); }
+.rcard__fig { position: relative; min-height: 0; margin-top: 4%; }
+.rcard.in { opacity: 1; }
+/* in the beam the card glows like a hologram */
+.rcard.is-holo { filter: drop-shadow(0 0 18px rgba(127, 243, 255, .55)); }
+.rcard.is-on b { color: #ffe9a8; }
+@media (hover: hover) { .recall.is-done .rcard:not(:disabled):not(.is-on):hover { transform: translateY(-3px); filter: drop-shadow(0 0 14px rgba(127, 243, 255, .5)); } }
+.rcard:focus-visible { outline: 3px solid var(--holo); outline-offset: 3px; }
+/* the drone; --tilt leans it into the flight */
+.drone { position: absolute; left: 0; top: 0; z-index: 5; width: var(--dw); pointer-events: none; transform: translate(-300px, 0);
+  transition: transform 1.25s cubic-bezier(.4, 0, .2, 1); }
+.drone__img { display: block; width: 100%; height: auto; aspect-ratio: 536 / 240; rotate: var(--tilt, 0deg); transition: rotate .8s ease-in-out;
+  animation: drone-bob 1.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 12px rgba(127, 243, 255, .35)); }
+@keyframes drone-bob { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+/* its screen: the voice's mouth (bars, as in the narration bar), bobbing with the drone */
+.drone__screen { position: absolute; left: 40.5%; top: 28.5%; width: 20%; height: 26%; display: flex; align-items: center; justify-content: center; gap: 7%;
+  animation: drone-bob 1.4s ease-in-out infinite alternate; }
+.drone__screen i { width: 7%; height: 12%; border-radius: 2px; background: linear-gradient(180deg, #ffffff, var(--holo)); box-shadow: 0 0 5px rgba(127, 243, 255, .9); }
+.is-talking .drone__screen i { animation: drone-talk .42s ease-in-out infinite alternate; }
+.is-talking .drone__screen i:nth-child(1), .is-talking .drone__screen i:nth-child(7) { --amp: 34%; animation-delay: -.3s; }
+.is-talking .drone__screen i:nth-child(2), .is-talking .drone__screen i:nth-child(6) { --amp: 58%; animation-delay: -.1s; }
+.is-talking .drone__screen i:nth-child(3), .is-talking .drone__screen i:nth-child(5) { --amp: 76%; animation-delay: -.25s; }
+.is-talking .drone__screen i:nth-child(4) { --amp: 88%; animation-delay: -.05s; }
+@keyframes drone-talk { from { height: 12%; } to { height: var(--amp, 60%); } }
+.caption.mouth-on-drone .voice { visibility: hidden; }
+/* the emitter lights up while it projects */
+.drone__flare { position: absolute; left: 50%; top: 92%; width: 46%; height: 30%; translate: -50% -50%; border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(closest-side, #ffffff, rgba(160, 248, 255, .85) 35%, rgba(127, 243, 255, 0)); transition: opacity .25s;
+  animation: drone-bob 1.4s ease-in-out infinite alternate; }
+.drone.beam .drone__flare { opacity: 1; }
+/* the beam: a cone of light from the emitter (narrow top, --e wide) spreading over the card. The blur on the
+   outer element softens the cone's clipped edges. */
+.recall__beam { position: absolute; z-index: 1; pointer-events: none; opacity: 0; filter: blur(2px); transform: scaleY(0); transform-origin: 50% 0;
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent); mask-image: linear-gradient(180deg, #000 62%, transparent);
+  transition: transform .35s cubic-bezier(.3, .7, .4, 1), opacity .3s; }
+.recall__beam i { position: absolute; inset: 0; clip-path: polygon(calc(50% - var(--e, 20px) / 2) 0, calc(50% + var(--e, 20px) / 2) 0, 100% 100%, 0 100%);
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, .08) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, rgba(220, 254, 255, .95), rgba(127, 243, 255, .5) 22%, rgba(127, 243, 255, .2) 70%, rgba(127, 243, 255, .3));
+  animation: beam-flicker 2.4s ease-in-out infinite; }
+@keyframes beam-flicker { 0%, 100% { opacity: 1; } 45% { opacity: .82; } 50% { opacity: .95; } 55% { opacity: .78; } }
+.recall.beam-on .recall__beam { opacity: 1; transform: none; }
+.is-tall .recall { --dw: 112px; --tray: min(calc((100cqw - 4 * 8px) / 5), 16cqh); --big: min(calc(100cqh - var(--dh) - var(--tray) - 84px), 78cqw); }
+/* phones: no room at the sides, so the tray is a row along the bottom (it stays centred as it grows) */
+.is-tall .recall:not(.is-done) .recall__slots { top: auto; bottom: 4px; display: grid; justify-content: center; gap: 8px;
+  grid-auto-flow: column; grid-auto-columns: var(--tray); grid-auto-rows: var(--tray); }
+.is-tall .recall:not(.is-done) .rslot { position: relative; inset: auto; width: auto; height: auto; }
+.is-tall .recall.is-done .recall__slots { top: calc(var(--dh) + 12px); gap: 12px;
+  --cell: min(calc((100cqw - 12px) / 2), calc((100cqh - var(--dh) - 12px - 24px) / 3)); grid-template-columns: repeat(2, var(--cell)); }
+.is-tall .recall.is-done .rslot:last-child { grid-column: 1 / -1; justify-self: center; width: var(--cell); }
+@media (prefers-reduced-motion: reduce) { .drone, .recall__beam { display: none; } }
+/* lip sync on the drone's screen (see narration.css) */
+.lipsync .drone__screen i { animation: none; height: calc(12% + var(--lv, 0) * 78%); transition: height 60ms linear; }

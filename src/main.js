@@ -1,34 +1,31 @@
 // Lines & Angles: the training run before Driftbound.
 //
-// A step player. Each step in src/steps.js is a short async script: it sets the caption, draws on the
+// A step player. Each step in src/lesson/steps.js is a short async script: it sets the caption, draws on the
 // holo-screen, narrates, and waits for the student. Next (under the screen) is the one call to
 // action. It pulses once a step is done; on question steps it stays locked until the right answer is
 // found, and every miss explains the mistake, so no student is ever stuck.
-import { Figure, at, angleOf } from './figure.js';
-import { Dialogue } from './dialogue.js';
-import { Voice } from './voice.js';
-import { Sound } from './audio.js';
-import { h, burst, burstAt, esc, angles } from './ui.js';
-import { CHAPTERS, STEPS } from './steps.js';
-import { createScene } from './scene.js';
-import { playIntro } from './intro.js';
+import { Figure, at, angleOf } from './engine/figure.js';
+import { Dialogue } from './engine/dialogue.js';
+import { Voice } from './engine/voice.js';
+import { Sound } from './engine/audio.js';
+import { h, burst, burstAt, esc, angles, reduced, EASE } from './engine/ui.js';
+import { createScene } from './engine/scene.js';
+import { CHAPTERS, STEPS } from './lesson/steps.js';
+import { playIntro } from './intro/intro.js';
 
 const GAME_URL = 'https://zathura-teal.vercel.app';
 const CANCEL = Symbol('cancel');
 const $ = (id) => document.getElementById(id);
-const reduceMQ = matchMedia('(prefers-reduced-motion: reduce)');
-const reduced = () => reduceMQ.matches;
 
 const els = {
-  caption: $('caption'), stage: $('view'), fig: $('fig'), custom: $('custom'), side: $('side'),
+  caption: $('caption'), stage: $('view'), fig: $('fig'), custom: $('custom'),
   readout: $('readout'), controls: $('controls'), glassIn: $('glass-in'),
   next: $('next'), nextWrap: $('next-wrap'), back: $('back'), mute: $('mute'),
 };
 
 const sound = new Sound();
-// the narration: one line beside the AI mouth, said aloud word by word (speech synthesis, when the
-// device has a voice and the sound is on); the mouth moves while it talks
-// the recorded voice (the game's co-pilot, made with Kokoro): its lines are decoded once the audio starts
+// the recorded voice (the game's co-pilot, made with Kokoro): its lines are decoded once the audio starts;
+// the narration says them in one line beside the AI orb, word by word
 const vo = new Voice(sound);
 const warm = () => vo.ready.then(() => vo.preload());
 window.addEventListener('pointerdown', warm, { once: true });
@@ -88,13 +85,6 @@ function overlays(b, s) {
   }
 }
 
-const EASE = {
-  linear: (t) => t,
-  out: (t) => 1 - (1 - t) ** 3,
-  in: (t) => t ** 3,
-  inOut: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2),
-  back: (t) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * (t - 1) ** 3 + c1 * (t - 1) ** 2; },
-};
 
 function updateNext() {
   const s = STEPS[cur];
@@ -125,8 +115,7 @@ function setCaption(text, again = false) {
 function resetStage() {
   fig.clear();
   els.custom.replaceChildren();
-  els.side.replaceChildren();
-  els.stage.classList.remove('is-custom', 'has-side');
+  els.stage.classList.remove('is-custom');
   els.readout.replaceChildren();
   els.readout.classList.remove('has-label');
   els.controls.replaceChildren();
@@ -338,11 +327,6 @@ function makeCtx(i, tk) {
       sound.stamp();
       c.wait(200).then(() => burstAt(els.readout, { count: 12, spread: 130 })).catch(() => {});
     },
-    side(node) {
-      els.side.replaceChildren(...(node ? [node] : []));
-      els.stage.classList.toggle('has-side', !!node);
-      if (node && !reduced()) els.side.animate([{ opacity: 0, transform: 'translateX(24px)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)' });
-    },
     stage(node) {
       els.custom.replaceChildren(...(node ? [node] : []));
       els.stage.classList.toggle('is-custom', !!node);
@@ -485,8 +469,6 @@ function makeCtx(i, tk) {
       tk.ready = true;
       updateNext();
     },
-    go: (k) => go(k, { dir: k < cur ? -1 : 1 }),
-    indexOf: (id) => STEPS.findIndex((s) => s.id === id),
     later,
   };
   return c;
@@ -594,7 +576,7 @@ const fonts = ['400 20px "Lilita One"', '600 18px "Fredoka"', '400 18px "Noto Sa
 const fontsIn = Promise.race([Promise.all(fonts.map((f) => document.fonts?.load(f, '∠1°−'))), new Promise((r) => setTimeout(r, 1500))]).catch(() => {});
 const ready = Promise.race([Promise.all([fontsIn, scene.loaded]), new Promise((r) => setTimeout(r, 4000))]);
 
-// the start banner: the play button starts the intro (src/intro.js: into the satellite, through its gate,
+// the start banner: the play button starts the intro (src/intro/intro.js: into the satellite, through its gate,
 // down the corridor into the hall, where a drone brings the screen), then the lesson. The tap also lets
 // the browser start the voice. A link to a given step (?step=N) skips both.
 const banner = $('start');

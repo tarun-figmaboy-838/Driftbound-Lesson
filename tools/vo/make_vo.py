@@ -1,15 +1,17 @@
 """Make the lesson's voice-over with Kokoro (open source, Apache-2.0, runs locally, free).
 
 The narrator is the game's co-pilot: Kokoro's af_heart voice with the same light robot shimmer and radio
-sound as in Driftbound. Every line the narration can say is collected from src/steps.js and src/main.js
+sound as in Driftbound. Every line the narration can say is collected from src/lesson/steps.js and src/main.js
 (captions, instructions, hints, the recall cards). Each file is named after a hash of the line exactly
-as the screen shows it, so the lesson finds it by itself (src/voice.js). The manifest also keeps the time
+as the screen shows it, so the lesson finds it by itself (src/engine/voice.js). The manifest also keeps the time
 each word starts, so the words on screen light up exactly as they are said.
 
 Change a line, run this again, and its new voice is made (lines that did not change are kept).
 
 usage (Python 3.10-3.12 with: pip install kokoro soundfile scipy numpy):
     python tools/vo/make_vo.py           # makes assets/vo/*.m4a and assets/vo/manifest.json
+
+Each line is one AAC .m4a file: the format every browser decodes, Safari included.
     python tools/vo/make_vo.py --list    # only prints the lines it would voice
 """
 import json
@@ -26,7 +28,7 @@ SR = 24000
 
 
 def key(text):
-    """djb2 over UTF-16 code units; must match hash() in src/voice.js"""
+    """djb2 over UTF-16 code units; must match hash() in src/engine/voice.js"""
     h = 5381
     b = text.encode('utf-16-le')
     for i in range(0, len(b), 2):
@@ -43,7 +45,7 @@ def unq(s):
 
 
 def lines():
-    src = (ROOT / 'src' / 'steps.js').read_text()
+    src = (ROOT / 'src' / 'lesson' / 'steps.js').read_text()
     out = []
     out += re.findall(r"c\.caption\(\s*" + Q, src)                       # captions
     out += re.findall(r"crew\(\s*" + Q, src)                             # instructions

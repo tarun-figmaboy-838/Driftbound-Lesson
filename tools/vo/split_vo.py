@@ -6,7 +6,7 @@ needs its own recording; this cuts the line's existing recording at the moment t
 starts (the manifest keeps every word's start time), with a short fade at each cut, and gives each
 piece its own file and word times. The full line's file and entry are removed.
 
-The lesson's source (src/steps.js) lists the pieces instead of the full line; make_vo.py collects them
+The lesson's source (src/lesson/steps.js) lists the pieces instead of the full line; make_vo.py collects them
 the same way, so a later run of make_vo.py keeps these files.
 
 usage:  python3 tools/vo/split_vo.py           (macOS: uses afconvert)
@@ -20,7 +20,7 @@ from array import array
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from make_vo import key  # noqa: E402  (djb2, the same hash as src/voice.js)
+from make_vo import key  # noqa: E402  (djb2, the same hash as src/engine/voice.js)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets' / 'vo'

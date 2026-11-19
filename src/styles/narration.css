@@ -1,0 +1,64 @@
+/* The narration bar at the top of the screen: the AI voice orb and the line it says. */
+
+/* ---------------------------------------------------------------- the narration bar (HUD, top of the screen)
+   The hexagon at its left is the voice's mouth: its wave moves while the caption or a hint is spoken. */
+/* a clean header row: the voice, the caption, and a thin glowing divider under them */
+.caption { position: relative; width: 100%; margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 18px;
+  padding: 4px 60px 14px 4px; }
+.caption::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(127, 243, 255, .6), rgba(127, 243, 255, .15) 70%, transparent); }
+.caption h1 { margin: 0; font: 700 clamp(18px, .95rem + .6vw, 26px)/1.25 var(--font-ui); color: #ffffff; letter-spacing: .005em; text-wrap: balance; }
+.caption:has(h1:empty) { visibility: hidden; }
+/* Ghost animation: things appear like a hologram ghost, see-through and blurred, drifting up with a
+   faint echo trailing behind, then turning solid. The narration's words do it one by one, as the voice
+   says them (hints too); buttons, cards and labels do it as they come in. */
+.caption h1 .w { display: inline-block; opacity: 0; }
+.caption h1 .w.on { animation: ghost-word .55s cubic-bezier(.22, 1, .36, 1) both; }
+.caption h1 .w.now { animation: none; opacity: 1; }
+@keyframes ghost-word {
+  0% { opacity: 0; filter: blur(7px); transform: translateY(.45em) scale(1.05);
+    text-shadow: 0 .35em 0 rgba(127, 243, 255, .35), 0 .7em 0 rgba(127, 243, 255, .15); }
+  45% { opacity: .7; filter: blur(1.5px); text-shadow: 0 .12em 0 rgba(127, 243, 255, .3), 0 0 14px rgba(127, 243, 255, .8); }
+  100% { opacity: 1; filter: none; transform: none; text-shadow: 0 0 0 rgba(127, 243, 255, 0); } }
+@keyframes ghost-in {
+  0% { opacity: 0; filter: blur(10px); transform: translateY(14px) scale(.96); }
+  50% { opacity: .65; filter: blur(2px); }
+  100% { opacity: 1; filter: none; transform: none; } }
+.enter { animation: ghost-in .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i, 0) * 90ms + 60ms); }
+/* the voice: the co-pilot AI, a small glass orb. Colours swirl slowly inside it (cyan, indigo, violet), a
+   white waveform in its middle follows the voice, and while it talks the orb swells a little and glows */
+.voice { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 2.5px;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 58%, #0d2f78 0%, #071a4c 62%, #040d2e 100%);
+  box-shadow: 0 0 0 1.5px rgba(160, 248, 255, .55), 0 0 0 4px rgba(5, 14, 44, .85), 0 6px 16px rgba(2, 8, 30, .55), 0 0 20px rgba(61, 220, 242, .3);
+  transition: transform .4s cubic-bezier(.34, 1.56, .64, 1), box-shadow .4s ease; }
+/* the swirl: a soft, blurred ring of colour turning slowly behind the waveform */
+.voice::before { content: ''; position: absolute; inset: -25%; z-index: -1; border-radius: 50%; opacity: .7; filter: blur(7px);
+  background: conic-gradient(from 20deg, #3ddcf2, #2f6dff 22%, #8a5cff 40%, #d06bff 52%, #3ddcf2 68%, #48f0d0 84%, #3ddcf2);
+  -webkit-mask: radial-gradient(circle, transparent 18%, #000 52%); mask: radial-gradient(circle, transparent 18%, #000 52%);
+  animation: orb-swirl 7s linear infinite; transition: opacity .4s ease; }
+@keyframes orb-swirl { to { transform: rotate(360deg); } }
+/* glass: a highlight at the top left and a soft darker rim */
+.voice::after { content: ''; position: absolute; inset: 0; z-index: 2; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 33% 24%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 26%),
+    radial-gradient(circle, rgba(4, 12, 44, 0) 60%, rgba(4, 12, 44, .45) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+.caption.talking .voice { transform: scale(1.08);
+  box-shadow: 0 0 0 1.5px rgba(190, 252, 255, .85), 0 0 0 4px rgba(5, 14, 44, .85), 0 6px 16px rgba(2, 8, 30, .55), 0 0 30px rgba(61, 220, 242, .6), 0 0 54px rgba(138, 92, 255, .3); }
+.caption.talking .voice::before { opacity: 1; }
+/* the waveform: small white bars with a glow; at rest a calm little wave */
+.voice i { position: relative; z-index: 1; width: 3px; height: var(--h, 4px); border-radius: 2px; background: #ffffff;
+  box-shadow: 0 0 5px rgba(255, 255, 255, .9), 0 0 10px rgba(127, 243, 255, .75); transition: height .25s ease; }
+.voice i:nth-child(1), .voice i:nth-child(7) { --h: 3px; }
+.voice i:nth-child(2), .voice i:nth-child(6) { --h: 4px; }
+.voice i:nth-child(3), .voice i:nth-child(5) { --h: 6px; }
+.voice i:nth-child(4) { --h: 7px; }
+.caption.talking .voice i { animation: talk .42s ease-in-out infinite alternate; }
+.caption.talking .voice i:nth-child(1), .caption.talking .voice i:nth-child(7) { --amp: 7px; animation-delay: -.3s; }
+.caption.talking .voice i:nth-child(2), .caption.talking .voice i:nth-child(6) { --amp: 12px; animation-delay: -.1s; }
+.caption.talking .voice i:nth-child(3), .caption.talking .voice i:nth-child(5) { --amp: 17px; animation-delay: -.25s; }
+.caption.talking .voice i:nth-child(4) { --amp: 21px; animation-delay: -.05s; }
+@keyframes talk { from { height: 4px; } to { height: var(--amp, 16px); } }
+@media (prefers-reduced-motion: reduce) { .voice::before { animation: none; } .caption.talking .voice { transform: none; } }
+/* lip sync: while the recorded voice plays, each bar's height follows the sound (--lv, 0..1) */
+.lipsync .caption .voice i { animation: none; height: calc(4px + var(--lv, 0) * 18px); transition: height 60ms linear; }

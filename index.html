@@ -10,10 +10,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Math&text=%E2%88%A0%E2%88%92&display=swap" />
-  <link rel="stylesheet" href="src/tokens.css" />
-  <link rel="stylesheet" href="src/components.css" />
-  <link rel="stylesheet" href="src/style.css" />
-  <link rel="stylesheet" href="src/pills.css" />
+  <!-- styles, in cascade order: tokens first, then each area of the page (src/styles/) -->
+  <link rel="stylesheet" href="src/styles/tokens.css" />
+  <link rel="stylesheet" href="src/styles/base.css" />
+  <link rel="stylesheet" href="src/styles/hq.css" />
+  <link rel="stylesheet" href="src/styles/narration.css" />
+  <link rel="stylesheet" href="src/styles/stage.css" />
+  <link rel="stylesheet" href="src/styles/buttons.css" />
+  <link rel="stylesheet" href="src/styles/cards.css" />
+  <link rel="stylesheet" href="src/styles/phone.css" />
+  <link rel="stylesheet" href="src/styles/recall.css" />
+  <link rel="stylesheet" href="src/styles/start.css" />
+  <link rel="stylesheet" href="src/styles/intro.css" />
+  <link rel="stylesheet" href="src/styles/pills.css" />
 </head>
 <body>
   <!-- the ship's strategy HQ (a picture made with Figma AI); the lesson plays on its big screen -->
@@ -25,9 +34,9 @@
 
   <!-- the start banner (Figma AI art): the satellite HQ in orbit, and one play button in the centre -->
   <div class="start" id="start">
-    <img class="start__pic" src="assets/ui/start/banner.jpg" alt="" draggable="false" />
-    <h1 class="start__title"><img src="assets/ui/start/title.png" alt="Driftbound" draggable="false" /></h1>
-    <button class="start__play" id="play" type="button" aria-label="Play"><img src="assets/ui/start/play.png" alt="" draggable="false" /></button>
+    <img class="start__pic" src="assets/ui/start/banner.webp" alt="" draggable="false" />
+    <h1 class="start__title"><img src="assets/ui/start/title.webp" alt="Driftbound" draggable="false" /></h1>
+    <button class="start__play" id="play" type="button" aria-label="Play"><img src="assets/ui/start/play.webp" alt="" draggable="false" /></button>
   </div>
   <main class="hq">
     <!-- the lesson screen: a big digital display laid over the picture's screen -->
@@ -40,14 +49,11 @@
         <!-- the narration: one line, said aloud word by word; the bars are the voice's mouth -->
         <div class="caption" id="narration">
           <span class="voice" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          <div class="caption__text">
-            <h1 id="caption"></h1>
-          </div>
+          <h1 id="caption"></h1>
         </div>
         <div class="view" id="view">
           <div class="fig" id="fig"></div>
           <div class="custom" id="custom"></div>
-          <aside class="side" id="side"></aside>
         </div>
         <div class="readout" id="readout" aria-live="polite"></div>
       </div>
