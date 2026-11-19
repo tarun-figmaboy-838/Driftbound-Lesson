@@ -103,22 +103,40 @@ button { font: inherit; color: inherit; }
   50% { opacity: .65; filter: blur(2px); }
   100% { opacity: 1; filter: none; transform: none; } }
 .enter { animation: ghost-in .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i, 0) * 90ms + 60ms); }
-.voice { display: flex; align-items: center; justify-content: center; gap: 4px; width: 64px; height: 44px; border-radius: 22px;
-  background: radial-gradient(circle at 50% 30%, rgba(127, 243, 255, .28), rgba(6, 18, 54, .95) 75%);
-  box-shadow: inset 0 0 0 1.5px rgba(127, 243, 255, .75), 0 0 18px rgba(61, 220, 242, .35); }
-/* at rest the bars make a soft smile; while the voice talks they move like a voice visualiser */
-.voice i { width: 4px; height: var(--h, 6px); border-radius: 2px; background: linear-gradient(180deg, #ffffff, var(--holo)); box-shadow: 0 0 6px rgba(127, 243, 255, .9);
-  transition: height .25s ease; }
-.voice i:nth-child(1), .voice i:nth-child(7) { --h: 6px; }
-.voice i:nth-child(2), .voice i:nth-child(6) { --h: 5px; }
-.voice i:nth-child(3), .voice i:nth-child(5) { --h: 4px; }
-.voice i:nth-child(4) { --h: 4px; }
+/* the voice: a little holo capsule built like the game's buttons (ink outline, a darker lip below, a face lit
+   from the top, a gloss highlight, a cyan rim). Its light bars rest in a soft wave; while the voice talks
+   they follow it, the capsule brightens and a signal ring pulses out of it */
+.voice { position: relative; display: flex; align-items: center; justify-content: center; gap: 4px; width: 70px; height: 44px; border-radius: 999px;
+  background: radial-gradient(ellipse 80% 70% at 50% 62%, rgba(61, 220, 242, .22), rgba(61, 220, 242, 0) 70%),
+    linear-gradient(180deg, #23509f 0%, #123275 48%, #0a2156 100%);
+  box-shadow: 0 0 0 2.5px #061032, 0 4px 0 2.5px #061032, 0 3px 0 1px #0b1f55, inset 0 0 0 1.5px rgba(127, 243, 255, .6),
+    inset 0 -6px 10px rgba(2, 10, 40, .55), 0 8px 18px rgba(2, 8, 30, .5), 0 0 18px rgba(61, 220, 242, .22);
+  transition: box-shadow .3s ease, filter .3s ease; }
+/* the gloss: a soft white pill along the top */
+.voice::before { content: ''; position: absolute; left: 18%; right: 18%; top: 3px; height: 28%; border-radius: 999px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0)); }
+/* the signal ring, only while talking */
+.voice::after { content: ''; position: absolute; inset: -3px; border-radius: 999px; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 0 2px rgba(127, 243, 255, .75), 0 0 14px rgba(61, 220, 242, .6); }
+.caption.talking .voice { filter: brightness(1.12); box-shadow: 0 0 0 2.5px #061032, 0 4px 0 2.5px #061032, 0 3px 0 1px #0b1f55,
+  inset 0 0 0 1.5px rgba(160, 248, 255, .9), inset 0 -6px 10px rgba(2, 10, 40, .5), 0 8px 18px rgba(2, 8, 30, .5), 0 0 26px rgba(61, 220, 242, .45); }
+.caption.talking .voice::after { animation: voice-ring 1.5s ease-out infinite; }
+@keyframes voice-ring { 0% { opacity: .85; transform: scale(1); } 100% { opacity: 0; transform: scale(1.32, 1.55); } }
+/* the light bars: rounded, white at the tip fading to cyan, glowing; at rest a soft wave */
+.voice i { position: relative; z-index: 1; width: 4.5px; height: var(--h, 6px); border-radius: 3px;
+  background: linear-gradient(180deg, #ffffff 0%, #c6fcff 35%, #3ddcf2 100%);
+  box-shadow: 0 0 6px rgba(127, 243, 255, .85), 0 0 1px rgba(255, 255, 255, .9); transition: height .25s ease; }
+.voice i:nth-child(1), .voice i:nth-child(7) { --h: 5px; }
+.voice i:nth-child(2), .voice i:nth-child(6) { --h: 8px; }
+.voice i:nth-child(3), .voice i:nth-child(5) { --h: 11px; }
+.voice i:nth-child(4) { --h: 13px; }
 .caption.talking .voice i { animation: talk .42s ease-in-out infinite alternate; }
 .caption.talking .voice i:nth-child(1), .caption.talking .voice i:nth-child(7) { --amp: 10px; animation-delay: -.3s; }
-.caption.talking .voice i:nth-child(2), .caption.talking .voice i:nth-child(6) { --amp: 18px; animation-delay: -.1s; }
-.caption.talking .voice i:nth-child(3), .caption.talking .voice i:nth-child(5) { --amp: 24px; animation-delay: -.25s; }
-.caption.talking .voice i:nth-child(4) { --amp: 28px; animation-delay: -.05s; }
+.caption.talking .voice i:nth-child(2), .caption.talking .voice i:nth-child(6) { --amp: 17px; animation-delay: -.1s; }
+.caption.talking .voice i:nth-child(3), .caption.talking .voice i:nth-child(5) { --amp: 22px; animation-delay: -.25s; }
+.caption.talking .voice i:nth-child(4) { --amp: 26px; animation-delay: -.05s; }
 @keyframes talk { from { height: 5px; } to { height: var(--amp, 20px); } }
+@media (prefers-reduced-motion: reduce) { .caption.talking .voice::after { animation: none; } }
 
 /* ---------------------------------------------------------------- the view: figure, or cards / title / recap, plus an optional side panel */
 .view { position: relative; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
@@ -284,7 +302,8 @@ button { font: inherit; color: inherit; }
 .is-tall .stage { padding: 14px 12px 12px; row-gap: 10px; }
 .is-tall .caption { column-gap: 12px; padding: 2px 52px 10px 2px; }
 .is-tall .mute { top: calc(var(--sy) + 12px); left: calc(var(--sx) + var(--sw) - 12px - 40px); width: 40px; height: 40px; }
-.is-tall .voice { width: 54px; height: 38px; gap: 3px; }
+.is-tall .voice { width: 58px; height: 38px; gap: 3px; }
+.is-tall .voice i { width: 4px; }
 .is-tall .corner { width: 14px; height: 14px; }
 .is-tall .pill { --cap: 25px; height: 50px; min-width: 84px; font-size: 19px; padding: 0 calc(var(--cap) + 2px) 3px; }
 .is-tall .back { width: 60px; }
@@ -465,5 +484,5 @@ button { font: inherit; color: inherit; }
 .intro-pano img { position: absolute; left: 0; top: 0; display: block; max-width: none; will-change: transform; }
 
 /* lip sync: while the recorded voice plays, each mouth bar's height follows the sound (--lv, 0..1) */
-.lipsync .caption .voice i { animation: none; height: calc(4px + var(--lv, 0) * 26px); transition: height 60ms linear; }
+.lipsync .caption .voice i { animation: none; height: calc(5px + var(--lv, 0) * 22px); transition: height 60ms linear; }
 .lipsync .drone__screen i { animation: none; height: calc(12% + var(--lv, 0) * 78%); transition: height 60ms linear; }

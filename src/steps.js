@@ -821,10 +821,12 @@ export const STEPS = [
       c.readout(`${S('o', '∠1 = ∠3')}${OP('•')}${S('a', '∠2 = ∠4')}`);
       await c.wait(800);
       c.talk(crew('Turn the copy of ∠1 half a turn round O.'));
-      const vals = [...v.s.vals];
-      v.set({ vals: [null, null, null, null] });           // the readout keeps the values: the turn needs the room
-      await c.spin(v, { a: 0, b: 55, r: 38, len: 118, hr: 92, auto: null });
-      v.set({ vals });
+      // the turn needs the room: the values step aside (the readout keeps them), and so do the names of the
+      // two angles the copy does not use; its track runs between the names and the points A and B
+      const vals = [...v.s.vals], names = [...v.s.names];
+      v.set({ vals: [null, null, null, null], names: [1, 0, 1, 0] });
+      await c.spin(v, { a: 0, b: 55, r: 38, len: 118, hr: 84, auto: null });
+      v.set({ vals, names });
     },
   },
 
@@ -834,7 +836,7 @@ export const STEPS = [
     async run(c) {
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], handle: true, hint: true }, (b, s) => {
-        s.vals = [deg(s.t), null, deg(s.t), null];
+        s.vals = s.hint ? [null, null, null, null] : [deg(s.t), null, deg(s.t), null];   // the values come with the first drag (the hint hand stands there)
         crossFig(b, s);
       });
       let moved = 0, finish;
