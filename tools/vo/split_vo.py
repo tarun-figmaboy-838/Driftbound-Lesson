@@ -55,6 +55,16 @@ SPLITS = {
     'A right angle is exactly 90°. This one opens wider than that.': ['A right angle is exactly 90°.', 'This one opens wider than that.'],
     'Obtuse angles are bigger than 90°. This one is exactly a square corner.': ['Obtuse angles are bigger than 90°.', 'This one is exactly a square corner.'],
     'Obtuse angles are bigger than 90°. This one is smaller than a square corner.': ['Obtuse angles are bigger than 90°.', 'This one is smaller than a square corner.'],
+    # tap hints: what is wrong, then where to look
+    '∠3 is next to ∠2: they share an arm. Look straight across O.': ['∠3 is next to ∠2: they share an arm.', 'Look straight across O.'],
+    '∠1 is next to ∠2: they share an arm. Look straight across O.': ['∠1 is next to ∠2: they share an arm.', 'Look straight across O.'],
+    'C is on the shared arm, but both angles start at the corner. Tap the corner.': ['C is on the shared arm, but both angles start at the corner.', 'Tap the corner.'],
+    'Point A is on one angle only. Find the point where both angles start.': ['Point A is on one angle only.', 'Find the point where both angles start.'],
+    'Point B is on one angle only. Find the point where both angles start.': ['Point B is on one angle only.', 'Find the point where both angles start.'],
+    'That’s ∠1 itself. Find the angle facing it across O.': ['That’s ∠1 itself.', 'Find the angle facing it across O.'],
+    'That’s ∠2 itself. Find the angle facing it across O.': ['That’s ∠2 itself.', 'Find the angle facing it across O.'],
+    'That’s ∠3 itself. Find the angle facing it across O.': ['That’s ∠3 itself.', 'Find the angle facing it across O.'],
+    'That’s ∠4 itself. Find the angle facing it across O.': ['That’s ∠4 itself.', 'Find the angle facing it across O.'],
     # the lesson's own lines
     'If a ray stands on a straight line, the two adjacent angles formed add up to 180°.': ['If a ray stands on a straight line,', 'the two adjacent angles formed add up to 180°.'],
     'They have the same vertex. They also have one common arm. The two angles do not overlap.': ['They have the same vertex.', 'They also have one common arm.', 'The two angles do not overlap.'],

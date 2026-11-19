@@ -256,6 +256,10 @@ button { font: inherit; color: inherit; }
 .next[aria-disabled="true"] { filter: grayscale(.85) brightness(.85); opacity: .7; cursor: not-allowed; }
 .next-wrap { justify-self: end; }
 .next-wrap.ready .next { animation: ready 1.8s ease-in-out infinite; }
+/* a Next that waited for its step (the recall's Launch mission) arrives: rises, overshoots and settles */
+.next-wrap.arrive { animation: next-arrive .75s cubic-bezier(.34, 1.56, .64, 1) both; }
+@keyframes next-arrive { from { opacity: 0; transform: translateY(18px) scale(.7); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .next-wrap.arrive { animation: none; } }
 @keyframes ready { 50% { transform: scale(1.05); filter: drop-shadow(0 0 14px rgba(127, 200, 255, .9)); } }
 .next-wrap.nope { animation: wiggle .5s ease; }
 .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 14px; min-width: 0; }
@@ -327,18 +331,27 @@ button { font: inherit; color: inherit; }
    the tray opens into the collection. --dw / --dh: the drone's size; --big: the projected card; --tray: a slot */
 .recall { position: relative; height: 100%; container-type: size;
   --dw: clamp(130px, 14cqw, 210px); --dh: calc(var(--dw) * .448);
-  --tray: min(calc((100cqw - 4 * 14px) / 5), 22cqh, 150px);
-  --big: min(calc(100cqh - var(--dh) - var(--tray) - 96px), 38cqw, 300px); }
+  --big: min(calc(100cqh - var(--dh) - 80px), 40cqw, 330px);
+  --gap: 16px;
+  /* a side card: two of them, one above the other, are exactly as tall as the card in the middle */
+  --tray: min(calc((var(--big) - var(--gap)) / 2), calc((100cqw - var(--big)) / 2 - 40px)); }
 .recall__stage { position: absolute; z-index: 3; left: 50%; top: calc(var(--dh) + 52px); pointer-events: none; width: var(--big); height: var(--big); transform: translateX(-50%); }
-.recall__slots { position: absolute; left: 0; right: 0; bottom: 4px; z-index: 2; display: grid; justify-content: center; gap: 14px;
-  grid-auto-flow: column; grid-auto-columns: var(--tray); grid-auto-rows: var(--tray); }
-/* a place in the tray takes room only once its card lands, so the row stays centred as it grows */
-.rslot { position: relative; }
-.rslot:not(.got) { display: none; }
+/* while the drone works, the collected cards wait at the sides: two on the left, two on the right, in rows
+   level with the top and the bottom of the card in the middle; they line up with the screen's edges */
+.recall__slots { position: absolute; inset: 0; z-index: 2; }
+.rslot { position: absolute; width: var(--tray); height: var(--tray);
+  top: calc(var(--dh) + 52px + var(--row, 0) * (var(--big) - var(--tray))); }
+.rslot[data-pos="0"], .rslot[data-pos="2"] { left: 0; }
+.rslot[data-pos="1"], .rslot[data-pos="3"] { right: 0; }
+.rslot[data-pos="2"], .rslot[data-pos="3"] { --row: 1; }
+/* a place takes room only once its card lands; the card being explained again is up in the light */
+.rslot:not(.got), .rslot.away { display: none; }
 .recall.is-done .recall__stage { display: none; }
 /* the recall uses the whole screen: no readout row under it */
 .stage:has(.recall) > .readout { display: none; }
-.recall.is-done .recall__slots { top: 0; bottom: 0; align-content: center; gap: 18px; grid-auto-flow: row;
+/* the drone gone: the cards grow into the big collection, one row */
+.recall.is-done .rslot { position: relative; inset: auto; width: auto; height: auto; }
+.recall.is-done .recall__slots { display: grid; justify-content: center; align-content: center; gap: 18px; grid-auto-flow: row;
   --cell: min(calc((100cqw - 4 * 18px) / 5), calc(100cqh - 2 * var(--dh) - 104px), 290px);   /* room above a card for the drone */
   grid-template-columns: repeat(5, var(--cell)); grid-auto-rows: var(--cell); }
 .rcard { position: absolute; inset: 0; display: grid; grid-template-rows: 24.6% minmax(0, 1fr); padding: 0 8% 8%; border: 0; border-radius: 12px;
@@ -388,7 +401,10 @@ button { font: inherit; color: inherit; }
 @keyframes beam-flicker { 0%, 100% { opacity: 1; } 45% { opacity: .82; } 50% { opacity: .95; } 55% { opacity: .78; } }
 .recall.beam-on .recall__beam { opacity: 1; transform: none; }
 .is-tall .recall { --dw: 112px; --tray: min(calc((100cqw - 4 * 8px) / 5), 16cqh); --big: min(calc(100cqh - var(--dh) - var(--tray) - 84px), 78cqw); }
-.is-tall .recall__slots { gap: 8px; }
+/* phones: no room at the sides, so the tray is a row along the bottom (it stays centred as it grows) */
+.is-tall .recall:not(.is-done) .recall__slots { top: auto; bottom: 4px; display: grid; justify-content: center; gap: 8px;
+  grid-auto-flow: column; grid-auto-columns: var(--tray); grid-auto-rows: var(--tray); }
+.is-tall .recall:not(.is-done) .rslot { position: relative; inset: auto; width: auto; height: auto; }
 .is-tall .recall.is-done .recall__slots { top: calc(var(--dh) + 12px); gap: 12px;
   --cell: min(calc((100cqw - 12px) / 2), calc((100cqh - var(--dh) - 12px - 24px) / 3)); grid-template-columns: repeat(2, var(--cell)); }
 .is-tall .recall.is-done .rslot:last-child { grid-column: 1 / -1; justify-self: center; width: var(--cell); }

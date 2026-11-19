@@ -494,9 +494,9 @@ export const STEPS = [
       await c.tapFig({
         answer: 'O',
         why: {
-          A: 'Point A is on one angle only. Find the point where both angles start.',
-          B: 'Point B is on one angle only. Find the point where both angles start.',
-          C: 'C is on the shared arm, but both angles start at the corner. Tap the corner.',
+          A: ['Point A is on one angle only.', 'Find the point where both angles start.'],
+          B: ['Point B is on one angle only.', 'Find the point where both angles start.'],
+          C: ['C is on the shared arm, but both angles start at the corner.', 'Tap the corner.'],
         },
       });
       v.set({ taps: null, ring: true });
@@ -773,7 +773,7 @@ export const STEPS = [
     async run(c) {
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], taps: true }, crossFig);
-      c.fig.onTap = (id) => { if (!c.pick?.(id)) c.talk({ text: `That’s ${id} itself. Find the angle facing it across O.`, mood: 'hint' }); };
+      c.fig.onTap = (id) => { if (!c.pick?.(id)) c.talk([{ text: `That’s ${id} itself.`, mood: 'hint' }, { text: 'Find the angle facing it across O.', mood: 'hint' }]); };
       c.caption('Which angle is opposite ∠1?');
       await c.choose({
         options: ['∠2', '∠3', '∠4'], answer: '∠3',
@@ -789,8 +789,8 @@ export const STEPS = [
       await c.choose({
         options: ['∠1', '∠3', '∠4'], answer: '∠4',
         why: {
-          '∠1': '∠1 is next to ∠2: they share an arm. Look straight across O.',
-          '∠3': '∠3 is next to ∠2: they share an arm. Look straight across O.',
+          '∠1': ['∠1 is next to ∠2: they share an arm.', 'Look straight across O.'],
+          '∠3': ['∠3 is next to ∠2: they share an arm.', 'Look straight across O.'],
         },
       });
       c.ready();
@@ -945,7 +945,7 @@ export const STEPS = [
   // and the card flies down into the tray. When all five are collected the drone leaves and the tray
   // opens into the collection; tapping a card brings the drone back to explain it again.
   {
-    id: 'recall', quiet: true, ch: 5, title: 'Recall', next: 'Launch mission', launch: true,
+    id: 'recall', quiet: true, ch: 5, title: 'Recall', next: 'Launch mission', launch: true, nextAfter: true,   // Launch mission arrives once the recall is done
     async run(c) {
       c.caption('Recall');
       const root = h(`<div class="recall"><div class="recall__beam" aria-hidden="true"><i></i></div><div class="recall__stage"></div><div class="recall__slots"></div><div class="drone" aria-hidden="true">${DRONE}</div></div>`);
@@ -958,9 +958,12 @@ export const STEPS = [
       const bar = document.getElementById('narration');
       bar.classList.add('mouth-on-drone');
       c.later(() => bar.classList.remove('mouth-on-drone'));
-      // the tray's five places (invisible until a card lands); each card waits off stage until the drone brings it
-      const cards = RECALL.map((R) => {
+      // each card's place in the collection (invisible until the card lands); while the drone works, four of
+      // them wait at the sides (data-pos 0-3: left and right, top row then bottom row) and the last card
+      // stays in the middle. Each card waits off stage until the drone brings it
+      const cards = RECALL.map((R, i) => {
         const slot = h('<div class="rslot"></div>');
+        if (i < 4) slot.dataset.pos = String(i);
         const el = h('<button type="button" class="rcard" disabled><b></b><span class="rcard__fig" aria-hidden="true"></span></button>');
         el.querySelector('b').textContent = R.term;
         el.setAttribute('aria-label', `${R.term}: ${[].concat(R.rule).join(' ')}`);
@@ -1065,18 +1068,6 @@ export const STEPS = [
         }));
       };
 
-      // a collected card rises from the tray back into the drone's light
-      const lift = async (k) => {
-        const el = k.el, a = el.getBoundingClientRect();
-        stage.appendChild(el);
-        if (c.reduced) return;
-        const b = el.getBoundingClientRect();
-        await c.until(el.animate([
-          { transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width})`, transformOrigin: '0 0' },
-          { transform: 'none', transformOrigin: '0 0' },
-        ], { duration: 720, easing: 'cubic-bezier(.45, 0, .2, 1)' }).finished.catch(() => {}));
-      };
-
       const explain = async (k) => {
         k.el.classList.add('is-on');
         const [first, ...more] = [].concat(k.R.rule);     // a rule can come in pieces: the rest join the line
@@ -1087,7 +1078,8 @@ export const STEPS = [
       };
 
       // the drone flies in once and stops in the middle; it projects each card in turn, the card is
-      // explained, then flies down into the tray. The drone leaves when all five are collected.
+      // explained, then flies to its place at the side (the last stays in the middle). The drone leaves
+      // when all five have been explained.
       stage.appendChild(cards[0].el);
       if (!c.reduced) await flyIn(hoverOver(stage));
       for (const k of cards) {
@@ -1103,16 +1095,19 @@ export const STEPS = [
         await explain(k);
         beamOff();                                       // the light goes back into the emitter
         await c.wait(c.reduced ? 0 : 280);
-        await collect(k);
-        await c.wait(c.reduced ? 0 : 200);
+        if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 200); }
       }
       if (!c.reduced) { flyOut(); await c.wait(1000); }
 
-      // all five collected and the drone gone: the tray opens up into the big collection
-      await relayout(() => root.classList.add('is-done'));
+      // the drone gone: the cards grow into the big collection, the last one from the middle to its place
+      const home = (k) => { k.el.classList.remove('is-holo', 'is-on'); k.slot.appendChild(k.el); k.slot.classList.add('got'); k.slot.classList.remove('away'); };
+      const last = cards[cards.length - 1];
+      await relayout(() => { home(last); root.classList.add('is-done'); });
       c.caption('You learned all about angles!');
       c.sound.right();
       await c.wait(700);
+      c.ready();                                        // Launch mission arrives
+      c.sound.pop();
 
       // tapping a card later: the drone flies back, projects onto it and explains it again
       let busy = false;
@@ -1124,25 +1119,26 @@ export const STEPS = [
           c.sound.tap();
           c.spawn(async () => {
             try {
-              // while the drone is here the cards stay small: the collection folds back into the tray, the
-              // drone comes back, and the card rises into its light; when the drone has gone, all grows back
+              // while the drone is here the cards stay small: the card goes to the middle and the other four
+              // to the places at the sides; the drone comes back and projects it; when the drone has gone,
+              // all grows back into the collection
+              let p = 0;
+              cards.forEach((o) => { if (o !== k) o.slot.dataset.pos = String(p++); });
               k.el.classList.add('is-on');
-              await relayout(() => root.classList.remove('is-done'), { stagger: 30 });
+              await relayout(() => { stage.appendChild(k.el); k.slot.classList.add('away'); root.classList.remove('is-done'); }, { stagger: 30 });
               if (!c.reduced) await flyIn(hoverOver(stage));
               beamOn(stage);
               k.el.classList.add('is-holo');
-              await lift(k);
               await explain(k);
               beamOff();
+              k.el.classList.remove('is-holo', 'is-on');
               await c.wait(c.reduced ? 0 : 280);
-              await collect(k);
               if (!c.reduced) { flyOut(); await c.wait(1000); }
-              await relayout(() => root.classList.add('is-done'), { stagger: 30 });
+              await relayout(() => { home(k); root.classList.add('is-done'); }, { stagger: 30 });
             } finally { busy = false; }
           });
         });
       });
-      c.ready();
     },
   },
 ];

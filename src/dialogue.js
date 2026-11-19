@@ -4,9 +4,12 @@
 // lights up at the moment the recording says it, and the mouth's bars follow the voice itself. With the
 // sound off (or a line without a recording) the words fill in at reading pace.
 //   caption      the step's sentence from the deck: replaces the line
-//   instruction  ("Drag B."): said after the caption, it follows it in the same line
+//   instruction  ("Drag B."): said after the caption, then takes the line and stays there (it is what to
+//                do now), so the line never runs a question and a task together
 //   hint         (a wrong answer, Next too early): takes the line at once while it is said, then the
-//                line goes back to the caption
+//                line goes back to the caption or instruction
+// One sentence at a time: a piece that goes on with the sentence before it (it starts in lower case)
+// joins the line instead of taking it.
 // Pieces are said in order: a new caption waits for the one before it to be said.
 // Tapping the line finishes it. Screen readers get each whole piece once, through the sr element.
 
@@ -50,7 +53,7 @@ export class Dialogue {
   // sentence (it starts in lower case) joins it, and the line only goes back to the caption after the last
   play(lines) {
     const ps = lines.filter(Boolean).map((l) => (typeof l === 'string' ? { text: l } : l))
-      .map((l, i) => ({ kind: l.mood === 'hint' ? 'hint' : 'line', text: l.text, hold: l.hold, join: i > 0 && /^[a-z]/.test(l.text) }));
+      .map((l) => ({ kind: l.mood === 'hint' ? 'hint' : 'line', text: l.text, hold: l.hold, join: /^[a-z]/.test(l.text) }));
     if (!ps.length) return Promise.resolve();
     if (ps[0].kind === 'hint') this.interrupt();
     ps.forEach((p, i) => {
@@ -149,16 +152,13 @@ export class Dialogue {
       words.push({ el, at });
       at += part.length;
     }
-    if (p.kind === 'line' && this.base) {
+    if (p.join && this.text.childNodes.length) {       // goes on with the sentence before it: joins the line
       this.text.append(document.createTextNode(' '), ...nodes);
-      this.base = `${this.base} ${p.text}`;
-    } else if (p.join) {                               // goes on with the hint's sentence
-      this.text.append(document.createTextNode(' '), ...nodes);
-    } else {
+      if (p.kind === 'line') this.base = `${this.base} ${p.text}`.trim();
+    } else {                                           // a new sentence takes the line
       this.text.replaceChildren(...nodes);
-      if (p.kind === 'caption') this.base = p.text;
+      if (p.kind !== 'hint') this.base = p.text;
     }
-    if (p.kind === 'line' && !this.base) this.base = p.text;
     Object.assign(p, { words, k: 0, t: 0, age: 0, waited: 0, started: false, heard: false, timing: null, ended: false, voiced: false });
     this.root.dataset.mood = p.kind === 'hint' ? 'hint' : '';
     if (this.sr) this.sr.textContent = p.text;

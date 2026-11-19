@@ -103,7 +103,13 @@ function updateNext() {
   els.next.title = locked ? (s.lockHint || 'Answer the question to go on.') : '';
   const ready = !!token?.ready && !locked;
   els.nextWrap.classList.toggle('ready', ready);
-  els.nextWrap.classList.toggle('gone', s.next === null);
+  // a step can keep its Next out of sight until it is done (the recall's Launch mission): then it arrives
+  const waiting = !!s.nextAfter && !memory[cur].done;
+  const hide = s.next === null || waiting;
+  if (!hide && els.nextWrap.classList.contains('gone') && s.nextAfter) {
+    els.nextWrap.classList.remove('arrive'); void els.nextWrap.offsetWidth; els.nextWrap.classList.add('arrive');
+  }
+  els.nextWrap.classList.toggle('gone', hide);
   els.next.querySelector('.lbl').textContent = s.next || 'Next';
   els.back.classList.toggle('gone', cur === 0);
 }
@@ -529,6 +535,7 @@ async function go(i, { dir = 1 } = {}) {
 function next() {
   const s = STEPS[cur];
   if (s.next === null) return;
+  if (s.nextAfter && !memory[cur].done) return;          // not there yet (the keyboard cannot reach it either)
   if (s.gate && !memory[cur].done) {
     sound.locked();
     els.nextWrap.classList.remove('nope');

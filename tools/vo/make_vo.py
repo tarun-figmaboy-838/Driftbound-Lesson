@@ -62,6 +62,7 @@ def lines():
     m = re.search(r"text:\s*`(That’s \$\{id\} itself\.[^`]*)`", src)
     if m:
         out += [m.group(1).replace('${id}', f'∠{k}') for k in range(1, 5)]
+    out += re.findall(r"\{\s*text:\s*" + Q + r",\s*mood:\s*'hint'\s*\}", src)   # a hint piece given as { text, mood }
     main = (ROOT / 'src' / 'main.js').read_text()
     out += re.findall(r"s\.lockHint \|\| " + Q, main)
     seen, res = set(), []

@@ -42,9 +42,11 @@ the answers sit above Back and Next.
 
 The narration is one line at the top of the screen, beside the AI mouth (the voice indicator). It is a
 recorded voice, the game's co-pilot (Kokoro's af_heart voice with a light robot sound). Each word
-lights up at the moment the voice says it, and the mouth's bars follow the voice. An instruction (for example
-"Drag B.") is said after the caption, in the same line; a wrong-answer hint takes the line while it is
-said, then the caption comes back. Answer buttons appear once the question has been said. There is no
+lights up at the moment the voice says it, and the mouth's bars follow the voice. The line shows one sentence
+at a time: an instruction (for example "Drag B.") is said after the caption and then takes the line,
+so a question and a task never run together; a long line comes in short pieces, one after another (a
+piece that goes on with the sentence joins it); a wrong-answer hint takes the line while it is said,
+then the caption or instruction comes back. Answer buttons appear once the question has been said. There is no
 character, no progress bar and no other text.
 
 ## Steps
@@ -73,7 +75,7 @@ and every drag task has a pulsing handle and also works with the arrow keys.
 | 17 | 36 | Does that still happen if we rotate a line? | Drags the line; ∠1 and ∠3 stay equal at every position | yes |
 | 18 | 37–41 | Let's see why it happens. / ∠1 and ∠2 form a linear pair. / ∠2 and ∠3 form another linear pair. / Both totals include the same ∠2. / So ∠1 and ∠3 must be equal. | Taps Next step four times; each linear pair sweeps its half turn; the working under the figure merges line by line (the two 180° totals merge, ∠2 is struck out on both sides) into ∠1 = ∠3 | yes |
 | 19 | 42 | Can you find the other three angles if ∠1 is 68°? | Finds ∠3, ∠2 and ∠4 in turn | yes |
-| 20 | 43 | Recall | For each of the five cards the deck lists (angles definition, adjacent angles, linear pair, linear pair converse, vertically opposite angles), a drone flies in and stops in the middle, projects the card as a hologram in its beam, the diagram animates the idea while the drone says the deck's sentence, and the card flies down into the tray. With all five collected the tray opens into the collection and the line says "You learned all about angles!". Tapping a card brings the drone back to explain it again. Next is Launch mission and opens the game | |
+| 20 | 43 | Recall | For each of the five cards the deck lists (angles definition, adjacent angles, linear pair, linear pair converse, vertically opposite angles), a drone flies in and stops in the middle, projects the card as a hologram in its beam, the diagram animates the idea while the drone says the deck's sentence, and the card flies down into the tray. While the drone works, the collected cards wait at the sides (two left, two right, level with the card in the middle). When the drone has gone the cards grow into the collection, the line says "You learned all about angles!" and Launch mission arrives. Tapping a card brings the drone back to explain it again. Next is Launch mission and opens the game | |
 
 ## Interactions and animations
 
