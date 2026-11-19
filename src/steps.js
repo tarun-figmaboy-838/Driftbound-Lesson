@@ -167,7 +167,7 @@ const RECALL = [
     },
   },
   {
-    term: 'Adjacent angles', rule: 'They have the same vertex. They also have one common arm. The two angles do not overlap.',
+    term: 'Adjacent angles', rule: ['They have the same vertex.', 'They also have one common arm.', 'The two angles do not overlap.'],
     box: [-64, -16, 70, 70], start: { a: 0, b: 0, ring: 0, glow: 0, blink: 0 },
     draw(b, s) {
       if (s.a) b.wedge('w1', O, 0, 50 * s.a, 30, { fill: FILL.orange, edge: C.orange, cls: s.blink ? 'blink' : '' });
@@ -345,9 +345,9 @@ const PAIR_CARDS = (pairs) => Object.entries(pairs).map(([id, [a1, a2]]) => ({
 }));
 
 const TYPE_WHY = {
-  52: { Right: 'A right angle is exactly 90°, a square corner. This one is smaller than that.', Obtuse: 'Obtuse angles are bigger than 90°. This one is smaller than a square corner.' },
-  90: { Acute: 'Acute angles are smaller than 90°. This one makes a perfect square corner.', Obtuse: 'Obtuse angles are bigger than 90°. This one is exactly a square corner.' },
-  128: { Acute: 'Acute angles are smaller than 90°. This one opens wider than a square corner.', Right: 'A right angle is exactly 90°. This one opens wider than that.' },
+  52: { Right: ['A right angle is exactly 90°, a square corner.', 'This one is smaller than that.'], Obtuse: ['Obtuse angles are bigger than 90°.', 'This one is smaller than a square corner.'] },
+  90: { Acute: ['Acute angles are smaller than 90°.', 'This one makes a perfect square corner.'], Obtuse: ['Obtuse angles are bigger than 90°.', 'This one is exactly a square corner.'] },
+  128: { Acute: ['Acute angles are smaller than 90°.', 'This one opens wider than a square corner.'], Right: ['A right angle is exactly 90°.', 'This one opens wider than that.'] },
 };
 
 
@@ -440,7 +440,7 @@ export const STEPS = [
       const res = await c.cards({
         items: PAIR_CARDS({ A: [30, 60], B: [45, 55], C: [35, 65] }),
         answer: 'A',
-        why: { B: '45° + 55° = 100°. Complementary angles make exactly 90°.', C: '35° + 65° = 100°. That’s 10° too many.' },
+        why: { B: ['45° + 55° = 100°.', 'Complementary angles make exactly 90°.'], C: ['35° + 65° = 100°.', 'That’s 10° too many.'] },
       });
       c.ready();
       await c.wait(400);
@@ -530,7 +530,7 @@ export const STEPS = [
         items: ['A', 'B', 'C'].map((id) => ({ id, label: ADJ[id].label, box: ADJ_BOX, draw: (b) => adjMini(b, ADJ[id]) })),
         answer: 'B',
         why: {
-          A: 'They share a vertex and an arm, but the orange angle covers the blue one: they overlap.',
+          A: ['They share a vertex and an arm,', 'but the orange angle covers the blue one: they overlap.'],
           C: 'Same vertex, but no common arm: there’s a gap between the two angles.',
         },
       });
@@ -582,8 +582,8 @@ export const STEPS = [
       await c.choose({
         options: [170, 180, 190], answer: 180, fmt: deg,
         why: {
-          170: 'Not quite. 60 + 110 = 170, and 5 + 5 = 10 more.',
-          190: 'A bit too much. 60 + 110 = 170, and 5 + 5 = 10 more.',
+          170: ['Not quite.', '60 + 110 = 170, and 5 + 5 = 10 more.'],
+          190: ['A bit too much.', '60 + 110 = 170, and 5 + 5 = 10 more.'],
         },
       });
       c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('g', '180°')}`);
@@ -639,7 +639,8 @@ export const STEPS = [
       v.set({ sweep: { r: 100, from: 0, at: 0, label: '' } });
       await c.tween(1200, (k) => { v.s.sweep.at = 180 * k; v.s.sweep.label = deg(180 * k); v.draw(); }, 'inOut');
       await c.wait(900);
-      c.caption('If a ray stands on a straight line, the two adjacent angles formed add up to 180°.');
+      c.caption('If a ray stands on a straight line,');                // the rule in two parts; the second joins the line
+      c.say(crew('the two adjacent angles formed add up to 180°.')).catch(() => {});
       c.sound.stamp();
     },
   },
@@ -654,8 +655,8 @@ export const STEPS = [
       await c.choose({
         options: [118, 128, 138], answer: 128, fmt: deg,
         why: {
-          118: '118° + 52° = 170°. A linear pair must make exactly 180°.',
-          138: '138° + 52° = 190°. That’s more than a straight line.',
+          118: ['118° + 52° = 170°.', 'A linear pair must make exactly 180°.'],
+          138: ['138° + 52° = 190°.', 'That’s more than a straight line.'],
         },
       });
       v.set({ left: '128°' });
@@ -672,7 +673,7 @@ export const STEPS = [
       await c.cards({
         items: PAIR_CARDS({ A: [110, 70], B: [85, 85], C: [100, 70] }),
         answer: 'A',
-        why: { B: '85° + 85° = 170°. Supplementary angles make exactly 180°.', C: '100° + 70° = 170°. That’s 10° short.' },
+        why: { B: ['85° + 85° = 170°.', 'Supplementary angles make exactly 180°.'], C: ['100° + 70° = 170°.', 'That’s 10° short.'] },
       });
 
     },
@@ -734,8 +735,8 @@ export const STEPS = [
         ],
         answer: 'A',
         why: {
-          B: '65° + 115° = 180°, but they aren’t adjacent: no shared vertex, no shared arm.',
-          C: 'They’re adjacent, but 65° + 95° = 160°, so the outer arms don’t make a straight line.',
+          B: ['65° + 115° = 180°,', 'but they aren’t adjacent: no shared vertex, no shared arm.'],
+          C: ['They’re adjacent, but 65° + 95° = 160°,', 'so the outer arms don’t make a straight line.'],
         },
       });
     },
@@ -777,8 +778,8 @@ export const STEPS = [
       await c.choose({
         options: ['∠2', '∠3', '∠4'], answer: '∠3',
         why: {
-          '∠2': '∠2 is next to ∠1: they share an arm. Opposite angles only share the vertex.',
-          '∠4': '∠4 is next to ∠1: they share an arm. Look straight across the vertex.',
+          '∠2': ['∠2 is next to ∠1: they share an arm.', 'Opposite angles only share the vertex.'],
+          '∠4': ['∠4 is next to ∠1: they share an arm.', 'Look straight across the vertex.'],
         },
       });
       v.set({ fill: ['orange', 'dim', 'orange', 'dim'] });
@@ -918,9 +919,9 @@ export const STEPS = [
       const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', null, null, null], vcls: [] }, crossFig);
       c.caption('Can you find the other three angles if ∠1 is 68°?');
       const QS = [
-        { k: 2, name: '∠3', fill: 'orange', opts: [22, 68, 112], ans: 68, why: { 22: 'That’s 90° − 68°. ∠3 is opposite ∠1, so they’re equal.', 112: '112° would make a linear pair with ∠1. But ∠3 is opposite ∠1.' } },
-        { k: 1, name: '∠2', fill: 'aqua', opts: [68, 112, 122], ans: 112, why: { 68: '∠2 is next to ∠1, not opposite. Together they make a linear pair: 180°.', 122: '68° + 122° = 190°. A linear pair makes exactly 180°.' } },
-        { k: 3, name: '∠4', fill: 'aqua', opts: [68, 112, 132], ans: 112, why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: '68° + 132° = 200°. ∠1 and ∠4 make a linear pair: 180°.' } },
+        { k: 2, name: '∠3', fill: 'orange', opts: [22, 68, 112], ans: 68, why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] } },
+        { k: 1, name: '∠2', fill: 'aqua', opts: [68, 112, 122], ans: 112, why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] } },
+        { k: 3, name: '∠4', fill: 'aqua', opts: [68, 112, 132], ans: 112, why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] } },
       ];
       for (const Q of QS) {
         v.s.fill[Q.k] = 'sun';
@@ -962,7 +963,7 @@ export const STEPS = [
         const slot = h('<div class="rslot"></div>');
         const el = h('<button type="button" class="rcard" disabled><b></b><span class="rcard__fig" aria-hidden="true"></span></button>');
         el.querySelector('b').textContent = R.term;
-        el.setAttribute('aria-label', `${R.term}: ${R.rule}`);
+        el.setAttribute('aria-label', `${R.term}: ${[].concat(R.rule).join(' ')}`);
         slots.appendChild(slot);
         return { R, slot, el };
       });
@@ -1078,7 +1079,9 @@ export const STEPS = [
 
       const explain = async (k) => {
         k.el.classList.add('is-on');
-        c.caption(k.R.rule, true);
+        const [first, ...more] = [].concat(k.R.rule);     // a rule can come in pieces: the rest join the line
+        c.caption(first, true);
+        if (more.length) c.say(more.map((t) => crew(t))).catch(() => {});
         await Promise.all([k.R.play(k.v, c), c.said()]);
         await c.wait(450);
       };

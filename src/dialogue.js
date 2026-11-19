@@ -45,12 +45,18 @@ export class Dialogue {
     this.add({ kind: 'caption', text });
   }
 
-  // instructions and hints; resolves once they have been said (or the line is cleared)
+  // instructions and hints; resolves once they have been said (or the line is cleared). A long hint comes
+  // in pieces, said one after another: a new sentence takes the line, a piece that goes on with the
+  // sentence (it starts in lower case) joins it, and the line only goes back to the caption after the last
   play(lines) {
     const ps = lines.filter(Boolean).map((l) => (typeof l === 'string' ? { text: l } : l))
-      .map((l) => ({ kind: l.mood === 'hint' ? 'hint' : 'line', text: l.text, hold: l.hold }));
+      .map((l, i) => ({ kind: l.mood === 'hint' ? 'hint' : 'line', text: l.text, hold: l.hold, join: i > 0 && /^[a-z]/.test(l.text) }));
     if (!ps.length) return Promise.resolve();
     if (ps[0].kind === 'hint') this.interrupt();
+    ps.forEach((p, i) => {
+      p.more = p.kind === 'hint' && ps[i + 1]?.kind === 'hint';
+      if (p.more && p.hold == null) p.hold = 0.35;     // a short breath between the pieces
+    });
     return Promise.all(ps.map((p) => this.add(p)));
   }
 
@@ -98,7 +104,10 @@ export class Dialogue {
   add(p) {
     return new Promise((res) => {
       p.resolve = res;
-      if (p.kind === 'hint') this.queue.unshift(p); else this.queue.push(p);
+      if (p.kind === 'hint') {                         // hints go before the rest, in their own order
+        const i = this.queue.findIndex((q) => q.kind !== 'hint');
+        this.queue.splice(i < 0 ? this.queue.length : i, 0, p);
+      } else this.queue.push(p);
       this.start();
     });
   }
@@ -143,6 +152,8 @@ export class Dialogue {
     if (p.kind === 'line' && this.base) {
       this.text.append(document.createTextNode(' '), ...nodes);
       this.base = `${this.base} ${p.text}`;
+    } else if (p.join) {                               // goes on with the hint's sentence
+      this.text.append(document.createTextNode(' '), ...nodes);
     } else {
       this.text.replaceChildren(...nodes);
       if (p.kind === 'caption') this.base = p.text;
@@ -262,6 +273,7 @@ export class Dialogue {
     if (p.kind === 'hint') {
       p.hold = (p.hold ?? BACK) - dt;
       if (p.hold > 0) return true;
+      if (p.more && this.queue[0]?.kind === 'hint') { this.done(p); return true; }   // the next piece takes over
       this.text.replaceChildren(...this.base.split(/(\s+)/).filter(Boolean).map((s) => {
         if (/^\s+$/.test(s)) return document.createTextNode(' ');
         const el = document.createElement('span'); el.className = 'w on now'; el.innerHTML = angles(esc(s)); return el;

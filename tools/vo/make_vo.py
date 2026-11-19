@@ -54,6 +54,10 @@ def lines():
     blocks.append(src[t:src.index('};', t)])
     for b in blocks:
         out += re.findall(r":\s*" + Q, b)
+        for arr in re.findall(r":\s*\[(.*?)\]", b, re.S):   # a long hint in pieces
+            out += re.findall(Q, arr)
+    for arr in re.findall(r"\brule\s*:\s*\[(.*?)\]", src, re.S):  # a recall rule in pieces
+        out += re.findall(Q, arr)
     # the one hint made from a template (tapping the angle itself, on the crossing lines)
     m = re.search(r"text:\s*`(That’s \$\{id\} itself\.[^`]*)`", src)
     if m:

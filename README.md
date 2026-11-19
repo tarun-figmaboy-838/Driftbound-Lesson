@@ -70,6 +70,7 @@ assets/ui/hint/       the hint hand (Figma AI)
 assets/ui/intro/      the intro (Figma AI): gate frame and door halves, corridor, the hall all the way round
 assets/vo/            the voice-over: one .m4a per line, and manifest.json (lines and word timings)
 tools/vo/make_vo.py   makes the voice-over with Kokoro
+tools/vo/split_vo.py  splits long recorded lines into pieces (cuts the recordings at the word times)
 LESSON_DESIGN.md      the lesson design: flow, mapping to the deck and the game
 ```
 

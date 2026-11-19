@@ -4,104 +4,125 @@
   "01aae066",
   "04ed37ec",
   "04ee6ea5",
+  "05065d7b",
   "0640014d",
+  "0692d1bc",
   "0693b5bd",
   "06c021cf",
   "070ee1a6",
   "08088006",
   "08088065",
+  "0b9e7cb7",
   "0d0efa4c",
-  "0d237326",
   "0ea047b4",
   "0ee9fe4a",
-  "0fb281f8",
   "0fe7eb11",
-  "11f37764",
   "11fcf620",
   "14b29ab7",
   "15c94af9",
-  "1a597baa",
+  "1a901644",
   "1aa94bb5",
+  "1ac9de9a",
   "1ad0abc7",
+  "1b2ad96a",
+  "1cae49d8",
   "22647022",
-  "25098e15",
+  "24bc538a",
+  "27736faa",
   "29e4058b",
+  "2a370692",
   "2b28395c",
   "2cf4f447",
   "2f72cdaf",
+  "35c94059",
+  "385ed8c4",
   "3a58934b",
   "4682a805",
+  "4779c1f9",
   "4abdfcab",
   "4d83384c",
   "51168216",
-  "52461f03",
+  "520894ae",
+  "5256eea3",
   "537df1a9",
-  "545c66af",
-  "5522ae0a",
-  "57df3792",
-  "590ce065",
-  "5ae1ab66",
+  "5500d95b",
   "5c119884",
-  "5dfd388c",
+  "5d864adf",
+  "5e3e291a",
   "639d68c7",
   "63e345b5",
   "675b76dc",
   "6768f75a",
-  "6e627c6c",
+  "69fc1d57",
+  "6a12203e",
   "7001ec75",
   "70eff148",
+  "7210b1cb",
   "728236f6",
   "72a600b7",
-  "74394897",
+  "75a38a54",
+  "7a24a9cc",
   "7b968a0c",
-  "89096cbf",
+  "829acf6f",
+  "857aefa0",
   "90aa4d3e",
   "94a23352",
+  "96473da8",
+  "97cd554b",
   "97fcf9fe",
   "98be6b57",
   "98d6eb94",
+  "9ae0e17d",
   "9b4c4912",
+  "9d92b462",
   "9e405912",
+  "9f887c2b",
   "a150421f",
+  "a503e29d",
   "a5304083",
+  "a97b99f6",
   "a9a9bab5",
   "ab9d2cdf",
+  "ada7ed41",
   "af335174",
   "afae6d65",
   "b12fffcc",
-  "b3249849",
+  "b36d327c",
   "b38bcdd9",
-  "b6429102",
+  "b7d0a7ef",
   "ba6de2e0",
+  "be54f44d",
   "c16faeef",
   "c453ce50",
-  "c7c2d907",
+  "c780bfa4",
   "c96f98e0",
   "ca159985",
   "ca40d7c6",
   "cbf563d4",
   "cc025747",
+  "ccd54c02",
   "ccf0f604",
   "cd9319a1",
   "d5890e2b",
   "d8559081",
+  "d8642976",
   "d86968d4",
   "d8aa0710",
+  "da6d19bb",
   "dac1f606",
   "dc0a064d",
-  "df42bd2f",
-  "df5ca2a0",
-  "e01487aa",
   "e426976f",
-  "e63b93ea",
   "e6a56cb9",
   "e7d11940",
   "e7f310af",
-  "ea8e3859",
-  "ee14c459",
+  "e98c54e7",
+  "e9c72379",
+  "f49c1208",
+  "f52debfb",
   "f589ab63",
-  "f5ab0b14",
-  "f8336056",
+  "f70cf4d7",
+  "f78d4a9d",
+  "f9010141",
   "fe6d4e5f"
  ],
  "lines": {
@@ -332,29 +353,6 @@
     1.79,
     2.111,
     2.23
-   ]
-  },
-  "df5ca2a0": {
-   "text": "If a ray stands on a straight line, the two adjacent angles formed add up to 180°.",
-   "seconds": 7.24,
-   "words": [
-    0.326,
-    0.469,
-    0.588,
-    0.98,
-    1.338,
-    1.433,
-    1.504,
-    1.802,
-    2.635,
-    2.778,
-    3.076,
-    3.647,
-    4.123,
-    4.766,
-    5.004,
-    5.159,
-    5.278
    ]
   },
   "ccf0f604": {
@@ -641,29 +639,6 @@
     0.445,
     0.742,
     0.85
-   ]
-  },
-  "5dfd388c": {
-   "text": "They have the same vertex. They also have one common arm. The two angles do not overlap.",
-   "seconds": 6.62,
-   "words": [
-    0.35,
-    0.492,
-    0.695,
-    0.814,
-    1.135,
-    2.04,
-    2.207,
-    2.564,
-    2.79,
-    3.052,
-    3.445,
-    4.159,
-    4.29,
-    4.528,
-    4.992,
-    5.135,
-    5.35
    ]
   },
   "b38bcdd9": {
@@ -954,37 +929,6 @@
     1.992
    ]
   },
-  "11f37764": {
-   "text": "45° + 55° = 100°. Complementary angles make exactly 90°.",
-   "seconds": 9.29,
-   "words": [
-    0.373,
-    1.623,
-    1.921,
-    3.397,
-    3.79,
-    5.528,
-    6.29,
-    6.838,
-    7.064,
-    7.671
-   ]
-  },
-  "1a597baa": {
-   "text": "35° + 65° = 100°. That’s 10° too many.",
-   "seconds": 7.33,
-   "words": [
-    0.373,
-    1.588,
-    1.873,
-    3.171,
-    3.54,
-    5.1,
-    5.433,
-    6.123,
-    6.326
-   ]
-  },
   "2b28395c": {
    "text": "Point A is on one angle only. Find the point where both angles start.",
    "seconds": 5.22,
@@ -1075,29 +1019,6 @@
     2.016
    ]
   },
-  "5ae1ab66": {
-   "text": "They share a vertex and an arm, but the orange angle covers the blue one: they overlap.",
-   "seconds": 6.33,
-   "words": [
-    0.35,
-    0.516,
-    0.766,
-    0.826,
-    1.469,
-    1.576,
-    1.695,
-    2.373,
-    2.504,
-    2.659,
-    3.076,
-    3.48,
-    3.873,
-    3.969,
-    4.23,
-    4.909,
-    5.088
-   ]
-  },
   "e7d11940": {
    "text": "Same vertex, but no common arm: there’s a gap between the two angles.",
    "seconds": 5.07,
@@ -1115,198 +1036,6 @@
     3.623,
     3.719,
     3.933
-   ]
-  },
-  "89096cbf": {
-   "text": "Not quite. 60 + 110 = 170, and 5 + 5 = 10 more.",
-   "seconds": 7.79,
-   "words": [
-    0.373,
-    0.635,
-    1.564,
-    1.992,
-    2.254,
-    3.195,
-    3.564,
-    4.933,
-    5.111,
-    5.54,
-    5.826,
-    6.207,
-    6.564,
-    6.802
-   ]
-  },
-  "df42bd2f": {
-   "text": "A bit too much. 60 + 110 = 170, and 5 + 5 = 10 more.",
-   "seconds": 7.98,
-   "words": [
-    0.35,
-    0.421,
-    0.647,
-    0.85,
-    1.79,
-    2.254,
-    2.516,
-    3.409,
-    3.778,
-    5.123,
-    5.302,
-    5.73,
-    6.016,
-    6.397,
-    6.754,
-    6.992
-   ]
-  },
-  "f8336056": {
-   "text": "118° + 52° = 170°. A linear pair must make exactly 180°.",
-   "seconds": 10.33,
-   "words": [
-    0.35,
-    1.957,
-    2.254,
-    3.659,
-    4.04,
-    6.159,
-    6.29,
-    6.695,
-    7.195,
-    7.433,
-    7.635,
-    8.266
-   ]
-  },
-  "e01487aa": {
-   "text": "138° + 52° = 190°. That’s more than a straight line.",
-   "seconds": 8.22,
-   "words": [
-    0.35,
-    2.028,
-    2.338,
-    3.707,
-    4.088,
-    6.123,
-    6.445,
-    6.659,
-    6.766,
-    6.85,
-    7.159
-   ]
-  },
-  "590ce065": {
-   "text": "85° + 85° = 170°. Supplementary angles make exactly 180°.",
-   "seconds": 10.41,
-   "words": [
-    0.373,
-    1.671,
-    2.016,
-    3.564,
-    3.969,
-    6.076,
-    6.766,
-    7.445,
-    7.683,
-    8.314
-   ]
-  },
-  "52461f03": {
-   "text": "100° + 70° = 170°. That’s 10° short.",
-   "seconds": 7.1,
-   "words": [
-    0.373,
-    1.373,
-    1.659,
-    2.766,
-    3.135,
-    5.1,
-    5.433,
-    6.088
-   ]
-  },
-  "e63b93ea": {
-   "text": "65° + 115° = 180°, but they aren’t adjacent: no shared vertex, no shared arm.",
-   "seconds": 10.6,
-   "words": [
-    0.373,
-    1.54,
-    1.802,
-    3.385,
-    3.766,
-    5.683,
-    5.826,
-    5.992,
-    6.183,
-    7.421,
-    7.73,
-    8.04,
-    8.921,
-    9.266,
-    9.588
-   ]
-  },
-  "0fb281f8": {
-   "text": "They’re adjacent, but 65° + 95° = 160°, so the outer arms don’t make a straight line.",
-   "seconds": 10.1,
-   "words": [
-    0.35,
-    0.54,
-    1.516,
-    1.707,
-    2.945,
-    3.254,
-    4.85,
-    5.23,
-    7.147,
-    7.29,
-    7.445,
-    7.802,
-    8.29,
-    8.504,
-    8.671,
-    8.73,
-    9.04
-   ]
-  },
-  "74394897": {
-   "text": "∠2 is next to ∠1: they share an arm. Opposite angles only share the vertex.",
-   "seconds": 6.83,
-   "words": [
-    0.373,
-    1.076,
-    1.23,
-    1.48,
-    1.6,
-    2.588,
-    2.754,
-    3.04,
-    3.135,
-    4.016,
-    4.492,
-    4.98,
-    5.302,
-    5.552,
-    5.635
-   ]
-  },
-  "545c66af": {
-   "text": "∠4 is next to ∠1: they share an arm. Look straight across the vertex.",
-   "seconds": 6.0,
-   "words": [
-    0.373,
-    1.1,
-    1.254,
-    1.504,
-    1.623,
-    2.564,
-    2.73,
-    3.004,
-    3.088,
-    3.885,
-    4.111,
-    4.385,
-    4.707,
-    4.802
    ]
   },
   "72a600b7": {
@@ -1347,79 +1076,6 @@
     4.6
    ]
   },
-  "57df3792": {
-   "text": "That’s 90° − 68°. ∠3 is opposite ∠1, so they’re equal.",
-   "seconds": 7.48,
-   "words": [
-    0.35,
-    0.647,
-    1.469,
-    2.421,
-    3.54,
-    4.314,
-    4.492,
-    4.957,
-    5.957,
-    6.159,
-    6.35
-   ]
-  },
-  "25098e15": {
-   "text": "112° would make a linear pair with ∠1. But ∠3 is opposite ∠1.",
-   "seconds": 7.69,
-   "words": [
-    0.373,
-    1.85,
-    1.98,
-    2.147,
-    2.242,
-    2.647,
-    3.04,
-    3.219,
-    4.469,
-    4.623,
-    5.54,
-    5.73,
-    6.326
-   ]
-  },
-  "c7c2d907": {
-   "text": "∠2 is next to ∠1, not opposite. Together they make a linear pair: 180°.",
-   "seconds": 7.86,
-   "words": [
-    0.373,
-    1.147,
-    1.302,
-    1.564,
-    1.695,
-    2.564,
-    2.778,
-    3.861,
-    4.326,
-    4.469,
-    4.647,
-    4.742,
-    5.135,
-    5.814
-   ]
-  },
-  "f5ab0b14": {
-   "text": "68° + 122° = 190°. A linear pair makes exactly 180°.",
-   "seconds": 10.17,
-   "words": [
-    0.373,
-    1.48,
-    1.754,
-    3.54,
-    3.933,
-    6.111,
-    6.242,
-    6.647,
-    7.23,
-    7.516,
-    8.147
-   ]
-  },
   "0ea047b4": {
    "text": "∠4 is opposite ∠2, not ∠1.",
    "seconds": 4.24,
@@ -1430,142 +1086,6 @@
     1.647,
     2.659,
     2.933
-   ]
-  },
-  "0d237326": {
-   "text": "68° + 132° = 200°. ∠1 and ∠4 make a linear pair: 180°.",
-   "seconds": 11.19,
-   "words": [
-    0.373,
-    1.445,
-    1.707,
-    3.6,
-    4.016,
-    5.826,
-    6.754,
-    6.957,
-    7.707,
-    7.897,
-    8.004,
-    8.397,
-    9.171
-   ]
-  },
-  "ee14c459": {
-   "text": "A right angle is exactly 90°, a square corner. This one is smaller than that.",
-   "seconds": 6.41,
-   "words": [
-    0.373,
-    0.457,
-    0.79,
-    1.183,
-    1.326,
-    1.921,
-    3.064,
-    3.159,
-    3.469,
-    4.361,
-    4.576,
-    4.707,
-    4.85,
-    5.302,
-    5.445
-   ]
-  },
-  "b3249849": {
-   "text": "Obtuse angles are bigger than 90°. This one is smaller than a square corner.",
-   "seconds": 6.07,
-   "words": [
-    0.35,
-    0.873,
-    1.35,
-    1.516,
-    1.873,
-    2.04,
-    3.457,
-    3.683,
-    3.897,
-    4.064,
-    4.564,
-    4.671,
-    4.73,
-    5.04
-   ]
-  },
-  "b6429102": {
-   "text": "Acute angles are smaller than 90°. This one makes a perfect square corner.",
-   "seconds": 6.07,
-   "words": [
-    0.35,
-    0.707,
-    1.171,
-    1.361,
-    1.873,
-    2.04,
-    3.48,
-    3.707,
-    3.873,
-    4.123,
-    4.219,
-    4.73,
-    5.04
-   ]
-  },
-  "6e627c6c": {
-   "text": "Obtuse angles are bigger than 90°. This one is exactly a square corner.",
-   "seconds": 6.22,
-   "words": [
-    0.35,
-    0.897,
-    1.397,
-    1.564,
-    1.921,
-    2.111,
-    3.552,
-    3.778,
-    3.992,
-    4.135,
-    4.754,
-    4.85,
-    5.183
-   ]
-  },
-  "ea8e3859": {
-   "text": "Acute angles are smaller than 90°. This one opens wider than a square corner.",
-   "seconds": 6.43,
-   "words": [
-    0.35,
-    0.707,
-    1.195,
-    1.385,
-    1.897,
-    2.064,
-    3.528,
-    3.754,
-    3.98,
-    4.48,
-    4.897,
-    5.004,
-    5.064,
-    5.397
-   ]
-  },
-  "5522ae0a": {
-   "text": "A right angle is exactly 90°. This one opens wider than that.",
-   "seconds": 5.74,
-   "words": [
-    0.373,
-    0.457,
-    0.79,
-    1.219,
-    1.373,
-    2.004,
-    3.385,
-    3.611,
-    3.814,
-    4.254,
-    4.659,
-    4.802
    ]
   },
   "22647022": {
@@ -1642,6 +1162,592 @@
     1.278,
     1.373,
     1.564
+   ]
+  },
+  "ada7ed41": {
+   "text": "68° + 132° = 200°.",
+   "seconds": 5.77,
+   "words": [
+    0.373,
+    1.445,
+    1.707,
+    3.6,
+    4.016
+   ]
+  },
+  "9d92b462": {
+   "text": "∠1 and ∠4 make a linear pair: 180°.",
+   "seconds": 5.43,
+   "words": [
+    0.06,
+    0.988,
+    1.191,
+    1.941,
+    2.131,
+    2.238,
+    2.631,
+    3.405
+   ]
+  },
+  "857aefa0": {
+   "text": "65° + 115° = 180°,",
+   "seconds": 5.62,
+   "words": [
+    0.373,
+    1.54,
+    1.802,
+    3.385,
+    3.766
+   ]
+  },
+  "829acf6f": {
+   "text": "but they aren’t adjacent: no shared vertex, no shared arm.",
+   "seconds": 4.97,
+   "words": [
+    0.06,
+    0.203,
+    0.369,
+    0.56,
+    1.798,
+    2.107,
+    2.417,
+    3.298,
+    3.643,
+    3.965
+   ]
+  },
+  "05065d7b": {
+   "text": "85° + 85° = 170°.",
+   "seconds": 6.02,
+   "words": [
+    0.373,
+    1.671,
+    2.016,
+    3.564,
+    3.969
+   ]
+  },
+  "5500d95b": {
+   "text": "Supplementary angles make exactly 180°.",
+   "seconds": 4.39,
+   "words": [
+    0.06,
+    0.75,
+    1.429,
+    1.667,
+    2.298
+   ]
+  },
+  "385ed8c4": {
+   "text": "118° + 52° = 170°.",
+   "seconds": 6.1,
+   "words": [
+    0.35,
+    1.957,
+    2.254,
+    3.659,
+    4.04
+   ]
+  },
+  "69fc1d57": {
+   "text": "A linear pair must make exactly 180°.",
+   "seconds": 4.24,
+   "words": [
+    0.06,
+    0.191,
+    0.596,
+    1.096,
+    1.334,
+    1.536,
+    2.167
+   ]
+  },
+  "1b2ad96a": {
+   "text": "68° + 122° = 190°.",
+   "seconds": 6.05,
+   "words": [
+    0.373,
+    1.48,
+    1.754,
+    3.54,
+    3.933
+   ]
+  },
+  "f52debfb": {
+   "text": "A linear pair makes exactly 180°.",
+   "seconds": 4.12,
+   "words": [
+    0.06,
+    0.191,
+    0.596,
+    1.179,
+    1.465,
+    2.096
+   ]
+  },
+  "1a901644": {
+   "text": "They’re adjacent, but 65° + 95° = 160°,",
+   "seconds": 7.09,
+   "words": [
+    0.35,
+    0.54,
+    1.516,
+    1.707,
+    2.945,
+    3.254,
+    4.85,
+    5.23
+   ]
+  },
+  "4779c1f9": {
+   "text": "so the outer arms don’t make a straight line.",
+   "seconds": 3.01,
+   "words": [
+    0.06,
+    0.203,
+    0.358,
+    0.715,
+    1.203,
+    1.417,
+    1.584,
+    1.643,
+    1.953
+   ]
+  },
+  "a503e29d": {
+   "text": "45° + 55° = 100°.",
+   "seconds": 5.47,
+   "words": [
+    0.373,
+    1.623,
+    1.921,
+    3.397,
+    3.79
+   ]
+  },
+  "b36d327c": {
+   "text": "Complementary angles make exactly 90°.",
+   "seconds": 3.82,
+   "words": [
+    0.06,
+    0.822,
+    1.37,
+    1.596,
+    2.203
+   ]
+  },
+  "f49c1208": {
+   "text": "138° + 52° = 190°.",
+   "seconds": 6.06,
+   "words": [
+    0.35,
+    2.028,
+    2.338,
+    3.707,
+    4.088
+   ]
+  },
+  "e98c54e7": {
+   "text": "That’s more than a straight line.",
+   "seconds": 2.15,
+   "words": [
+    0.06,
+    0.382,
+    0.596,
+    0.703,
+    0.787,
+    1.096
+   ]
+  },
+  "2a370692": {
+   "text": "A bit too much.",
+   "seconds": 1.73,
+   "words": [
+    0.35,
+    0.421,
+    0.647,
+    0.85
+   ]
+  },
+  "1cae49d8": {
+   "text": "60 + 110 = 170, and 5 + 5 = 10 more.",
+   "seconds": 6.25,
+   "words": [
+    0.06,
+    0.524,
+    0.786,
+    1.679,
+    2.048,
+    3.393,
+    3.572,
+    4.0,
+    4.286,
+    4.667,
+    5.024,
+    5.262
+   ]
+  },
+  "ccd54c02": {
+   "text": "Not quite.",
+   "seconds": 1.5,
+   "words": [
+    0.373,
+    0.635
+   ]
+  },
+  "0692d1bc": {
+   "text": "∠2 is next to ∠1, not opposite.",
+   "seconds": 3.8,
+   "words": [
+    0.373,
+    1.147,
+    1.302,
+    1.564,
+    1.695,
+    2.564,
+    2.778
+   ]
+  },
+  "6a12203e": {
+   "text": "Together they make a linear pair: 180°.",
+   "seconds": 4.06,
+   "words": [
+    0.06,
+    0.525,
+    0.668,
+    0.846,
+    0.941,
+    1.334,
+    2.013
+   ]
+  },
+  "9f887c2b": {
+   "text": "112° would make a linear pair with ∠1.",
+   "seconds": 4.41,
+   "words": [
+    0.373,
+    1.85,
+    1.98,
+    2.147,
+    2.242,
+    2.647,
+    3.04,
+    3.219
+   ]
+  },
+  "da6d19bb": {
+   "text": "But ∠3 is opposite ∠1.",
+   "seconds": 3.28,
+   "words": [
+    0.06,
+    0.214,
+    1.131,
+    1.321,
+    1.917
+   ]
+  },
+  "9ae0e17d": {
+   "text": "That’s 90° − 68°.",
+   "seconds": 3.48,
+   "words": [
+    0.35,
+    0.647,
+    1.469,
+    2.421
+   ]
+  },
+  "27736faa": {
+   "text": "∠3 is opposite ∠1, so they’re equal.",
+   "seconds": 4.0,
+   "words": [
+    0.06,
+    0.834,
+    1.012,
+    1.477,
+    2.477,
+    2.679,
+    2.87
+   ]
+  },
+  "35c94059": {
+   "text": "35° + 65° = 100°.",
+   "seconds": 5.04,
+   "words": [
+    0.373,
+    1.588,
+    1.873,
+    3.171,
+    3.54
+   ]
+  },
+  "d8642976": {
+   "text": "That’s 10° too many.",
+   "seconds": 2.29,
+   "words": [
+    0.06,
+    0.393,
+    1.083,
+    1.286
+   ]
+  },
+  "be54f44d": {
+   "text": "100° + 70° = 170°.",
+   "seconds": 5.04,
+   "words": [
+    0.373,
+    1.373,
+    1.659,
+    2.766,
+    3.135
+   ]
+  },
+  "97cd554b": {
+   "text": "That’s 10° short.",
+   "seconds": 2.06,
+   "words": [
+    0.06,
+    0.393,
+    1.048
+   ]
+  },
+  "96473da8": {
+   "text": "∠2 is next to ∠1: they share an arm.",
+   "seconds": 3.96,
+   "words": [
+    0.373,
+    1.076,
+    1.23,
+    1.48,
+    1.6,
+    2.588,
+    2.754,
+    3.04,
+    3.135
+   ]
+  },
+  "5e3e291a": {
+   "text": "Opposite angles only share the vertex.",
+   "seconds": 2.88,
+   "words": [
+    0.06,
+    0.536,
+    1.024,
+    1.346,
+    1.596,
+    1.679
+   ]
+  },
+  "520894ae": {
+   "text": "∠4 is next to ∠1: they share an arm.",
+   "seconds": 3.83,
+   "words": [
+    0.373,
+    1.1,
+    1.254,
+    1.504,
+    1.623,
+    2.564,
+    2.73,
+    3.004,
+    3.088
+   ]
+  },
+  "c780bfa4": {
+   "text": "Look straight across the vertex.",
+   "seconds": 2.18,
+   "words": [
+    0.06,
+    0.286,
+    0.56,
+    0.882,
+    0.977
+   ]
+  },
+  "0b9e7cb7": {
+   "text": "They share a vertex and an arm,",
+   "seconds": 2.31,
+   "words": [
+    0.35,
+    0.516,
+    0.766,
+    0.826,
+    1.469,
+    1.576,
+    1.695
+   ]
+  },
+  "75a38a54": {
+   "text": "but the orange angle covers the blue one: they overlap.",
+   "seconds": 4.02,
+   "words": [
+    0.06,
+    0.191,
+    0.346,
+    0.763,
+    1.167,
+    1.56,
+    1.656,
+    1.917,
+    2.596,
+    2.775
+   ]
+  },
+  "7210b1cb": {
+   "text": "Acute angles are smaller than 90°.",
+   "seconds": 3.47,
+   "words": [
+    0.35,
+    0.707,
+    1.195,
+    1.385,
+    1.897,
+    2.064
+   ]
+  },
+  "f70cf4d7": {
+   "text": "This one opens wider than a square corner.",
+   "seconds": 2.96,
+   "words": [
+    0.06,
+    0.286,
+    0.512,
+    1.012,
+    1.429,
+    1.536,
+    1.596,
+    1.929
+   ]
+  },
+  "7a24a9cc": {
+   "text": "This one makes a perfect square corner.",
+   "seconds": 2.65,
+   "words": [
+    0.06,
+    0.287,
+    0.453,
+    0.703,
+    0.799,
+    1.31,
+    1.62
+   ]
+  },
+  "f78d4a9d": {
+   "text": "A right angle is exactly 90°, a square corner.",
+   "seconds": 4.3,
+   "words": [
+    0.373,
+    0.457,
+    0.79,
+    1.183,
+    1.326,
+    1.921,
+    3.064,
+    3.159,
+    3.469
+   ]
+  },
+  "f9010141": {
+   "text": "This one is smaller than that.",
+   "seconds": 2.1,
+   "words": [
+    0.06,
+    0.275,
+    0.406,
+    0.549,
+    1.001,
+    1.144
+   ]
+  },
+  "a97b99f6": {
+   "text": "A right angle is exactly 90°.",
+   "seconds": 3.33,
+   "words": [
+    0.373,
+    0.457,
+    0.79,
+    1.219,
+    1.373,
+    2.004
+   ]
+  },
+  "e9c72379": {
+   "text": "This one opens wider than that.",
+   "seconds": 2.41,
+   "words": [
+    0.06,
+    0.286,
+    0.489,
+    0.929,
+    1.334,
+    1.477
+   ]
+  },
+  "5256eea3": {
+   "text": "Obtuse angles are bigger than 90°.",
+   "seconds": 3.49,
+   "words": [
+    0.35,
+    0.897,
+    1.397,
+    1.564,
+    1.921,
+    2.111
+   ]
+  },
+  "24bc538a": {
+   "text": "This one is exactly a square corner.",
+   "seconds": 2.72,
+   "words": [
+    0.06,
+    0.286,
+    0.5,
+    0.643,
+    1.262,
+    1.358,
+    1.691
+   ]
+  },
+  "b7d0a7ef": {
+   "text": "This one is smaller than a square corner.",
+   "seconds": 2.68,
+   "words": [
+    0.06,
+    0.286,
+    0.5,
+    0.667,
+    1.167,
+    1.274,
+    1.333,
+    1.643
+   ]
+  },
+  "1ac9de9a": {
+   "text": "If a ray stands on a straight line,",
+   "seconds": 2.57,
+   "words": [
+    0.326,
+    0.469,
+    0.588,
+    0.98,
+    1.338,
+    1.433,
+    1.504,
+    1.802
+   ]
+  },
+  "5d864adf": {
+   "text": "the two adjacent angles formed add up to 180°.",
+   "seconds": 4.66,
+   "words": [
+    0.06,
+    0.203,
+    0.501,
+    1.072,
+    1.548,
+    2.191,
+    2.429,
+    2.584,
+    2.703
    ]
   }
  }
