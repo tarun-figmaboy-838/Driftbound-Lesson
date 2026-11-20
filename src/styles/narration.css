@@ -15,6 +15,8 @@
 .caption h1 .w { display: inline-block; opacity: 0; }
 .caption h1 .w.on { animation: ghost-word .55s cubic-bezier(.22, 1, .36, 1) both; }
 .caption h1 .w.now { animation: none; opacity: 1; }
+/* the words that carry the idea (terms and angle sizes) are gold, like the moving ray in the figures */
+.caption h1 .w.key { color: #ffd75e; text-shadow: 0 0 10px rgba(255, 197, 49, .35); }
 @keyframes ghost-word {
   0% { opacity: 0; filter: blur(7px); transform: translateY(.45em) scale(1.05);
     text-shadow: 0 .35em 0 rgba(127, 243, 255, .35), 0 .7em 0 rgba(127, 243, 255, .15); }
@@ -62,3 +64,5 @@
 @media (prefers-reduced-motion: reduce) { .voice::before { animation: none; } .caption.talking .voice { transform: none; } }
 /* lip sync: while the recorded voice plays, each bar's height follows the sound (--lv, 0..1) */
 .lipsync .caption .voice i { animation: none; height: calc(4px + var(--lv, 0) * 18px); transition: height 60ms linear; }
+/* praise: the line glows green-gold while it is said */
+.caption[data-mood="praise"] h1 { color: #e6ff9a; text-shadow: 0 0 14px rgba(212, 255, 122, .55); }

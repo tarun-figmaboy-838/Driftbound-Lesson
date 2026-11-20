@@ -61,9 +61,6 @@ function linearFig(b, s) {
   if (s.right != null) b.text('vr', at(O, t / 2, labelR(t)), s.right, { size: 26, color: TXT.orange });
   if (s.left != null) b.text('vl', at(O, (t + 180) / 2, labelR(180 - t)), s.left, { size: s.left === 'x' ? 30 : 26, color: TXT.aqua, font: s.left === 'x' ? 'x' : 'num' });
   if (s.handle) b.handle('hc', 'c', at(O, t, 122), { label: 'Point C. Drag it, or use the arrow keys, to move ray OC.', now: t, min: 15, max: 165, hint: s.hint });
-  // the angles still to be measured glow and can be tapped (r: ∠COB, l: ∠AOC)
-  if (s.mtaps?.includes('r')) b.tap('mr', 'r', { o: O, a: 3, b: t - 3, r: 96 }, 'Angle COB: measure it', { cue: true });
-  if (s.mtaps?.includes('l')) b.tap('ml', 'l', { o: O, a: t + 3, b: 177, r: 96 }, 'Angle AOC: measure it', { cue: true });
 }
 
 // two lines crossing at O (deck slides 29-42): AB (aqua) and PQ (sun). ∠1..∠4 go anticlockwise from OB.
@@ -83,9 +80,38 @@ function crossFig(b, s) {
     if (s.names?.[k]) b.text(`n${k}`, at(O, mid(a, z), 64), `∠${k + 1}`, { font: 'name', size: 21, color: TXT[f] || '#fff' });
     if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: s.vals[k] === 'x' ? 30 : 26, color: TXT[f] || '#fff', cls: s.vcls?.[k] || '', font: s.vals[k] === 'x' ? 'x' : 'num' });
     if (s.taps) b.tap(`t${k}`, `∠${k + 1}`, { o: O, a: a + 3, b: z - 3, r: 96 }, `Angle ${k + 1}`);
-    if (s.mtaps?.includes(`∠${k + 1}`)) b.tap(`m${k}`, `∠${k + 1}`, { o: O, a: a + 3, b: z - 3, r: 96 }, `Angle ${k + 1}: measure it`, { cue: true });
   });
   if (s.handle) b.handle('hp', 'p', at(O, t, 126), { label: 'The end of the line. Drag it, or use the arrow keys, to rotate the line.', now: t, min: 20, max: 160, hint: s.hint });
+}
+
+// two separate angles, a1 on the left (aqua) and a2 on the right (orange); as s.j goes to 1 the left one
+// slides over and turns onto the right one (sharing an arm). s.line: the outer arms as one line (they make
+// a straight line only if a1 + a2 = 180°); s.names: the points A, O, B and C
+const JOIN_BOX = [-158, -38, 158, 140];
+function joinFig(a1, a2) {
+  return (b, s) => {
+    const j = s.j || 0, len = lerp(84, 128, j);
+    const pv = [lerp(-112, 0, j), 0], pr = a2 * j;
+    const qv = [lerp(44, 0, j), 0];
+    b.wedge('wp', pv, pr, pr + a1, 40, { fill: FILL.aqua, edge: C.aqua });
+    b.wedge('wq', qv, 0, a2, 40, { fill: FILL.orange, edge: C.orange });
+    if (s.line) b.line('ab', [-150, 0], [150, 0], { color: C.aqua, start: true, end: true, cls: 'glow' });
+    else {
+      b.ray('p1', pv, pr + a1, len, { color: C.aqua });
+      b.ray('q0', qv, 0, len, { color: C.aqua });
+    }
+    b.ray('p0', pv, pr, len, { color: C.sun });
+    b.ray('q1', qv, a2, len, { color: C.sun });
+    b.dot('pv', pv, { r: 6 });
+    if (j < 0.98) b.dot('qv', qv, { r: 6 });
+    b.text('vp', at(pv, pr + a1 / 2, 70), `${a1}°`, { size: 26, color: TXT.aqua });
+    b.text('vq', at(qv, a2 / 2, labelR(a2)), `${a2}°`, { size: 26, color: TXT.orange });
+    if (s.names) {
+      b.dot('pa', [-100, 0], { r: 5 }); b.dot('pb', [100, 0], { r: 5 });
+      b.label('na', [-100, 0], 'A', 270, 25); b.label('nb', [100, 0], 'B', 270, 25);
+      b.label('no', O, 'O', 270, 26); b.label('nc', at(O, a2, 128), 'C', a2, 25);
+    }
+  };
 }
 
 // two separate angles side by side; s.j slides the second one onto the first (sharing an arm)
@@ -341,28 +367,6 @@ function eqnBoard() {
 
 // ---------------------------------------------------------------- shared question pieces
 
-// The student measures the angles: each angle still to measure glows (s.mtaps); tapping one runs
-// measure(id), which swings the protractor's needle across it. Resolves once every angle is measured.
-function tapToMeasure(c, v, ids, measure) {
-  return c.until(new Promise((resolve) => {
-    const left = new Set(ids);
-    let busy = false;
-    v.set({ mtaps: [...left] });
-    c.fig.onTap = (id) => {
-      if (busy || !left.has(id)) return;
-      busy = true;
-      left.delete(id);
-      v.set({ mtaps: [...left] });
-      c.spawn(async () => {
-        await measure(id);
-        c.sound.pop();
-        busy = false;
-        if (!left.size) { c.fig.onTap = null; resolve(); }
-      });
-    };
-  }));
-}
-
 const PAIR_CARDS = (pairs) => Object.entries(pairs).map(([id, [a1, a2]]) => ({
   id, label: `${a1}° and ${a2}°`, box: PAIR_BOX, state: { j: 0, sq: false }, draw: (b, s) => pairMini(b, a1, a2, s),
 }));
@@ -387,7 +391,7 @@ export const STEPS = [
     async run(c) {
       c.fig.box(-92, -40, 160, 146);
       const L = 132;
-      const v = c.view({ o: 0, a: 0, b: 0, t: 0, names: false, ring: false, drag: false, hint: true }, (b, s) => {
+      const v = c.view({ o: 0, a: 0, b: 0, t: 0, names: false, ring: false }, (b, s) => {
         if (s.t > 0.5) b.wedge('w', O, 0, s.t, 36, { fill: FILL.orange, edge: C.orange });
         if (s.a) b.ray('oa', O, 0, L * s.a, { color: C.aqua });
         if (s.b) b.ray('ob', O, s.t, L * s.b, { color: C.sun });
@@ -396,9 +400,8 @@ export const STEPS = [
         if (s.names) {
           b.label('no', O, 'O', 245, 25);
           b.label('na', [L, 0], 'A', 300, 25);
-          b.label('nb', at(O, s.t, L), 'B', s.t, s.drag ? 38 : 26);
+          b.label('nb', at(O, s.t, L), 'B', s.t, 26);
         }
-        if (s.drag) b.handle('hb', 'b', at(O, s.t, L), { label: 'Point B. Drag it, or use the arrow keys, to turn arm OB.', now: s.t, min: 10, max: 170, hint: s.hint });
       });
       c.caption('Do you remember how an angle is formed?');
       await c.wait(300);
@@ -412,15 +415,6 @@ export const STEPS = [
       c.sound.pop();
       await c.wait(1600);
       v.set({ ring: false });
-      await c.wait(600);
-      v.set({ drag: true });
-      c.ready();
-      const setT = (t) => { v.set({ t: Math.round(clamp(t, 10, 170)), hint: false }); };
-      c.fig.onDrag = (id, p) => setT(upper(angleOf(p), 10, 170));
-      c.fig.onNudge = (id, d) => setT(v.s.t + d);
-      c.fig.dragAll = 'b';
-      v.draw();
-      await c.say(crew('Drag B.'));
     },
   },
 
@@ -584,23 +578,21 @@ export const STEPS = [
     },
   },
 
-  // deck slides 17-18: measure with the protractor, add, then trace the half turn from B to A
+  // deck slides 17-18: the protractor measures both angles, then the student adds them
   {
     id: 'linearSum', ch: 2, gate: true, title: 'Measure the linear pair', lockHint: 'Add the two angles and pick the total.',
     async run(c) {
       c.fig.box(...LIN_BOX);
       const v = c.view({ l: 1, c: 1, w: 1, t: 65, right: null, left: null, prot: null }, linearFig);
       c.caption('Let’s measure both angles.');
-      c.talk(crew('Tap each angle to measure it.'));
-      await tapToMeasure(c, v, ['r', 'l'], async (id) => {
-        if (id === 'r') {                                  // ∠COB: from OB (0°) round to OC
-          v.s.prot = { r: 60, a0: 0, from: 0, needle: 0 };
-          await c.tween(1000, (k) => { v.s.prot.needle = 65 * k; v.s.right = deg(65 * k); v.draw(); }, 'inOut');
-        } else {                                           // ∠AOC: from OA (180°) back to OC
-          v.s.prot = { r: 60, a0: 0, from: 180, needle: 180 };
-          await c.tween(1100, (k) => { v.s.prot.needle = 180 - 115 * k; v.s.left = deg(115 * k); v.draw(); }, 'inOut');
-        }
-      });
+      await c.wait(300);
+      v.s.prot = { r: 60, a0: 0, from: 0, needle: 0 };     // ∠COB: from OB (0°) round to OC
+      await c.tween(1000, (k) => { v.s.prot.needle = 65 * k; v.s.right = deg(65 * k); v.draw(); }, 'inOut');
+      c.sound.pop();
+      await c.wait(250);
+      v.s.prot = { r: 60, a0: 0, from: 180, needle: 180 }; // ∠AOC: from OA (180°) back to OC
+      await c.tween(1100, (k) => { v.s.prot.needle = 180 - 115 * k; v.s.left = deg(115 * k); v.draw(); }, 'inOut');
+      c.sound.pop();
       await c.wait(300);
       v.set({ prot: null });
       c.caption('What do the two angles add up to?');
@@ -613,8 +605,7 @@ export const STEPS = [
         },
       });
       c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('g', '180°')}`);
-      c.talk(crew('Trace from B to A.'));
-      await c.trace(v, { r: 100, from: 0, to: 180, auto: null });
+      await c.wait(900);
     },
   },
 
@@ -647,6 +638,7 @@ export const STEPS = [
       c.talk(crew('Drag point C.'));
       await c.until(done);
       c.ready();
+      c.praise();
       c.caption('The angles change, but their total stays 180°.');
       c.sound.right();
       await c.wait(1200);
@@ -691,74 +683,30 @@ export const STEPS = [
   },
 
   // ============================================================ CONVERSE
-  // deck slide 24: supplementary (recall what it means first)
+  // deck slides 24-27: supplementary angles; the pair found is the pair that then becomes adjacent (its card
+  // goes, the two angles stay, fill the screen, slide together and form a linear pair)
   {
     id: 'supp', ch: 3, gate: true, title: 'Supplementary angles', lockHint: 'Tap the card with the supplementary pair.',
     async run(c) {
       c.caption('Supplementary angles add up to 180°.');
       c.caption('Which pair is supplementary?');
-      await c.cards({
-        items: PAIR_CARDS({ A: [110, 70], B: [85, 85], C: [100, 70] }),
+      const PAIRS = { A: [110, 70], B: [85, 85], C: [100, 70] };
+      const res = await c.cards({
+        items: Object.entries(PAIRS).map(([id, [a1, a2]]) => ({ id, label: `${a1}° and ${a2}°`, box: JOIN_BOX, state: { j: 0 }, draw: joinFig(a1, a2) })),
         answer: 'A',
         why: { B: ['85° + 85° = 170°.', 'Supplementary angles make exactly 180°.'], C: ['100° + 70° = 170°.', 'Supplementary angles make exactly 180°.'] },
       });
-
-    },
-  },
-
-  // deck slides 25-27: supplementary angles made adjacent form a linear pair
-  {
-    id: 'join', ch: 3, gate: true, title: 'Make them adjacent', lockHint: 'Drag the 110° angle to join them.',
-    async run(c) {
-      c.fig.box(...LIN_BOX);
-      const v = c.view({ j: 0, line: false, names: false, drag: true, hint: true }, (b, s) => {
-        const j = s.j, len = lerp(84, 128, j);
-        const pv = [lerp(-112, 0, j), 0], pr = 70 * j;    // the 110° angle slides right and turns 70°
-        const qv = [lerp(44, 0, j), 0];                    // the 70° angle slides left
-        b.wedge('wp', pv, pr, pr + 110, 40, { fill: FILL.aqua, edge: C.aqua });
-        b.wedge('wq', qv, 0, 70, 40, { fill: FILL.orange, edge: C.orange });
-        if (s.line) b.line('ab', [-150, 0], [150, 0], { color: C.aqua, start: true, end: true, cls: 'glow' });
-        else {
-          b.ray('p1', pv, pr + 110, len, { color: C.aqua });
-          b.ray('q0', qv, 0, len, { color: C.aqua });
-        }
-        b.ray('p0', pv, pr, len, { color: C.sun });
-        b.ray('q1', qv, 70, len, { color: C.sun });
-        b.dot('pv', pv, { r: 6 });
-        if (j < 0.98) b.dot('qv', qv, { r: 6 });
-        b.text('vp', at(pv, pr + 55, 70), '110°', { size: 26, color: TXT.aqua });
-        b.text('vq', at(qv, 35, labelR(70)), '70°', { size: 26, color: TXT.orange });
-        if (s.names) {
-          b.dot('pa', [-100, 0], { r: 5 }); b.dot('pb', [100, 0], { r: 5 });
-          b.label('na', [-100, 0], 'A', 270, 25); b.label('nb', [100, 0], 'B', 270, 25);
-          b.label('no', O, 'O', 270, 26); b.label('nc', at(O, 70, 128), 'C', 70, 25);
-        }
-        // the 110° angle's corner: drag it to the 70° angle's corner (it slides and turns as it goes)
-        if (s.drag) b.handle('hj', 'jv', pv, { label: 'The 110° angle. Drag it, or use the arrow keys, to join it to the 70° angle.', now: Math.round(j * 100), min: 0, max: 100, hint: s.hint });
-      });
-      c.caption('What if these two supplementary angles become adjacent?');
-      c.talk(crew('Drag the 110° angle to join them.'));
-      let finish;
-      const joined = new Promise((r) => { finish = r; });
-      const setJ = (j) => {
-        j = clamp(j, 0, 1);
-        v.set({ j, hint: false });
-        if (j >= 0.82) finish();                           // close enough: it snaps into place
-      };
-      c.fig.onDrag = (id, p) => setJ((p[0] + 112) / 112);
-      c.fig.onNudge = (id, d) => setJ(v.s.j - d * 0.04);  // the right arrow moves it right
-      c.fig.dragAll = 'jv';
-      v.draw();
-      await c.until(joined);
-      c.fig.onDrag = c.fig.onNudge = null;
-      c.fig.dragAll = null;
-      v.set({ drag: false });
       c.ready();
+      await c.wait(500);
+      await res.unframe();                                 // the card goes; 110° and 70° stay and fill the screen
+      c.caption('What if these two supplementary angles become adjacent?');
+      await c.said();
+      await c.wait(300);
       c.sound.whoosh();
-      await v.to({ j: 1 }, 380, 'out');
-      v.set({ line: true, names: true });
+      await res.view.to({ j: 1 }, 1400, 'inOut');          // the 110° angle slides over and turns onto the 70° one
+      res.view.set({ line: true, names: true });
       c.sound.snap();
-      c.burst(c.fig.center('[data-k="ab"]') || [innerWidth / 2, innerHeight / 2], { count: 18 });
+      c.burst(res.card.querySelector('[data-k="ab"]') || res.card, { count: 18 });
       c.caption('Their outer arms lie on a straight line.');
       await c.wait(1700);
       c.caption('Adjacent angles that add to 180° form a linear pair.');
@@ -847,32 +795,38 @@ export const STEPS = [
 
   // deck slides 34-35: measure all four, then turn ∠1 half a turn: it lands exactly on ∠3
   {
-    id: 'measure', ch: 4, gate: true, title: 'Measure the angles', lockHint: 'Turn the copy of ∠1 round O to go on.',
+    id: 'measure', ch: 4, title: 'Measure the angles',
     async run(c) {
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], vals: [null, null, null, null], prot: null }, crossFig);
       c.caption('Let’s measure the angles.');
-      c.talk(crew('Tap each angle to measure it.'));
+      await c.wait(300);
       // the protractor on line AB: above it for ∠1 and ∠2, below it for ∠3 and ∠4; the needle swings from
       // line AB to line PQ (at 55° and 235°)
-      const MEAS = { '∠1': [0, 0, 0, 55], '∠2': [1, 0, 180, 55], '∠3': [2, 180, 180, 235], '∠4': [3, 180, 360, 235] };
-      await tapToMeasure(c, v, Object.keys(MEAS), async (id) => {
-        const [k, a0, from, to] = MEAS[id];
+      const MEAS = [[0, 0, 0, 55], [1, 0, 180, 55], [2, 180, 180, 235], [3, 180, 360, 235]];
+      for (const [k, a0, from, to] of MEAS) {
         v.s.prot = { r: 60, a0, from, needle: from };
-        await c.tween(900, (e) => { v.s.prot.needle = lerp(from, to, e); v.s.vals[k] = deg(Math.abs(to - from) * e); v.draw(); }, 'inOut');
-      });
+        await c.tween(800, (e) => { v.s.prot.needle = lerp(from, to, e); v.s.vals[k] = deg(Math.abs(to - from) * e); v.draw(); }, 'inOut');
+        c.sound.pop();
+        await c.wait(200);
+      }
       await c.wait(300);
       v.set({ prot: null });
       c.caption('Vertically opposite angles are equal.');
       c.readout(`${S('o', '∠1 = ∠3 = 55°')}${OP('•')}${S('a', '∠2 = ∠4 = 125°')}`);
       await c.wait(800);
-      c.talk(crew('Turn the copy of ∠1 half a turn round O.'));
-      // the turn needs the room: the values step aside (the readout keeps them), and so do the names of the
-      // two angles the copy does not use; its track runs between the names and the points A and B
+      // a copy of ∠1 turns half a turn round O and lands exactly on ∠3 (the values step aside for it; the
+      // readout keeps them)
       const vals = [...v.s.vals], names = [...v.s.names];
       v.set({ vals: [null, null, null, null], names: [1, 0, 1, 0] });
-      await c.spin(v, { a: 0, b: 55, r: 38, len: 118, hr: 84, auto: null });
-      v.set({ vals, names });
+      v.s.spin = { o: O, a: 0, b: 55, r: 38, len: 118, rot: 0, done: false };
+      await c.tween(1600, (e) => { v.s.spin.rot = 180 * e; v.draw(); }, 'inOut');
+      v.s.spin.done = true;
+      v.draw();
+      c.sound.snap();
+      c.burst(c.fig.center('[data-k="sp-w"]') || [innerWidth / 2, innerHeight / 2], { count: 16, spread: 120 });
+      await c.wait(1300);
+      v.set({ spin: null, vals, names });
     },
   },
 
@@ -905,6 +859,7 @@ export const STEPS = [
       c.talk(crew('Drag the line.'));
       await c.until(done);
       c.ready();
+      c.praise();
       c.caption('Yes: vertically opposite angles stay equal.');
       c.sound.right();
     },
@@ -912,7 +867,7 @@ export const STEPS = [
 
   // deck slides 37-41: why it happens (proof with two linear pairs)
   {
-    id: 'proof', quiet: true, ch: 4, gate: true, title: 'Why it works', lockHint: 'Tap “Next step” to finish the proof.',
+    id: 'proof', quiet: true, ch: 4, title: 'Why it works',
     async run(c) {
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['dim', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], glow: null, sweep: null }, crossFig);
@@ -940,7 +895,8 @@ export const STEPS = [
           } },
       ];
       for (const P of PLAN) {
-        await c.button('Next step');
+        await c.said();                                    // the line before has been said
+        await c.wait(P === PLAN[0] ? 300 : 1100);          // a moment to look at the working
         c.caption(P.cap);
         v.set({ fill: P.fill, glow: P.glow, sweep: null });
         if (!eq.el.isConnected) c.els.readout.replaceChildren(eq.el);
@@ -953,7 +909,6 @@ export const STEPS = [
         }
         await working;
       }
-      c.ready();
       eq.el.classList.add('done');
       c.sound.right();
       c.burst(c.els.readout, { count: 16 });

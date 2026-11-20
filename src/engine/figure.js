@@ -171,7 +171,6 @@ class Builder {
       const d = `M${cx} ${cy}L${pa[0]} ${pa[1]}A${R} ${R} 0 ${b - a > 180 ? 1 : 0} 0 ${pb[0]} ${pb[1]}Z`;
       hit = `<path class="hit" d="${d}"/>`;
       glow = `<path class="${gc}" d="${d}"/>`;
-      if (cue) this.cuePts.push({ id, p: at(o, (a + b) / 2, r * 0.62) });   // the hand points into the angle
     }
     this.push(key, glow + hit, { cls: 'tap', attrs: { tabindex: '0', role: 'button', 'aria-label': label, 'data-tap': id } });
   }

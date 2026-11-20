@@ -19,6 +19,26 @@ const START_WAIT = 2;      // seconds to wait for a recording to start before fi
 
 import { esc, angles } from './ui.js';
 
+// the words that carry the idea are lit in gold: the terms the lesson teaches, and every angle size
+const KEY = /\b(two rays|same point|vertex|common arm|shared arm|adjacent|linear pair|straight line|complementary|supplementary|vertically opposite|opposite|equal|acute|right angle|obtuse|square corner|overlap)\b|\d+°/gi;
+
+// a line as word spans (each word lights up as it is said); words inside a key term get .key
+function wordSpans(text, cls = 'w') {
+  const keys = [...text.matchAll(KEY)].map((m) => [m.index, m.index + m[0].length]);
+  const nodes = [], words = [];
+  let at = 0;
+  for (const part of text.split(/(\s+)/).filter(Boolean)) {
+    if (/^\s+$/.test(part)) { nodes.push(document.createTextNode(' ')); at += 1; continue; }
+    const el = document.createElement('span');
+    el.className = keys.some(([a, b]) => at < b && at + part.length > a) ? `${cls} key` : cls;
+    el.innerHTML = angles(esc(part));
+    nodes.push(el);
+    words.push({ el, at });
+    at += part.length;
+  }
+  return { nodes, words };
+}
+
 export class Dialogue {
   constructor(root, { text, mouth = null, speaker = null, blip = null, sr = null, reduced = () => false, muted = () => false } = {}) {
     this.root = root;
@@ -53,7 +73,7 @@ export class Dialogue {
   // sentence (it starts in lower case) joins it, and the line only goes back to the caption after the last
   play(lines) {
     const ps = lines.filter(Boolean).map((l) => (typeof l === 'string' ? { text: l } : l))
-      .map((l) => ({ kind: l.mood === 'hint' ? 'hint' : 'line', text: l.text, hold: l.hold, join: /^[a-z]/.test(l.text) }));
+      .map((l) => ({ kind: l.mood === 'hint' || l.mood === 'praise' ? 'hint' : 'line', mood: l.mood, text: l.text, hold: l.hold, join: /^[a-z]/.test(l.text) }));
     if (!ps.length) return Promise.resolve();
     if (ps[0].kind === 'hint') this.interrupt();
     ps.forEach((p, i) => {
@@ -70,6 +90,12 @@ export class Dialogue {
       const t = setTimeout(res, max);
       this.waiters.push(() => { clearTimeout(t); res(); });
     });
+  }
+
+  // drop what is still waiting to be said (a question answered before it was read out)
+  dropQueued() {
+    this.queue.forEach((p) => p.resolve?.());
+    this.queue = [];
   }
 
   clear() {
@@ -139,19 +165,7 @@ export class Dialogue {
   // lay a piece out in the line, its words hidden until they are said
   begin(p) {
     this.cur = p;
-    const parts = p.text.split(/(\s+)/).filter(Boolean);
-    const nodes = [];
-    const words = [];
-    let at = 0;
-    for (const part of parts) {
-      if (/^\s+$/.test(part)) { nodes.push(document.createTextNode(' ')); at += 1; continue; }
-      const el = document.createElement('span');
-      el.className = 'w';
-      el.innerHTML = angles(esc(part));
-      nodes.push(el);
-      words.push({ el, at });
-      at += part.length;
-    }
+    const { nodes, words } = wordSpans(p.text);
     if (p.join && this.text.childNodes.length) {       // goes on with the sentence before it: joins the line
       this.text.append(document.createTextNode(' '), ...nodes);
       if (p.kind === 'line') this.base = `${this.base} ${p.text}`.trim();
@@ -160,7 +174,7 @@ export class Dialogue {
       if (p.kind !== 'hint') this.base = p.text;
     }
     Object.assign(p, { words, k: 0, t: 0, age: 0, waited: 0, started: false, heard: false, timing: null, ended: false, voiced: false });
-    this.root.dataset.mood = p.kind === 'hint' ? 'hint' : '';
+    this.root.dataset.mood = p.kind === 'hint' ? (p.mood === 'praise' ? 'praise' : 'hint') : '';
     if (this.sr) this.sr.textContent = p.text;
     if (this.reduced()) this.reveal(p, Infinity);
     p.voiced = this.speak(p);
@@ -274,10 +288,8 @@ export class Dialogue {
       p.hold = (p.hold ?? BACK) - dt;
       if (p.hold > 0) return true;
       if (p.more && this.queue[0]?.kind === 'hint') { this.done(p); return true; }   // the next piece takes over
-      this.text.replaceChildren(...this.base.split(/(\s+)/).filter(Boolean).map((s) => {
-        if (/^\s+$/.test(s)) return document.createTextNode(' ');
-        const el = document.createElement('span'); el.className = 'w on now'; el.innerHTML = angles(esc(s)); return el;
-      }));
+      if (this.queue.length) { this.done(p); return true; }  // a new line is waiting: it takes the line (no flash of the old one)
+      this.text.replaceChildren(...wordSpans(this.base, 'w on now').nodes);
       this.root.dataset.mood = '';
       if (!this.reduced()) this.text.animate([{ opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'none' }], { duration: 420, easing: 'ease-out' });
     }

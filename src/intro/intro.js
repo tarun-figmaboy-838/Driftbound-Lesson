@@ -1,7 +1,8 @@
 // The opening, after Play. The camera flies into the satellite and stops at its entry gate; the gate
 // checks in (its lights blink, a scan sweeps the doors) and slides open; the camera walks in at eye
 // height, down the corridor and through the doorway into the command hall, looks all the way round the
-// hall (a full turn) and stops in front of the wall screen; a drone flies in, projects the lesson's screen
+// hall (a full turn) and stops before its front wall, where the DRIFTBOUND hologram rises from a projector
+// table; a drone flies in, projects the lesson's screen
 // and flies off. Then the lesson starts.
 //
 // Pictures (Figma AI, assets/ui/intro): the gate, cut into its frame and the two door halves (the halves

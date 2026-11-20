@@ -67,6 +67,8 @@ def lines():
     out += re.findall(r"\{\s*text:\s*" + Q + r",\s*mood:\s*'hint'\s*\}", src)   # a hint piece given as { text, mood }
     main = (ROOT / 'src' / 'main.js').read_text()
     out += re.findall(r"s\.lockHint \|\| " + Q, main)
+    p = main.index('const PRAISE = {')                                # the praise lines
+    out += re.findall(Q, main[p:main.index('};', p)])
     seen, res = set(), []
     for s in map(unq, out):
         if s and s not in seen:

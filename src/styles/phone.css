@@ -15,6 +15,9 @@
 .is-tall .next { min-width: 130px; }
 .is-tall .cards { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); align-items: stretch; gap: 12px; padding: 2px 6px; }
 .is-tall .cards > span { aspect-ratio: auto; height: 100%; }
+.is-tall .cards.solved > span.kept { grid-column: 1; grid-row: 2; }
+.is-tall .cards.fill { grid-auto-rows: none; grid-template-rows: minmax(0, 1fr); }
+.is-tall .cards.fill > span.kept { grid-row: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .holo--glow, .holo--scan { animation: none !important; }

@@ -40,6 +40,33 @@ const dialogue = new Dialogue($('narration'), {
   muted: () => sound.muted,
 });
 const fig = new Figure(els.fig);
+
+// praise when the student gets something right: the co-pilot says it (in the narration line, then the
+// line goes back to the caption) and a badge pops up over the screen. A different line each time.
+const PRAISE = {
+  first: ['Great job!', 'Well done!', 'Excellent!', 'Nice work!'],   // right first time
+  again: ['You got it!', 'That’s it!'],                               // right after a miss
+};
+const praiseAt = { first: 0, again: 0 };
+function praise(firstTry = true) {
+  const kind = firstTry ? 'first' : 'again';
+  const text = PRAISE[kind][praiseAt[kind]++ % PRAISE[kind].length];
+  dialogue.dropQueued();                                   // the question is answered: it need not be read now
+  dialogue.play([{ text, mood: 'praise' }]);
+  const pop = h('<div class="praise-pop" aria-hidden="true"><i class="praise-pop__star"></i><span></span><i class="praise-pop__star"></i></div>');
+  pop.querySelector('span').textContent = text;
+  document.body.appendChild(pop);
+  if (reduced()) { setTimeout(() => pop.remove(), 1400); return; }
+  pop.animate([
+    { opacity: 0, transform: 'translate(-50%, 14px) scale(.6)' },
+    { opacity: 1, transform: 'translate(-50%, 0) scale(1.08)', offset: 0.18 },
+    { opacity: 1, transform: 'translate(-50%, 0) scale(1)', offset: 0.3 },
+    { opacity: 1, transform: 'translate(-50%, -6px) scale(1)', offset: 0.8 },
+    { opacity: 0, transform: 'translate(-50%, -22px) scale(.96)' },
+  ], { duration: 1700, easing: 'ease-out' }).onfinish = () => pop.remove();
+  setTimeout(() => burstAt(pop, { count: 14, spread: 150 }), 200);
+}
+
 const memory = STEPS.map(() => ({}));   // per step: { done } and anything a step wants to keep
 const shared = {};                       // across steps (the mission-check score)
 let cur = -1;
@@ -47,8 +74,7 @@ let token = null;
 let maxCh = 0;
 
 // Overlays any figure can switch on through its state: a protractor measuring an angle (s.prot), a
-// glowing arc sweeping round (s.sweep), the student's trace along an arc (s.trace) and a ghost copy
-// of an angle that the student spins round the vertex (s.spin).
+// glowing arc sweeping round (s.sweep) and a ghost copy of an angle turning round the vertex (s.spin).
 function overlays(b, s) {
   const P = s.prot;
   if (P) {
@@ -64,24 +90,12 @@ function overlays(b, s) {
     b.arc('sw', Sw.o || [0, 0], Sw.from, Sw.at, Sw.r, { color: Sw.color || '#fff3b0', w: 5, cls: 'glow' });
     if (Sw.label) b.text('sw-v', at(Sw.o || [0, 0], (Sw.from + Sw.at) / 2, Sw.r + (Sw.lr || 24)), Sw.label, { size: 24, color: '#fff3b0' });
   }
-  const T = s.trace;
-  if (T) {
-    const o = T.o || [0, 0];
-    b.arc('tr-path', o, T.from, T.to, T.r, { color: 'rgba(255,243,176,.35)', w: 3, cls: 'dashy' });
-    b.arc('tr', o, T.from, T.at, T.r, { color: '#fff3b0', w: 6, cls: 'glow' });
-    if (T.at > T.from + 4) b.text('tr-v', at(o, (T.from + T.at) / 2, T.r + 26), `${Math.round(T.at - T.from)}°`, { size: 26, color: '#fff3b0' });
-    if (!T.done) b.handle('tr-h', 'tr', at(o, T.at, T.r), { label: 'Trace the turn. Drag, or use the arrow keys.', now: T.at - T.from, min: 0, max: T.to - T.from, hint: T.hint });
-  }
   const G = s.spin;
   if (G) {
     const o = G.o || [0, 0], a = G.a + G.rot, z = G.b + G.rot;
     b.wedge('sp-w', o, a, z, G.r, { fill: 'rgba(255,243,176,.42)', edge: '#fff3b0', cls: G.done ? 'flash' : '' });
     b.line('sp-a', o, at(o, a, G.len), { color: '#fff3b0', w: 3.5, dash: true });
     b.line('sp-b', o, at(o, z, G.len), { color: '#fff3b0', w: 3.5, dash: true });
-    if (!G.done) {
-      b.arc('sp-path', o, (G.a + G.b) / 2, (G.a + G.b) / 2 + 180, G.hr, { color: 'rgba(255,243,176,.3)', w: 3 });
-      b.handle('sp-h', 'sp', at(o, (G.a + G.b) / 2 + G.rot, G.hr), { label: 'Turn the copy round O. Drag, or use the arrow keys.', now: G.rot, min: 0, max: 180, hint: G.hint });
-    }
   }
 }
 
@@ -148,6 +162,54 @@ function shake(el) {
   el.classList.add('shake');
 }
 
+// ---------------------------------------------------------------- the right card
+// The other cards fade away and the right one glides to the middle of the row (FLIP: it is laid out in
+// the middle at once, then moved there from where it was).
+async function settleCard(wrap, card) {
+  const keep = card.closest('.cards > span');
+  const others = [...wrap.children].filter((x) => x !== keep);
+  if (!reduced()) {
+    await Promise.all(others.map((el) => el.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.86)' }],
+      { duration: 340, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {})));
+  }
+  const a = keep.getBoundingClientRect();
+  keep.classList.add('kept');
+  wrap.classList.add('solved');
+  const b = keep.getBoundingClientRect();
+  if (!reduced() && (a.left !== b.left || a.top !== b.top)) {
+    await keep.animate([{ transform: `translate(${a.left - b.left}px, ${a.top - b.top}px)` }, { transform: 'none' }],
+      { duration: 650, easing: 'cubic-bezier(.22, 1, .36, 1)' }).finished.catch(() => {});
+  }
+}
+
+// The card's frame goes and its figure stays, growing to fill the screen: the figure is the start of
+// what comes next. Its lines and labels take the size of the main figure's.
+async function unframeCard(wrap, card, figure) {
+  const keep = card.closest('.cards > span');
+  card.tabIndex = -1;
+  wrap.classList.add('unframed');
+  await new Promise((r) => setTimeout(r, reduced() ? 0 : 420));
+  // the drawing's own outline (not the card's box, whose shape changes): it grows evenly, never stretched
+  const drawn = () => {
+    const rs = [...figure.svg.querySelectorAll('[data-k]')].map((el) => el.getBoundingClientRect()).filter((r) => r.width || r.height);
+    const l = Math.min(...rs.map((r) => r.left)), t = Math.min(...rs.map((r) => r.top));
+    const r = Math.max(...rs.map((x) => x.right)), bt = Math.max(...rs.map((x) => x.bottom));
+    return { cx: (l + r) / 2, cy: (t + bt) / 2, w: r - l };
+  };
+  const a = drawn();
+  wrap.classList.add('fill');
+  figure.kMin = 0.8; figure.kMax = 1.3;
+  figure.render();
+  const b = drawn(), box = keep.getBoundingClientRect();
+  if (!reduced() && b.w > 0) {
+    const origin = `${b.cx - box.left}px ${b.cy - box.top}px`;
+    await keep.animate([
+      { transform: `translate(${a.cx - b.cx}px, ${a.cy - b.cy}px) scale(${a.w / b.w})`, transformOrigin: origin },
+      { transform: 'none', transformOrigin: origin },
+    ], { duration: 750, easing: 'cubic-bezier(.45, 0, .2, 1)' }).finished.catch(() => {});
+  }
+}
+
 // ---------------------------------------------------------------- the toolkit each step gets
 function makeCtx(i, tk) {
   const step = STEPS[i];
@@ -201,110 +263,6 @@ function makeCtx(i, tk) {
         },
       };
     },
-    // the student drags a dot along an arc (anticlockwise from `from` to `to`); the arc lights up
-    // behind the finger and shows how far it has turned. Resolves when the end is reached.
-    trace(v, { o = [0, 0], r, from, to, auto = 'Trace it for me' }) {
-      return guard(new Promise((resolve) => {
-        const span = to - from;
-        v.s.trace = { o, r, from, to, at: from, done: false, hint: true };
-        v.draw();
-        let tick = 0, finished = false, autoBtn = null;
-        const set = (rel) => {
-          if (finished || tk.dead) return;
-          rel = Math.max(0, Math.min(span, rel));
-          const T = v.s.trace;
-          T.at = from + rel;
-          T.hint = false;
-          if (Math.floor(rel / 30) > tick) { tick = Math.floor(rel / 30); sound.tick(tick); }
-          if (rel >= span - 2) {
-            finished = true;
-            T.at = to;
-            T.done = true;
-            if (document.activeElement?.closest?.('.fig-svg')) fig.svg.focus({ preventScroll: true });
-            fig.onDrag = null; fig.onNudge = null; fig.dragAll = null;
-            autoBtn?.parentElement?.remove();
-            v.draw();
-            sound.right();
-            const pt = fig.center('[data-k="tr"]');
-            if (pt) burst(pt[0], pt[1], { count: 16, spread: 130 });
-            resolve();
-            return;
-          }
-          v.draw();
-        };
-        fig.onDrag = (id, p) => {
-          let rel = ((angleOf([p[0] - o[0], p[1] - o[1]]) - from) % 360 + 360) % 360;
-          if (rel > span) rel = rel > span + (360 - span) / 2 ? 0 : span;
-          if (Math.abs(rel - (v.s.trace.at - from)) > 50) return;   // follow the path, no jumping across
-          set(rel);
-        };
-        fig.onNudge = (id, d) => set(v.s.trace.at - from + d * 3);
-        fig.dragAll = 'tr';
-        v.draw();
-        if (auto) {
-          autoBtn = h('<button type="button" class="pill act"><span></span></button>');
-          autoBtn.querySelector('span').textContent = auto;
-          autoBtn.addEventListener('click', () => {
-            sound.tap();
-            autoBtn.disabled = true;
-            const start = v.s.trace.at - from;
-            c.tween(1500, (k) => set(start + (span - start) * k), 'inOut').catch(() => {});
-          });
-          els.controls.appendChild(entering(autoBtn, 0));
-        }
-      }));
-    },
-    // the student turns a ghost copy of an angle round its vertex, half a turn (rot 0 -> 180)
-    spin(v, { o = [0, 0], a, b, r, len, hr, auto = 'Turn it for me' }) {
-      return guard(new Promise((resolve) => {
-        const mid = (a + b) / 2;
-        v.s.spin = { o, a, b, r, len, hr, rot: 0, done: false, hint: true };
-        v.draw();
-        let finished = false, autoBtn = null, tick = 0;
-        const set = (rot) => {
-          if (finished || tk.dead) return;
-          const G = v.s.spin;
-          G.rot = Math.max(0, Math.min(180, rot));
-          G.hint = false;
-          if (Math.floor(G.rot / 45) > tick) { tick = Math.floor(G.rot / 45); sound.tick(tick); }
-          if (G.rot >= 177) {
-            finished = true;
-            G.rot = 180;
-            G.done = true;
-            if (document.activeElement?.closest?.('.fig-svg')) fig.svg.focus({ preventScroll: true });
-            fig.onDrag = null; fig.onNudge = null; fig.dragAll = null;
-            autoBtn?.parentElement?.remove();
-            v.draw();
-            sound.snap();
-            const pt = fig.center('[data-k="sp-w"]');
-            if (pt) burst(pt[0], pt[1], { count: 16, spread: 120 });
-            resolve();
-            return;
-          }
-          v.draw();
-        };
-        fig.onDrag = (id, p) => {
-          const rel = ((angleOf([p[0] - o[0], p[1] - o[1]]) - mid) % 360 + 360) % 360;
-          const r2 = rel > 270 ? 0 : Math.min(rel, 180);
-          if (Math.abs(r2 - v.s.spin.rot) > 60) return;
-          set(r2);
-        };
-        fig.onNudge = (id, d) => set(v.s.spin.rot + d * 3);
-        fig.dragAll = 'sp';
-        v.draw();
-        if (auto) {
-          autoBtn = h('<button type="button" class="pill act"><span></span></button>');
-          autoBtn.querySelector('span').textContent = auto;
-          autoBtn.addEventListener('click', () => {
-            sound.tap();
-            autoBtn.disabled = true;
-            const start = v.s.spin.rot;
-            c.tween(1400, (k) => set(start + (180 - start) * k), 'inOut').catch(() => {});
-          });
-          els.controls.appendChild(entering(autoBtn, 0));
-        }
-      }));
-    },
     // a small static figure inside some element (cards, chips, recap)
     mini(host, box, draw, opts = {}) {
       const f = new Figure(host, { kMin: 0.42, kMax: 0.9, pad: 8, ...opts });
@@ -327,6 +285,7 @@ function makeCtx(i, tk) {
       sound.stamp();
       c.wait(200).then(() => burstAt(els.readout, { count: 12, spread: 130 })).catch(() => {});
     },
+    praise,                                                 // the student did it: say so (see praise() above)
     stage(node) {
       els.custom.replaceChildren(...(node ? [node] : []));
       els.stage.classList.toggle('is-custom', !!node);
@@ -349,6 +308,7 @@ function makeCtx(i, tk) {
               btns.forEach((o) => { if (o !== b && !o.disabled) o.classList.add('is-off'); });
               sound.right();
               burstAt(b);
+              praise(wrong === 0);
               resolve({ wrong, value: v });
             } else {
               wrong++;
@@ -372,7 +332,10 @@ function makeCtx(i, tk) {
       }));
     },
 
-    // A / B / C cards with a small figure each; resolves with { wrong, view } (the right card's view)
+    // A / B / C cards with a small figure each. On the right card the others fade away and it glides to
+    // the middle; then it resolves with { wrong, view, card, unframe }. view is the card's figure;
+    // unframe() lets the card's frame go and its figure grow to fill the screen, for a step whose next
+    // idea uses that same figure (it carries on from there)
     cards({ items, answer, why = {} }) {
       return guard(new Promise((resolve) => {
         let wrong = 0;
@@ -383,6 +346,7 @@ function makeCtx(i, tk) {
           card.dataset.id = it.id;
           card.setAttribute('aria-label', `Option ${k + 1}: ${it.label}`);
           const f = new Figure(card.querySelector('.qcard__mini'), { kMin: 0.55, kMax: 0.95, pad: 12 });
+          it.figure = f;
           later(() => f.destroy());
           f.box(...it.box);
           views[it.id] = c.view(it.state || {}, it.draw, f);
@@ -394,7 +358,8 @@ function makeCtx(i, tk) {
               cards.forEach((o) => { if (o !== card && !o.classList.contains('is-wrong')) o.classList.add('is-off'); });
               sound.right();
               burstAt(card, { count: 20, spread: 160 });
-              resolve({ wrong, view: views[it.id], card });
+              praise(wrong === 0);
+              settleCard(wrap, card).then(() => resolve({ wrong, view: views[it.id], card, unframe: () => unframeCard(wrap, card, it.figure) }));
             } else {
               wrong++;
               card.classList.add('is-wrong');
@@ -413,21 +378,6 @@ function makeCtx(i, tk) {
       }));
     },
 
-    // an action button in the controls row; resolves when tapped
-    button(label, { tone = 'aqua', keep = false } = {}) {
-      return guard(new Promise((resolve) => {
-        const b = h('<button type="button" class="pill act"><span></span></button>');
-        b.querySelector('span').textContent = label;
-        b.addEventListener('click', () => {
-          if (b.disabled || tk.dead) return;
-          sound.tap();
-          if (!keep) { const w = b.parentElement; (w && w !== els.controls ? w : b).remove(); }
-          resolve(b);
-        });
-        // it comes in once the narration has been said
-        dialogue.settled().then(() => { if (!tk.dead) els.controls.appendChild(entering(b, 0)); });
-      }));
-    },
 
     // tap targets on the figure; resolves with { wrong } once the right one is tapped
     tapFig({ answer, why = {} }) {
@@ -445,6 +395,7 @@ function makeCtx(i, tk) {
             fig.handFor = null;
             fig.onTap = null;
             sound.right();
+            praise(wrong === 0);
             burstAt(el, { count: 14, spread: 110 });
             resolve({ wrong });
           } else {

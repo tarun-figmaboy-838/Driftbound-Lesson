@@ -31,7 +31,7 @@ serve.py, start.command    local server (no-cache, so a reload always runs the l
 
 src/
   main.js                  entry: the step player (navigation, Next locking, the toolkit steps use:
-                           answers, cards, taps, tracing, spinning a copy of an angle), the start
+                           answers, cards, taps on the figure, praise), the start
   lesson/steps.js          THE LESSON: every step, its captions, questions, hints and figures,
                            with the deck's slide numbers; the recall (drone and cards)
   intro/intro.js           the intro film after Play
@@ -62,6 +62,7 @@ assets/                    only what the page loads
 
 tools/                     run by hand, not by the page
   ui/encode_images.py      a picture to WebP (settings inside); rebuilds the intro's pictures
+  ui/hall_wall.py          the hall's front wall: paints its screen out, adds the hologram and table
   ui/inline_pills.py       builds src/styles/pills.css from tools/ui/polygon (POLYGON capsule art)
   vo/make_vo.py            makes the voice with Kokoro, for every line in steps.js and main.js
   vo/split_vo.py           splits long recorded lines into pieces (cuts at the word times)
@@ -88,7 +89,7 @@ docs/lesson-design.md      the lesson design
   Until then the line shows without a voice. A long line can be split with `tools/vo/split_vo.py`.
 - **A picture:** `python3 tools/ui/encode_images.py source.png assets/ui/<area>/<name>.webp`.
 - **The background:** after replacing `assets/ui/bg/`, update `PICS` in `src/engine/scene.js` (the
-  picture's size and the rectangle of its own screen, in picture pixels).
+  picture's size and where the lesson screen goes on its front wall, in picture pixels).
 - **The buttons' art:** replace the art in `tools/ui/polygon/` and run `python3 tools/ui/inline_pills.py`.
 - **The game link:** `GAME_URL` in `src/main.js`.
 
