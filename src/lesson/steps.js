@@ -35,8 +35,9 @@ const OP = (v) => `<span class="op">${v}</span>`;
 function lineAB(b, s, glow = false) {
   if (s.l) b.line('ab', [-150 * s.l, 0], [150 * s.l, 0], { color: C.aqua, start: true, end: true, cls: glow ? 'glow' : '' });
 }
+// the vertex O; the line's ends A and B only where the step names them (s.ab: the rule ∠AOC + ∠COB)
 function pointsAOB(b, s, oDir = 270) {
-  if (s.l > 0.72) {
+  if (s.ab && s.l > 0.72) {
     b.dot('pa', [-100, 0], { r: 5 });
     b.dot('pb', [100, 0], { r: 5 });
     b.label('na', [-100, 0], 'A', 270, 25);
@@ -86,7 +87,7 @@ function crossFig(b, s) {
 
 // two separate angles, a1 on the left (aqua) and a2 on the right (orange); as s.j goes to 1 the left one
 // slides over and turns onto the right one (sharing an arm). s.line: the outer arms as one line (they make
-// a straight line only if a1 + a2 = 180°); s.names: the points A, O, B and C
+// a straight line only if a1 + a2 = 180°); s.names: the points O and C
 const JOIN_BOX = [-158, -38, 158, 140];
 function joinFig(a1, a2) {
   return (b, s) => {
@@ -107,8 +108,6 @@ function joinFig(a1, a2) {
     b.text('vp', at(pv, pr + a1 / 2, 70), `${a1}°`, { size: 26, color: TXT.aqua });
     b.text('vq', at(qv, a2 / 2, labelR(a2)), `${a2}°`, { size: 26, color: TXT.orange });
     if (s.names) {
-      b.dot('pa', [-100, 0], { r: 5 }); b.dot('pb', [100, 0], { r: 5 });
-      b.label('na', [-100, 0], 'A', 270, 25); b.label('nb', [100, 0], 'B', 270, 25);
       b.label('no', O, 'O', 270, 26); b.label('nc', at(O, a2, 128), 'C', a2, 25);
     }
   };
@@ -650,7 +649,7 @@ export const STEPS = [
     id: 'axiom', quiet: true, ch: 2, title: 'Linear pair axiom',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 1, c: 1, w: 1, t: 62, sweep: null }, linearFig);
+      const v = c.view({ l: 1, c: 1, w: 1, t: 62, sweep: null, ab: true }, linearFig);
       c.caption('A linear pair always adds to 180°.');
       c.readout(`${S('a', '∠AOC')}${OP('+')}${S('o', '∠COB')}${OP('=')}${S('g', '180°')}`);
       await c.wait(500);
