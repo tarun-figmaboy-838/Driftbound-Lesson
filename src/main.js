@@ -41,30 +41,22 @@ const dialogue = new Dialogue($('narration'), {
 });
 const fig = new Figure(els.fig);
 
-// praise when the student gets something right: the co-pilot says it (in the narration line, then the
-// line goes back to the caption) and a badge pops up over the screen. A different line each time.
+// praise when the student gets something right, in the narration line: the co-pilot says a word of praise
+// and then `got`, a few words on what the student got right, as one line ("Great job! Acute: less than
+// 90°."); then the line goes back to the caption. A different word each time.
 const PRAISE = {
   first: ['Great job!', 'Well done!', 'Excellent!', 'Nice work!'],   // right first time
   again: ['You got it!', 'That’s it!'],                               // right after a miss
 };
 const praiseAt = { first: 0, again: 0 };
-function praise(firstTry = true) {
+function praise(firstTry = true, got = '') {
   const kind = firstTry ? 'first' : 'again';
   const text = PRAISE[kind][praiseAt[kind]++ % PRAISE[kind].length];
   dialogue.dropQueued();                                   // the question is answered: it need not be read now
-  dialogue.play([{ text, mood: 'praise' }]);
-  const pop = h('<div class="praise-pop" aria-hidden="true"><i class="praise-pop__star"></i><span></span><i class="praise-pop__star"></i></div>');
-  pop.querySelector('span').textContent = text;
-  document.body.appendChild(pop);
-  if (reduced()) { setTimeout(() => pop.remove(), 1400); return; }
-  pop.animate([
-    { opacity: 0, transform: 'translate(-50%, 14px) scale(.6)' },
-    { opacity: 1, transform: 'translate(-50%, 0) scale(1.08)', offset: 0.18 },
-    { opacity: 1, transform: 'translate(-50%, 0) scale(1)', offset: 0.3 },
-    { opacity: 1, transform: 'translate(-50%, -6px) scale(1)', offset: 0.8 },
-    { opacity: 0, transform: 'translate(-50%, -22px) scale(.96)' },
-  ], { duration: 1700, easing: 'ease-out' }).onfinish = () => pop.remove();
-  setTimeout(() => burstAt(pop, { count: 14, spread: 150 }), 200);
+  dialogue.play([                                         // a short hold after it: the lesson goes on
+    { text, mood: 'praise', hold: got ? null : 0.6 },
+    got && { text: got, mood: 'praise', hold: 0.6, join: true },
+  ]);
 }
 
 const memory = STEPS.map(() => ({}));   // per step: { done } and anything a step wants to keep
@@ -87,8 +79,9 @@ function overlays(b, s) {
   }
   const Sw = s.sweep;
   if (Sw && Sw.at > Sw.from) {
-    b.arc('sw', Sw.o || [0, 0], Sw.from, Sw.at, Sw.r, { color: Sw.color || '#fff3b0', w: 5, cls: 'glow' });
-    if (Sw.label) b.text('sw-v', at(Sw.o || [0, 0], (Sw.from + Sw.at) / 2, Sw.r + (Sw.lr || 24)), Sw.label, { size: 24, color: '#fff3b0' });
+    // the angles' own edge lights up as it turns across them (r: their radius), the size counting up beside it
+    b.arc('sw', Sw.o || [0, 0], Sw.from, Sw.at, Sw.r, { color: Sw.color || '#fff3b0', w: 3.5, cls: 'glow' });
+    if (Sw.label) b.text('sw-v', at(Sw.o || [0, 0], (Sw.from + Sw.at) / 2, Sw.r + (Sw.lr || 19)), Sw.label, { size: 22, color: '#fff3b0' });
   }
   const G = s.spin;
   if (G) {
@@ -292,8 +285,8 @@ function makeCtx(i, tk) {
     },
     controls(...items) { els.controls.replaceChildren(...items.map((el, k) => entering(el, k))); },
 
-    // answer buttons; resolves with { wrong } once the right one is tapped
-    choose({ options, answer, fmt = (v) => `${v}`, why = {}, onWrong = null }) {
+    // answer buttons; resolves with { wrong } once the right one is tapped. got: what the praise says was right
+    choose({ options, answer, fmt = (v) => `${v}`, why = {}, got = '', onWrong = null }) {
       return guard(new Promise((resolve) => {
         let wrong = 0;
         const btns = options.map((v) => {
@@ -308,7 +301,7 @@ function makeCtx(i, tk) {
               btns.forEach((o) => { if (o !== b && !o.disabled) o.classList.add('is-off'); });
               sound.right();
               burstAt(b);
-              praise(wrong === 0);
+              praise(wrong === 0, got);
               resolve({ wrong, value: v });
             } else {
               wrong++;
@@ -336,7 +329,7 @@ function makeCtx(i, tk) {
     // the middle; then it resolves with { wrong, view, card, unframe }. view is the card's figure;
     // unframe() lets the card's frame go and its figure grow to fill the screen, for a step whose next
     // idea uses that same figure (it carries on from there)
-    cards({ items, answer, why = {} }) {
+    cards({ items, answer, why = {}, got = '' }) {
       return guard(new Promise((resolve) => {
         let wrong = 0;
         const wrap = h('<div class="cards"></div>');
@@ -358,7 +351,7 @@ function makeCtx(i, tk) {
               cards.forEach((o) => { if (o !== card && !o.classList.contains('is-wrong')) o.classList.add('is-off'); });
               sound.right();
               burstAt(card, { count: 20, spread: 160 });
-              praise(wrong === 0);
+              praise(wrong === 0, got);
               settleCard(wrap, card).then(() => resolve({ wrong, view: views[it.id], card, unframe: () => unframeCard(wrap, card, it.figure) }));
             } else {
               wrong++;
@@ -378,38 +371,6 @@ function makeCtx(i, tk) {
       }));
     },
 
-
-    // tap targets on the figure; resolves with { wrong } once the right one is tapped
-    tapFig({ answer, why = {} }) {
-      return guard(new Promise((resolve) => {
-        let wrong = 0;
-        // every possible target pulses; the hint hand comes to the right one only once the student is
-        // stuck (a wrong tap, or a while without tapping), so it never gives the answer away at once
-        const showHand = () => { if (!tk.dead && fig.onTap) { fig.handFor = answer; fig.render(); } };
-        const stuck = setTimeout(showHand, 6000);
-        later(() => { clearTimeout(stuck); fig.handFor = null; });
-        fig.onTap = (id, el) => {
-          if (tk.dead) return;
-          if (id === answer) {
-            clearTimeout(stuck);
-            fig.handFor = null;
-            fig.onTap = null;
-            sound.right();
-            praise(wrong === 0);
-            burstAt(el, { count: 14, spread: 110 });
-            resolve({ wrong });
-          } else {
-            wrong++;
-            sound.wrong();
-            el.classList.remove('nope');
-            void el.getBoundingClientRect();
-            el.classList.add('nope');
-            talk(why[id]);
-            showHand();
-          }
-        };
-      }));
-    },
 
     // run something alongside the main script (its cancellation is swallowed)
     spawn(fn) { Promise.resolve().then(fn).catch((e) => { if (e !== CANCEL) console.error(e); }); },

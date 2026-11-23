@@ -50,6 +50,8 @@ def lines():
     out += re.findall(r"c\.caption\(\s*" + Q, src)                       # captions
     out += re.findall(r"crew\(\s*" + Q, src)                             # instructions
     out += re.findall(r"\b(?:lockHint|cap|rule)\s*:\s*" + Q, src)        # lock hints, questions, recall
+    out += re.findall(r"\bgot\s*:\s*" + Q, src)                         # what the praise says was right
+    out += re.findall(r"c\.praise\(\s*\w+\s*,\s*" + Q, src)             # ... after a hands-on task
     # wrong-answer explanations: the values inside every why: { ... } and the TYPE_WHY table
     blocks = re.findall(r"why:\s*\{(.*?)\}\s*[,}]", src, re.S)
     t = src.index('const TYPE_WHY = {')

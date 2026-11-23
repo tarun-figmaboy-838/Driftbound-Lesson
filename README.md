@@ -74,7 +74,8 @@ docs/lesson-design.md      the lesson design
 
 - **A step** (in `src/lesson/steps.js`) is an `async run(c)` script. `c` is the toolkit from
   `makeCtx()` in `src/main.js`: `c.caption()`, `c.say()`, `c.view()` (a figure with state),
-  `c.choose()` / `c.tapFig()` (questions with an explanation for every wrong answer), `c.ready()`
+  `c.choose()` / `c.cards()` (questions with an explanation for every wrong answer and a line on what
+  was right), `c.ready()`
   (unlocks Next). Leaving a step cancels its script.
 - **The narration** shows one sentence at a time; every line it can say has a recording in
   `assets/vo`, found by a hash of the exact text. Change a line's text and it needs a new recording.

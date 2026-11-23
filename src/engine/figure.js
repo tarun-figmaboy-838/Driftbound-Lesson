@@ -7,7 +7,7 @@
 // Drawing is keyed: each draw call names its item, and only items whose markup changed are touched.
 // Elements that persist keep their CSS animations and their keyboard focus while the figure moves.
 
-import { esc, lerp } from './ui.js';
+import { esc } from './ui.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const RAD = Math.PI / 180;
@@ -20,7 +20,6 @@ class Builder {
     this.f = fig;
     this.k = fig.k;
     this.items = [];
-    this.cuePts = [];     // tap targets being hinted ({ id, p }); they all pulse
     this.handAt = null;   // a drag handle being hinted: the hint hand rests on it
   }
 
@@ -148,31 +147,11 @@ class Builder {
       + `<text class="t-tag" x="${n(x)}" y="${n(y + fs * 0.04)}" font-size="${n(fs)}" text-anchor="middle" dominant-baseline="central">${esc(str)}</text>`, { cls: 'tagpop' });
   }
 
-  // something the student can tap: a point {c, r}, a segment {p, q, w} or a sector {o, a, b, r}
-  // a tap target. It glows (a ring round a point, a line along an arm, an outline round an angle):
-  // softly pulsing while it is hinted (cue), fully on hover and keyboard focus.
-  tap(key, id, shape, label, { cue = false } = {}) {
-    const k = this.k, gc = `glow-t${cue ? ' cue' : ''}`;
-    let hit = '', glow = '';
-    if (shape.c) {
-      const [x, y] = this.P(shape.c), R = n((shape.r || 26) * k);
-      hit = `<circle class="hit" cx="${x}" cy="${y}" r="${R}"/>`;
-      glow = `<circle class="${gc}" cx="${x}" cy="${y}" r="${n(16 * k)}"/>`;
-      if (cue) this.cuePts.push({ id, p: shape.c });
-    } else if (shape.p) {
-      const [x1, y1] = this.P(shape.p), [x2, y2] = this.P(shape.q);
-      const d = `M${x1} ${y1}L${x2} ${y2}`;
-      hit = `<path class="hit-line" d="${d}" stroke-width="${n((shape.w || 30) * k)}"/>`;
-      glow = `<path class="${gc} glow-line" d="${d}" stroke-width="${n(6 * k)}"/>`;
-      if (cue) this.cuePts.push({ id, p: [lerp(shape.p[0], shape.q[0], 0.62), lerp(shape.p[1], shape.q[1], 0.62)] });
-    } else {
-      const { o, a, b, r } = shape;
-      const R = n(r * this.f.s), [cx, cy] = this.P(o), pa = this.P(at(o, a, r)), pb = this.P(at(o, b, r));
-      const d = `M${cx} ${cy}L${pa[0]} ${pa[1]}A${R} ${R} 0 ${b - a > 180 ? 1 : 0} 0 ${pb[0]} ${pb[1]}Z`;
-      hit = `<path class="hit" d="${d}"/>`;
-      glow = `<path class="${gc}" d="${d}"/>`;
-    }
-    this.push(key, glow + hit, { cls: 'tap', attrs: { tabindex: '0', role: 'button', 'aria-label': label, 'data-tap': id } });
+  // an angle the student can tap, the sector {o, a, b, r}. Its outline glows on hover and keyboard focus.
+  tap(key, id, { o, a, b, r }, label) {
+    const R = n(r * this.f.s), [cx, cy] = this.P(o), pa = this.P(at(o, a, r)), pb = this.P(at(o, b, r));
+    const d = `M${cx} ${cy}L${pa[0]} ${pa[1]}A${R} ${R} 0 ${b - a > 180 ? 1 : 0} 0 ${pb[0]} ${pb[1]}Z`;
+    this.push(key, `<path class="glow-t" d="${d}"/><path class="hit" d="${d}"/>`, { cls: 'tap', attrs: { tabindex: '0', role: 'button', 'aria-label': label, 'data-tap': id } });
   }
 
   // the hint hand (Figma AI art): rests on the hinted target (the first one) and presses it, with a
@@ -185,19 +164,35 @@ class Builder {
     this.push(key, `${ripple}<g class="hint-hand" style="transform-origin:${x0}px ${y0}px">${pic}</g>`, { cls: 'hint-hand-wrap' });
   }
 
-  // a draggable knob (a slider for keyboards and screen readers)
+  // a draggable knob at the end of a ray that turns round O (a slider for keyboards and screen readers):
+  // a glowing ring with a bright core, and two curved arrows either side, along the path it turns on.
+  // While it is hinted the arrows pop in and nudge the way they point.
   handle(key, id, p, { label = 'Handle', now = 0, min = 0, max = 180, hint = false, color = '#ffc531' } = {}) {
     const k = this.k, R = 13 * k;
     const [x, y] = this.P(p);
     if (hint) this.handAt = p;
-    const html = (hint ? `<circle class="hint-ring" cx="${x}" cy="${y}" r="${n(R * 1.5)}"/>` : '')
-      + `<circle class="hit" cx="${x}" cy="${y}" r="${n(R * 2.6)}"/>`
+    const a = angleOf(p), rr = Math.hypot(p[0], p[1]), px = rr * this.f.s, H = 10 * k, W = 4 * k;
+    const deg = (len) => len / px / RAD;                   // a length on screen as degrees round O
+    const arrow = (side) => {
+      const a0 = a + side * deg(R + 7 * k), a1 = a + side * deg(R + 27 * k), aS = a1 - side * deg(H * 0.6);
+      const p0 = this.P(at([0, 0], a0, rr)), pS = this.P(at([0, 0], aS, rr)), [tx, ty] = this.P(at([0, 0], a1, rr));
+      const shaft = `M${p0[0]} ${p0[1]}A${n(px)} ${n(px)} 0 0 ${side > 0 ? 0 : 1} ${pS[0]} ${pS[1]}`;
+      const t = (a1 + side * 90) * RAD, dx = Math.cos(t), dy = -Math.sin(t), w2 = H * 0.62;
+      const bx = tx - dx * H, by = ty - dy * H;
+      const head = `M${n(tx)} ${n(ty)}L${n(bx - dy * w2)} ${n(by + dx * w2)}L${n(bx + dy * w2)} ${n(by - dx * w2)}Z`;
+      return `<g class="knob-arrow" style="--dx:${n(dx * 4 * k)}px;--dy:${n(dy * 4 * k)}px">`
+        + `<path class="ink" d="${shaft}" stroke-width="${n(W * 2)}"/><path class="ink-h" d="${head}" stroke-width="${n(W)}"/>`
+        + `<path d="${shaft}" fill="none" stroke="#fff" stroke-width="${n(W)}" stroke-linecap="round"/>`
+        + `<path d="${head}" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></g>`;
+    };
+    const html = `<circle class="hit" cx="${x}" cy="${y}" r="${n(R * 2.6)}"/>`
+      + arrow(1) + arrow(-1)
       + `<circle class="ink-f" cx="${x}" cy="${y}" r="${n(R + 3 * k)}"/>`
-      + `<circle cx="${x}" cy="${y}" r="${n(R)}" fill="${color}"/>`
-      + `<ellipse cx="${x}" cy="${n(y - R * 0.38)}" rx="${n(R * 0.55)}" ry="${n(R * 0.3)}" fill="rgba(255,255,255,.75)"/>`
+      + `<circle class="knob-ring" cx="${x}" cy="${y}" r="${n(R - 1.2 * k)}" stroke="${color}" stroke-width="${n(3.2 * k)}"/>`
+      + `<circle cx="${x}" cy="${y}" r="${n(R * 0.42)}" fill="#fff"/>`
       + `<circle class="focus" cx="${x}" cy="${y}" r="${n(R + 9 * k)}"/>`;
     this.push(key, html, {
-      cls: 'drag',
+      cls: `drag${hint ? ' is-hint' : ''}`,
       attrs: { tabindex: '0', role: 'slider', 'aria-label': label, 'aria-valuemin': String(min), 'aria-valuemax': String(max), 'aria-valuenow': String(Math.round(now)), 'aria-valuetext': `${Math.round(now)} degrees`, 'data-drag': id },
     });
   }
@@ -226,7 +221,6 @@ export class Figure {
     this.onDrag = null;         // (id, unitPoint, phase) => void
     this.onNudge = null;        // (id, delta) => void   arrow keys on a handle
     this.dragAll = null;        // handle id that any press on the figure drags (easier on phones)
-    this.handFor = null;        // with several tap targets: the one the hint hand rests on (set once the student is stuck)
     this.dragging = null;
     this.ro = new ResizeObserver(() => this.render());
     this.ro.observe(host);
@@ -283,10 +277,7 @@ export class Figure {
     if (!this.fn || !this.layout()) return;
     const b = new Builder(this);
     this.fn(b);
-    // the hint hand: on the only target, or (with several) on the one handFor names, once the student is stuck
-    const cue = b.cuePts.length === 1 ? b.cuePts[0] : b.cuePts.find((q) => q.id === this.handFor);
-    if (cue) b.hand('zz-hand', [cue.p]);
-    else if (b.handAt) b.hand('zz-hand', [b.handAt]);
+    if (b.handAt) b.hand('zz-hand', [b.handAt]);          // the hint hand, on a drag handle
     this.commit(b.items);
     this.svg.classList.toggle('draggable', !!(this.onDrag && (this.dragAll || b.items.some((i) => i.attrs?.['data-drag']))));
   }

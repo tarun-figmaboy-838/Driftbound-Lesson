@@ -35,17 +35,12 @@
 .fig-svg .pulse-ring { fill: none; transform-box: fill-box; transform-origin: center; animation: ring 1.3s ease-out infinite; }
 @keyframes ring { from { transform: scale(.7); opacity: 1; } to { transform: scale(2.3); opacity: 0; } }
 .fig-svg .hit { fill: transparent; }
-.fig-svg .hit-line { stroke: transparent; fill: none; stroke-linecap: round; }
 .fig-svg .tap { cursor: pointer; outline: none; }
-/* tap targets glow: a ring round a point, a line along an arm, an outline round an angle. A hinted target
-   pulses softly; hover and keyboard focus light it fully. No fills, no dashes. */
+/* an angle that can be tapped: its outline lights on hover and keyboard focus. No fills, no dashes. */
 .fig-svg .glow-t { fill: none; stroke: var(--holo); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0;
   filter: drop-shadow(0 0 5px rgba(127, 243, 255, .95)) drop-shadow(0 0 12px rgba(61, 220, 242, .6)); transition: opacity .2s ease; }
-.fig-svg .glow-line { stroke: #b6fbff; }
-.fig-svg .glow-t.cue { animation: glow-pulse 1.3s ease-in-out infinite alternate; }
-@keyframes glow-pulse { from { opacity: .45; } to { opacity: 1; } }
-.fig-svg .tap:focus-visible .glow-t { opacity: 1; animation: none; }
-@media (hover: hover) { .fig-svg .tap:hover .glow-t { opacity: 1; animation: none; } }
+.fig-svg .tap:focus-visible .glow-t { opacity: 1; }
+@media (hover: hover) { .fig-svg .tap:hover .glow-t { opacity: 1; } }
 .fig-svg .focus { fill: none; stroke: var(--holo); stroke-width: 2.5; opacity: 0; filter: drop-shadow(0 0 6px rgba(127, 243, 255, .9)); }
 .fig-svg .drag:focus-visible .focus { opacity: 1; }
 /* the hint hand: comes in after a moment, then stays on the target and presses it; a ripple pulses
@@ -57,10 +52,13 @@
 .fig-svg .hand-ripple { fill: rgba(255, 224, 102, .18); stroke: #ffe066; stroke-width: 2.5; transform-box: fill-box; transform-origin: center; opacity: 0;
   animation: hand-ripple 1.4s ease-out infinite; }
 @keyframes hand-ripple { 0%, 34% { transform: scale(.5); opacity: 0; } 40% { opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
-.fig-svg .tap.nope { animation: nope .45s ease; }
-@keyframes nope { 30% { filter: drop-shadow(0 0 6px #ff7a6b); } }
 .fig-svg .drag { cursor: grab; outline: none; }
-.fig-svg .hint-ring { fill: none; stroke: #ffe066; stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: ring 1.5s ease-out infinite; }
+/* the drag knob; its arrows show the way it turns (they pop in and nudge while it is hinted) */
+.fig-svg .knob-ring { fill: #0b2560; filter: drop-shadow(0 0 5px rgba(255, 210, 80, .7)); }
+.fig-svg .knob-arrow { filter: drop-shadow(0 0 4px rgba(255, 214, 90, .95)); transform-box: fill-box; transform-origin: center; }
+.fig-svg .drag.is-hint .knob-arrow { animation: knob-pop .45s cubic-bezier(.3, 1.7, .5, 1) .2s both, knob-nudge 1.1s ease-in-out .65s infinite; }
+@keyframes knob-pop { from { opacity: 0; transform: scale(.2); } to { opacity: 1; transform: scale(1); } }
+@keyframes knob-nudge { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(var(--dx), var(--dy)); } }
 .fig-svg .dashy path:last-child { stroke-dasharray: 2 9; }
 
 /* ---------------------------------------------------------------- readout and the deck's label box (HUD, bottom of the screen) */

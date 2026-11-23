@@ -22,7 +22,7 @@
 @media (prefers-reduced-motion: reduce) {
   .holo--glow, .holo--scan { animation: none !important; }
   .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
-  .fig-svg .glow-t.cue { animation: none; opacity: .8; }
   .fig-svg .hint-hand, .fig-svg .hint-hand-wrap { animation: none; }
   .fig-svg .hand-ripple { animation: none; opacity: .6; }
+  .fig-svg .knob-arrow { animation: none !important; }
 }

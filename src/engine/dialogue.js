@@ -70,10 +70,10 @@ export class Dialogue {
 
   // instructions and hints; resolves once they have been said (or the line is cleared). A long hint comes
   // in pieces, said one after another: a new sentence takes the line, a piece that goes on with the
-  // sentence (it starts in lower case) joins it, and the line only goes back to the caption after the last
+  // sentence (it starts in lower case, or says join: true) joins it, and the line only goes back to the caption after the last
   play(lines) {
     const ps = lines.filter(Boolean).map((l) => (typeof l === 'string' ? { text: l } : l))
-      .map((l) => ({ kind: l.mood === 'hint' || l.mood === 'praise' ? 'hint' : 'line', mood: l.mood, text: l.text, hold: l.hold, join: /^[a-z]/.test(l.text) }));
+      .map((l) => ({ kind: l.mood === 'hint' || l.mood === 'praise' ? 'hint' : 'line', mood: l.mood, text: l.text, hold: l.hold, join: l.join ?? /^[a-z]/.test(l.text) }));
     if (!ps.length) return Promise.resolve();
     if (ps[0].kind === 'hint') this.interrupt();
     ps.forEach((p, i) => {

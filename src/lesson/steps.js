@@ -31,23 +31,19 @@ const OP = (v) => `<span class="op">${v}</span>`;
 
 // ---------------------------------------------------------------- figures
 
-// the straight line AB through O, drawn out from the middle as s.l goes from 0 to 1
+// the straight line through O, drawn out from the middle as s.l goes from 0 to 1
 function lineAB(b, s, glow = false) {
   if (s.l) b.line('ab', [-150 * s.l, 0], [150 * s.l, 0], { color: C.aqua, start: true, end: true, cls: glow ? 'glow' : '' });
 }
-// the vertex O; the line's ends A and B only where the step names them (s.ab: the rule ∠AOC + ∠COB)
-function pointsAOB(b, s, oDir = 270) {
-  if (s.ab && s.l > 0.72) {
-    b.dot('pa', [-100, 0], { r: 5 });
-    b.dot('pb', [100, 0], { r: 5 });
-    b.label('na', [-100, 0], 'A', 270, 25);
-    b.label('nb', [100, 0], 'B', 270, 25);
-  }
+// the vertex O
+function pointO(b, oDir = 270) {
   b.dot('po', O, { r: 7 });
   b.label('no', O, 'O', oDir, 26);
 }
+// a value or a name in an angle: a number (26), the unknown x (30) or a name like ∠1 (22)
+const tagOpts = (v, color) => (v === 'x' ? { size: 30, color, font: 'x' } : v.startsWith('∠') ? { size: 22, color, font: 'name' } : { size: 26, color });
 
-// ray OC standing on line AB (deck slides 14-23): ∠COB on the right (orange), ∠AOC on the left (aqua)
+// ray OC standing on a straight line (deck slides 14-23): the right angle (orange) and the left one (aqua)
 const LIN_BOX = [-158, -38, 158, 140];
 function linearFig(b, s) {
   const t = s.t;
@@ -56,11 +52,11 @@ function linearFig(b, s) {
     b.wedge('wl', O, 180 - (180 - t) * s.w, 180, 40, { fill: FILL.aqua, edge: C.aqua, cls: s.blink ? 'blink2' : '' });
   }
   lineAB(b, s, s.glow);
-  if (s.c) b.ray('oc', O, t, 122 * s.c, { color: C.sun });
-  pointsAOB(b, s);
-  if (s.c > 0.95) b.label('nc', at(O, t, 122), 'C', t + (s.handle ? 0 : 0), s.handle ? 36 : 25);
-  if (s.right != null) b.text('vr', at(O, t / 2, labelR(t)), s.right, { size: 26, color: TXT.orange });
-  if (s.left != null) b.text('vl', at(O, (t + 180) / 2, labelR(180 - t)), s.left, { size: s.left === 'x' ? 30 : 26, color: TXT.aqua, font: s.left === 'x' ? 'x' : 'num' });
+  if (s.c) b.ray('oc', O, t, 122 * s.c, { color: C.sun, end: !s.handle });   // the knob stands in for the arrowhead
+  pointO(b);
+  if (s.c > 0.95) b.label('nc', at(O, t, 122), 'C', t, s.handle ? 36 : 25);
+  if (s.right != null) b.text('vr', at(O, t / 2, labelR(t)), s.right, tagOpts(s.right, TXT.orange));
+  if (s.left != null) b.text('vl', at(O, (t + 180) / 2, labelR(180 - t)), s.left, tagOpts(s.left, TXT.aqua));
   if (s.handle) b.handle('hc', 'c', at(O, t, 122), { label: 'Point C. Drag it, or use the arrow keys, to move ray OC.', now: t, min: 15, max: 165, hint: s.hint });
 }
 
@@ -74,8 +70,8 @@ function crossFig(b, s) {
     if (f) b.wedge(`w${k}`, O, a, z, 38, { fill: FILL[f], edge: EDGE[f], cls: s.wcls?.[k] || '' });
   });
   if (s.l) b.line('ab', [-150 * s.l, 0], [150 * s.l, 0], { color: C.aqua, start: true, end: true, cls: s.glow === 'ab' ? 'glow' : '' });
-  if (s.q) b.line('pq', at(O, t + 180, 126 * s.q), at(O, t, 126 * s.q), { color: C.sun, start: true, end: true, cls: s.glow === 'pq' ? 'glow' : '' });
-  pointsAOB(b, s, 292);
+  if (s.q) b.line('pq', at(O, t + 180, 126 * s.q), at(O, t, 126 * s.q), { color: C.sun, start: true, end: !s.handle, cls: s.glow === 'pq' ? 'glow' : '' });
+  pointO(b, 292);
   W.forEach(([a, z], k) => {
     const f = s.fill?.[k];
     if (s.names?.[k]) b.text(`n${k}`, at(O, mid(a, z), 64), `∠${k + 1}`, { font: 'name', size: 21, color: TXT[f] || '#fff' });
@@ -113,7 +109,9 @@ function joinFig(a1, a2) {
   };
 }
 
-// two separate angles side by side; s.j slides the second one onto the first (sharing an arm)
+// two separate angles side by side; s.j slides the second one onto the first (sharing an arm).
+// Once joined: s.ring rings the shared vertex, s.arm lights the shared arm (the outer arms dim),
+// s.blink blinks the two angles in turn
 const PAIR_BOX = [-30, -32, 170, 62];
 function pairMini(b, a1, a2, s = {}) {
   const j = s.j || 0;
@@ -125,13 +123,15 @@ function pairMini(b, a1, a2, s = {}) {
   const box = [(PAIR_BOX[0] + PAIR_BOX[2]) / 2, (PAIR_BOX[1] + PAIR_BOX[3]) / 2];
   const o = [(box[0] - mid[0]) * j, (box[1] - mid[1]) * j];
   const v2 = [lerp(106, 0, j) + o[0], o[1]];
-  b.wedge('w1', o, 0, a1, R, { fill: FILL.orange, edge: C.orange });
-  b.wedge('w2', v2, rot, rot + a2, R, { fill: FILL.aqua, edge: C.aqua });
-  b.ray('a1', o, 0, L, { color: C.aqua, w: 4.5 });
-  b.ray('b1', o, a1, L, { color: C.sun, w: 4.5 });
-  b.ray('a2', v2, rot, L, { color: C.aqua, w: 4.5 });
-  b.ray('b2', v2, rot + a2, L, { color: C.sun, w: 4.5 });
+  const outer = s.arm ? 'dim' : '', shared = s.arm ? 'glow' : '';
+  b.wedge('w1', o, 0, a1, R, { fill: FILL.orange, edge: C.orange, cls: s.blink ? 'blink' : '' });
+  b.wedge('w2', v2, rot, rot + a2, R, { fill: FILL.aqua, edge: C.aqua, cls: s.blink ? 'blink2' : '' });
+  b.ray('a1', o, 0, L, { color: C.aqua, w: 4.5, cls: outer });
+  b.ray('b1', o, a1, L, { color: C.sun, w: 4.5, cls: shared });
+  b.ray('a2', v2, rot, L, { color: C.sun, w: 4.5, cls: shared });
+  b.ray('b2', v2, rot + a2, L, { color: C.aqua, w: 4.5, cls: outer });
   b.dot('o1', o, { r: 4.5 });
+  if (s.ring) b.pulse('ring', o);
   if (j < 0.98) b.dot('o2', v2, { r: 4.5 });
   if (j < 0.4) {
     b.text('v1', [o[0] + 10, o[1] - 19], `${a1}°`, { size: 20, color: TXT.orange });
@@ -173,7 +173,7 @@ function lineMini(b, { t = 65, other = 180, right = '', left = '' } = {}) {
 
 const RECALL = [
   {
-    term: 'Angles definition', rule: 'Two rays starting from the same point form an angle.',
+    term: 'Angles', rule: 'Two rays starting from the same point form an angle.',
     box: [-18, -18, 78, 70], start: { t: 0, ring: 0 },
     draw(b, s) {
       if (s.t > 0.5) b.wedge('w', O, 0, s.t, 28, { fill: FILL.orange, edge: C.orange });
@@ -434,23 +434,25 @@ export const STEPS = [
         if (s.sq) b.square('sq', O, 0, 17);
       });
       const ROUNDS = [
-        { d: 52, t: 'Acute', cap: 'Which type of angle is this?' },
-        { d: 90, t: 'Right', cap: 'What type is it now?' },
-        { d: 128, t: 'Obtuse', cap: 'And what type is this?' },
+        { d: 52, t: 'Acute', cap: 'Which type of angle is this?', got: 'Acute: less than 90°.' },
+        { d: 90, t: 'Right', cap: 'What type is it now?', got: 'A right angle: exactly 90°.' },
+        { d: 128, t: 'Obtuse', cap: 'And what type is this?', got: 'Obtuse: more than 90°.' },
       ];
       for (const [k, R] of ROUNDS.entries()) {
         c.caption(R.cap);
         if (k) { v.set({ val: false, sq: false }); await v.to({ t: R.d }, 800, 'inOut'); }
-        await c.choose({ options: ['Acute', 'Right', 'Obtuse'], answer: R.t, why: TYPE_WHY[R.d] });
+        await c.choose({ options: ['Acute', 'Right', 'Obtuse'], answer: R.t, why: TYPE_WHY[R.d], got: R.got });
         v.set({ sq: R.d === 90 });
         await c.wait(1200);
       }
     },
   },
 
-  // deck slide 7: complementary (the deck asks without saying what it means, so recall it first)
+  // deck slides 7-12: complementary, then adjacent. The pair found is the pair that then shares a point and
+  // an arm (its card goes, the two angles stay and fill the screen, slide together, and are named adjacent).
+  // The deck asks about complementary angles without saying what they are, so that is said first.
   {
-    id: 'comp', ch: 0, gate: true, title: 'Complementary angles', lockHint: 'Tap the card with the complementary pair.',
+    id: 'comp', ch: 0, gate: true, title: 'Complementary and adjacent angles', lockHint: 'Tap the card with the complementary pair.',
     async run(c) {
       c.caption('Complementary angles add up to 90°.');
       c.caption('Which pair is complementary?');
@@ -458,79 +460,32 @@ export const STEPS = [
         items: PAIR_CARDS({ A: [30, 60], B: [45, 55], C: [35, 65] }),
         answer: 'A',
         why: { B: ['45° + 55° = 100°.', 'Complementary angles make exactly 90°.'], C: ['35° + 65° = 100°.', 'Complementary angles make exactly 90°.'] },
+        got: '30° + 60° = 90°.',
       });
       c.ready();
-      await c.wait(400);
-      await res.view.to({ j: 1 }, 1100, 'inOut');          // the two angles slide together into a right angle
-      res.view.set({ sq: true });
-      c.sound.snap();
-      await c.wait(900);
-    },
-  },
-
-  // ============================================================ ADJACENT ANGLES
-  // deck slides 8-12: same vertex, common arm, no overlap
-  {
-    id: 'adjacent', ch: 1, gate: true, title: 'Adjacent angles', lockHint: 'Do what the screen asks to go on.',
-    async run(c) {
-      c.fig.box(-70, -40, 166, 152);
-      const L = 128, TC = 40, TB = 100;
-      const v = c.view({ ra: 0, rc: 0, rb: 0, w: 0, names: false, taps: null, ring: false, glowC: false, blink: false, dimArms: false }, (b, s) => {
-        if (s.w) {
-          b.wedge('w1', O, 0, TC * s.w, 44, { fill: FILL.orange, edge: C.orange, cls: s.blink ? 'blink' : '' });
-          b.wedge('w2', O, TC, TC + (TB - TC) * s.w, 44, { fill: FILL.aqua, edge: C.aqua, cls: s.blink ? 'blink2' : '' });
-        }
-        if (s.ra) b.ray('oa', O, 0, L * s.ra, { color: C.aqua, cls: s.dimArms ? 'dim' : '' });
-        if (s.rb) b.ray('ob', O, TB, L * s.rb, { color: C.aqua, cls: s.dimArms ? 'dim' : '' });
-        if (s.rc) b.ray('oc', O, TC, L * s.rc, { color: C.sun, cls: s.glowC ? 'glow' : '' });
-        b.dot('o', O, { r: 7 });
-        if (s.ring) b.pulse('ring', O);
-        if (s.names) {
-          b.label('no', O, 'O', 245, 25);
-          b.label('na', [L, 0], 'A', 300, 25);
-          b.label('nc', at(O, TC, L), 'C', TC, 26);
-          b.label('nb', at(O, TB, L), 'B', TB, 26);
-        }
-        if (s.taps === 'points') {
-          [['O', O], ['A', [L, 0]], ['C', at(O, TC, L)], ['B', at(O, TB, L)]].forEach(([n, p]) => b.tap(`tp${n}`, n, { c: p, r: 28 }, `Point ${n}`, { cue: true }));
-        }
-        if (s.taps === 'arms') {
-          [['OA', 0], ['OC', TC], ['OB', TB]].forEach(([n, d]) => b.tap(`ta${n}`, n, { p: at(O, d, 34), q: at(O, d, L - 8), w: 34 }, `Arm ${n}`, { cue: true }));
-        }
-      });
+      await c.wait(500);
+      await res.unframe();                                 // the card goes; 30° and 60° stay and fill the screen
+      const v = res.view;
       c.caption('What if these two angles share a point and an arm?');
-      await c.wait(250);
-      await v.to({ ra: 1 }, 380, 'out');
-      await v.to({ rc: 1 }, 380, 'out');
-      await v.to({ rb: 1 }, 380, 'out');
-      v.set({ names: true });
-      await v.to({ w: 1 }, 600, 'out');
+      await c.said();
+      await c.wait(300);
+      c.sound.whoosh();
+      await v.to({ j: 1 }, 1100, 'inOut');                 // the 60° angle slides over and turns onto the 30° one
+      v.set({ sq: true });                                 // still 90° together: a square corner
+      c.sound.snap();
+      await c.wait(700);
 
-      v.set({ taps: 'points' });
-      c.talk(crew('Tap the point where both angles start.'));
-      await c.tapFig({
-        answer: 'O',
-        why: {
-          A: ['Point A is on one angle only.', 'Find the point where both angles start.'],
-          B: ['Point B is on one angle only.', 'Find the point where both angles start.'],
-          C: ['C is on the shared arm, but both angles start at the corner.', 'Tap the corner.'],
-        },
-      });
-      v.set({ taps: null, ring: true });
+      v.set({ ring: true });                               // the shared vertex rings while it is named
       c.caption('They have the same vertex.');
-      await c.wait(1500);
+      await c.said(); await c.wait(700);
 
-      v.set({ ring: false, taps: 'arms' });
-      c.talk(crew('Tap the arm both angles share.'));
-      await c.tapFig({ answer: 'OC', why: { OA: 'OA is an arm of one angle only.', OB: 'OB is an arm of one angle only.' } });
-      v.set({ taps: null, glowC: true, dimArms: true });
+      v.set({ ring: false, arm: true });                   // the shared arm lights up, the outer arms dim
       c.caption('They also have one common arm.');
-      await c.wait(1500);
+      await c.said(); await c.wait(700);
 
-      c.ready();
-      v.set({ glowC: false, dimArms: false, blink: true });
+      v.set({ arm: false, blink: true });                  // the two angles blink in turn, side by side
       c.caption('The two angles do not overlap.');
-      await c.wait(1600);
+      await c.said(); await c.wait(600);
       v.set({ blink: false });
       c.caption('We call these adjacent angles.');
       c.stamp('Adjacent angles');
@@ -538,6 +493,7 @@ export const STEPS = [
     },
   },
 
+  // ============================================================ ADJACENT ANGLES
   // deck slide 13: which pair is adjacent?
   {
     id: 'adjacentQ', ch: 1, gate: true, title: 'Which pair is adjacent?', lockHint: 'Tap the adjacent pair to go on.',
@@ -550,6 +506,7 @@ export const STEPS = [
           A: ['They share a vertex and an arm,', 'but the orange angle covers the blue one: they overlap.'],
           C: 'Same vertex, but no common arm: there’s a gap between the two angles.',
         },
+        got: 'Same vertex, a common arm, no overlap.',
       });
     },
   },
@@ -602,6 +559,7 @@ export const STEPS = [
           170: ['Not quite.', '60 + 110 = 170, and 5 + 5 = 10 more.'],
           190: ['A bit too much.', '60 + 110 = 170, and 5 + 5 = 10 more.'],
         },
+        got: '65° + 115° = 180°.',
       });
       c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('g', '180°')}`);
       await c.wait(900);
@@ -637,7 +595,7 @@ export const STEPS = [
       c.talk(crew('Drag point C.'));
       await c.until(done);
       c.ready();
-      c.praise();
+      c.praise(true, 'You moved ray OC.');
       c.caption('The angles change, but their total stays 180°.');
       c.sound.right();
       await c.wait(1200);
@@ -649,11 +607,11 @@ export const STEPS = [
     id: 'axiom', quiet: true, ch: 2, title: 'Linear pair axiom',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 1, c: 1, w: 1, t: 62, sweep: null, ab: true }, linearFig);
+      const v = c.view({ l: 1, c: 1, w: 1, t: 62, sweep: null, right: '∠1', left: '∠2' }, linearFig);
       c.caption('A linear pair always adds to 180°.');
-      c.readout(`${S('a', '∠AOC')}${OP('+')}${S('o', '∠COB')}${OP('=')}${S('g', '180°')}`);
+      c.readout(`${S('o', '∠1')}${OP('+')}${S('a', '∠2')}${OP('=')}${S('g', '180°')}`);
       await c.wait(500);
-      v.set({ sweep: { r: 100, from: 0, at: 0, label: '' } });
+      v.set({ sweep: { r: 40, from: 0, at: 0, label: '' } });   // along the two angles' edge
       await c.tween(1200, (k) => { v.s.sweep.at = 180 * k; v.s.sweep.label = deg(180 * k); v.draw(); }, 'inOut');
       await c.wait(900);
       c.caption('If a ray stands on a straight line,');                // the rule in two parts; the second joins the line
@@ -675,6 +633,7 @@ export const STEPS = [
           118: ['118° + 52° = 170°.', 'A linear pair must make exactly 180°.'],
           138: ['138° + 52° = 190°.', 'That’s more than a straight line.'],
         },
+        got: '52° + 128° = 180°.',
       });
       v.set({ left: '128°' });
       await c.wait(900);
@@ -694,6 +653,7 @@ export const STEPS = [
         items: Object.entries(PAIRS).map(([id, [a1, a2]]) => ({ id, label: `${a1}° and ${a2}°`, box: JOIN_BOX, state: { j: 0 }, draw: joinFig(a1, a2) })),
         answer: 'A',
         why: { B: ['85° + 85° = 170°.', 'Supplementary angles make exactly 180°.'], C: ['100° + 70° = 170°.', 'Supplementary angles make exactly 180°.'] },
+        got: '110° + 70° = 180°.',
       });
       c.ready();
       await c.wait(500);
@@ -729,6 +689,7 @@ export const STEPS = [
           B: ['65° + 115° = 180°,', 'but they aren’t adjacent: no shared vertex, no shared arm.'],
           C: ['They’re adjacent, but 65° + 95° = 160°,', 'so the outer arms don’t make a straight line.'],
         },
+        got: 'Adjacent, and 115° + 65° = 180°.',
       });
     },
   },
@@ -772,6 +733,7 @@ export const STEPS = [
           '∠2': ['∠2 is next to ∠1: they share an arm.', 'Opposite angles only share the vertex.'],
           '∠4': ['∠4 is next to ∠1: they share an arm.', 'Look straight across the vertex.'],
         },
+        got: '∠3 faces ∠1 across O.',
       });
       v.set({ fill: ['orange', 'dim', 'orange', 'dim'] });
       await c.wait(900);
@@ -783,6 +745,7 @@ export const STEPS = [
           '∠1': ['∠1 is next to ∠2: they share an arm.', 'Look straight across O.'],
           '∠3': ['∠3 is next to ∠2: they share an arm.', 'Look straight across O.'],
         },
+        got: '∠4 faces ∠2 across O.',
       });
       c.ready();
       v.set({ fill: ['orange', 'aqua', 'orange', 'aqua'], taps: false });
@@ -858,7 +821,7 @@ export const STEPS = [
       c.talk(crew('Drag the line.'));
       await c.until(done);
       c.ready();
-      c.praise();
+      c.praise(true, 'You turned the line.');
       c.caption('Yes: vertically opposite angles stay equal.');
       c.sound.right();
     },
@@ -903,7 +866,7 @@ export const STEPS = [
         working.catch(() => {});                           // a step left mid-way: its working stops quietly
         if (P.arc) {                                       // the half turn each linear pair fills
           const [a, z] = P.arc;
-          v.s.sweep = { r: 100, from: a, at: a, label: '' };
+          v.s.sweep = { r: 38, from: a, at: a, label: '' };   // along the pair's edge
           await c.tween(1000, (e) => { v.s.sweep.at = lerp(a, z, e); v.s.sweep.label = deg(180 * e); v.draw(); }, 'inOut');
         }
         await working;
@@ -923,9 +886,9 @@ export const STEPS = [
       const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', null, null, null], vcls: [] }, crossFig);
       c.caption('Can you find the other three angles if ∠1 is 68°?');
       const QS = [
-        { k: 2, name: '∠3', fill: 'orange', opts: [22, 68, 112], ans: 68, why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] } },
-        { k: 1, name: '∠2', fill: 'aqua', opts: [68, 112, 122], ans: 112, why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] } },
-        { k: 3, name: '∠4', fill: 'aqua', opts: [68, 112, 132], ans: 112, why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] } },
+        { k: 2, name: '∠3', fill: 'orange', opts: [22, 68, 112], ans: 68, why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] }, got: '∠3 is opposite ∠1: 68°.' },
+        { k: 1, name: '∠2', fill: 'aqua', opts: [68, 112, 122], ans: 112, why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] }, got: '180° − 68° = 112°.' },
+        { k: 3, name: '∠4', fill: 'aqua', opts: [68, 112, 132], ans: 112, why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] }, got: '∠4 is opposite ∠2: 112°.' },
       ];
       for (const Q of QS) {
         v.s.fill[Q.k] = 'sun';
@@ -933,7 +896,7 @@ export const STEPS = [
         v.s.vcls = [];
         v.s.vcls[Q.k] = 'blink';
         v.draw();
-        await c.choose({ options: Q.opts, answer: Q.ans, fmt: deg, why: Q.why });
+        await c.choose({ options: Q.opts, answer: Q.ans, fmt: deg, why: Q.why, got: Q.got });
         v.s.fill[Q.k] = Q.fill;
         v.s.vals[Q.k] = deg(Q.ans);
         v.s.vcls = [];
@@ -958,10 +921,10 @@ export const STEPS = [
       const beam = root.querySelector('.recall__beam');
       const drone = root.querySelector('.drone');
       c.stage(root);
-      // while the drone is here, it is the one talking: the mouth moves to its screen
+      // while the drone is here, it is the one talking: the mouth moves to its screen (and back when it leaves)
       const bar = document.getElementById('narration');
-      bar.classList.add('mouth-on-drone');
-      c.later(() => bar.classList.remove('mouth-on-drone'));
+      const mouthOnDrone = (on) => bar.classList.toggle('mouth-on-drone', on);
+      c.later(() => mouthOnDrone(false));
       // each card's place in the collection (invisible until the card lands); while the drone works, four of
       // them wait at the sides (data-pos 0-3: left and right, top row then bottom row) and the last card
       // stays in the middle. Each card waits off stage until the drone brings it
@@ -988,6 +951,7 @@ export const STEPS = [
         return [r.left - rr.left + r.width / 2 - drone.offsetWidth / 2, Math.max(0, r.top - rr.top - drone.offsetHeight - 40)];
       };
       const flyIn = async (to) => {
+        mouthOnDrone(true);
         place(-drone.offsetWidth - 40, to[1], { now: true, tilt: 9 });
         c.sound.whoosh();
         place(to[0], to[1], { tilt: 8 });
@@ -998,6 +962,7 @@ export const STEPS = [
       const flyOut = () => {
         const y = parseFloat(drone.style.transform.split(',')[1]) || 0;
         place(W() + 40, y, { tilt: 9 });
+        mouthOnDrone(false);
       };
 
       // ---- the projection: a cone of light from the drone's emitter down over the card
@@ -1030,6 +995,24 @@ export const STEPS = [
           { transform: 'none', opacity: 0.7, offset: 0.86 },
           { transform: 'none', opacity: 1, filter: 'none' },
         ], { duration: 900, easing: 'cubic-bezier(.3, .6, .3, 1)' }).finished.catch(() => {}));
+      };
+
+      // ---- then the card's shape draws itself: each line grows from where it starts (a ray from its
+      // vertex), and the filled parts (angles, arrowheads, points, labels) come in as the lines finish
+      const drawIn = async (fig) => {
+        fig.classList.remove('is-waiting');
+        if (c.reduced) return;
+        const ms = 750;
+        const anims = [...fig.querySelectorAll('svg [data-k] *')].map((el) => {
+          const fill = el.getAttribute('fill');
+          if (el.tagName === 'path' && (!fill || fill === 'none') && el.getTotalLength) {
+            const L = el.getTotalLength() + 1;
+            return el.animate([{ strokeDasharray: `${L} ${L}`, strokeDashoffset: L }, { strokeDasharray: `${L} ${L}`, strokeDashoffset: 0 }],
+              { duration: ms * 0.8, easing: 'ease-in-out' });
+          }
+          return el.tagName === 'g' ? null : el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.78 }, { opacity: 1 }], { duration: ms, easing: 'ease-out' });
+        }).filter(Boolean);
+        await c.until(Promise.all(anims.map((a) => a.finished.catch(() => {}))));
       };
 
       // ---- the card flies down into its slot in the tray and is collected
@@ -1095,13 +1078,16 @@ export const STEPS = [
         }
         beamOn(stage);
         c.sound.pop();
+        const fig = k.el.querySelector('.rcard__fig');
+        fig.classList.add('is-waiting');                 // the card comes first, empty
         await release(k.el);
+        await drawIn(fig);                               // then its shape draws in
         await explain(k);
         beamOff();                                       // the light goes back into the emitter
         await c.wait(c.reduced ? 0 : 280);
         if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 200); }
       }
-      if (!c.reduced) { flyOut(); await c.wait(1000); }
+      if (!c.reduced) { flyOut(); await c.wait(1000); } else mouthOnDrone(false);
 
       // the drone gone: the cards grow into the big collection, the last one from the middle to its place
       const home = (k) => { k.el.classList.remove('is-holo', 'is-on'); k.slot.appendChild(k.el); k.slot.classList.add('got'); k.slot.classList.remove('away'); };
@@ -1137,7 +1123,7 @@ export const STEPS = [
               beamOff();
               k.el.classList.remove('is-holo', 'is-on');
               await c.wait(c.reduced ? 0 : 280);
-              if (!c.reduced) { flyOut(); await c.wait(1000); }
+              if (!c.reduced) { flyOut(); await c.wait(1000); } else mouthOnDrone(false);
               await relayout(() => { home(k); root.classList.add('is-done'); }, { stagger: 30 });
             } finally { busy = false; }
           });

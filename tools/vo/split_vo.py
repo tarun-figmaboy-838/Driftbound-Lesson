@@ -58,9 +58,6 @@ SPLITS = {
     # tap hints: what is wrong, then where to look
     '∠3 is next to ∠2: they share an arm. Look straight across O.': ['∠3 is next to ∠2: they share an arm.', 'Look straight across O.'],
     '∠1 is next to ∠2: they share an arm. Look straight across O.': ['∠1 is next to ∠2: they share an arm.', 'Look straight across O.'],
-    'C is on the shared arm, but both angles start at the corner. Tap the corner.': ['C is on the shared arm, but both angles start at the corner.', 'Tap the corner.'],
-    'Point A is on one angle only. Find the point where both angles start.': ['Point A is on one angle only.', 'Find the point where both angles start.'],
-    'Point B is on one angle only. Find the point where both angles start.': ['Point B is on one angle only.', 'Find the point where both angles start.'],
     'That’s ∠1 itself. Find the angle facing it across O.': ['That’s ∠1 itself.', 'Find the angle facing it across O.'],
     'That’s ∠2 itself. Find the angle facing it across O.': ['That’s ∠2 itself.', 'Find the angle facing it across O.'],
     'That’s ∠3 itself. Find the angle facing it across O.': ['That’s ∠3 itself.', 'Find the angle facing it across O.'],
