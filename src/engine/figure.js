@@ -7,9 +7,37 @@
 // Drawing is keyed: each draw call names its item, and only items whose markup changed are touched.
 // Elements that persist keep their CSS animations and their keyboard focus while the figure moves.
 
-import { esc } from './ui.js';
+import { esc, reduced } from './ui.js';
 
 const NS = 'http://www.w3.org/2000/svg';
+// a line or an angle that is highlighted (glowing, blinking, flashing in, or marked 'trace') is traced
+// as the highlight comes on: a bright pen line draws itself along it, so the eye follows the shape the
+// voice is naming
+const TRACE = /(^|\s)(glow|blink2?|flash|trace)(\s|$)/;
+
+// the tracing: the pen line draws from one end to the other (out along an arm, round the arc, back along
+// the other arm for an angle), stays a moment, then fades into the highlight
+function trace(g) {
+  if (reduced()) return;
+  g.querySelectorAll('.trace-light').forEach((p) => {
+    const L = p.getTotalLength?.() || 0;
+    if (L < 4) return;
+    const tip = p.classList.contains('tip');               // the pen's glowing tip, at the front of the line
+    const timing = { duration: Math.min(1700, 900 + L * 1.5), delay: p.classList.contains('later') ? 700 : 0, easing: 'ease-in-out', fill: 'both' };
+    p.style.strokeDasharray = tip ? `0.1px ${n(L + 2)}px` : `${n(L + 1)}px ${n(L + 1)}px`;
+    p.animate(tip ? [
+      { strokeDashoffset: '0px', opacity: 1 },
+      { strokeDashoffset: `${n(-L)}px`, opacity: 1, offset: 0.62 },
+      { strokeDashoffset: `${n(-L)}px`, opacity: 0, offset: 0.72 },
+      { strokeDashoffset: `${n(-L)}px`, opacity: 0 },
+    ] : [
+      { strokeDashoffset: `${n(L + 1)}px`, opacity: 1 },
+      { strokeDashoffset: '0px', opacity: 1, offset: 0.62 },
+      { strokeDashoffset: '0px', opacity: 1, offset: 0.8 },
+      { strokeDashoffset: '0px', opacity: 0 },
+    ], timing);
+  });
+}
 const RAD = Math.PI / 180;
 export const at = (o, deg, r) => [o[0] + r * Math.cos(deg * RAD), o[1] + r * Math.sin(deg * RAD)];
 export const angleOf = ([x, y]) => ((Math.atan2(y, x) / RAD) + 360) % 360;
@@ -20,11 +48,21 @@ class Builder {
     this.f = fig;
     this.k = fig.k;
     this.items = [];
+    this.lights = [];     // the tracing of highlighted lines and angles: drawn on top of everything
     this.handAt = null;   // a drag handle being hinted: the hint hand rests on it
   }
 
   P(p) { return [n(this.f.ox + p[0] * this.f.s), n(this.f.oy - p[1] * this.f.s)]; }
   push(key, html, opts = {}) { this.items.push({ key, html, cls: opts.cls || '', attrs: opts.attrs || null, style: opts.style || '' }); }
+
+  // the tracing of a highlighted item (its outline d): a pen line and its glowing tip, on the top layer so
+  // nothing drawn over the item hides it. It exists only while the item is highlighted, so it is traced as
+  // the highlight comes on. later: traced a moment after (the second of two angles blinking in turn)
+  light(key, d, w, color, later = false) {
+    const l = later ? ' later' : '';
+    this.lights.push({ key: `${key}~trace`, cls: 'trace', attrs: null, style: `--glow:${color}`,
+      html: `<path class="trace-light${l}" d="${d}" stroke-width="${n(w)}"/><path class="trace-light tip${l}" d="${d}" stroke-width="${n(w * 2.6)}"/>` });
+  }
 
   // a straight stroke from p to q with a navy outline under it; arrowheads optional
   line(key, p, q, { color = '#3ddcf2', w = 5, start = false, end = false, cls = '', dash = false } = {}) {
@@ -51,6 +89,7 @@ class Builder {
     html += `<path d="${d}" stroke="${color}" stroke-width="${n(W)}" fill="none" stroke-linecap="round"${da}/>`;
     html += heads.map((hd) => `<path d="${hd}" fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>`).join('');
     this.push(key, html, { cls, style: `--glow:${color}` });
+    if (!dash && TRACE.test(cls)) this.light(key, d, W * 1.1, color);   // highlighted: traced end to end
   }
 
   ray(key, o, deg, len, opts = {}) { this.line(key, o, at(o, deg, len), { end: true, ...opts }); }
@@ -70,6 +109,8 @@ class Builder {
     let html = `<path d="${d}" fill="${fill}"/>`;
     if (edge && sweep < 359.8) html += `<path d="M${pa[0]} ${pa[1]}A${R} ${R} 0 ${big} 0 ${pb[0]} ${pb[1]}" fill="none" stroke="${edge}" stroke-width="${n(2.6 * this.k)}" stroke-linecap="round"/>`;
     this.push(key, html, { cls, style: `--glow:${edge || '#fff'}` });
+    // highlighted: traced round (out along one arm, round the arc, back along the other)
+    if (sweep < 359.8 && TRACE.test(cls)) this.light(key, d, 4 * this.k, edge || '#fff', /blink2/.test(cls));
   }
 
   // the little square that marks a right angle (a = direction of the first arm)
@@ -277,6 +318,7 @@ export class Figure {
     if (!this.fn || !this.layout()) return;
     const b = new Builder(this);
     this.fn(b);
+    b.items.push(...b.lights);                             // the tracing, over the whole figure
     if (b.handAt) b.hand('zz-hand', [b.handAt]);          // the hint hand, on a drag handle
     this.commit(b.items);
     this.svg.classList.toggle('draggable', !!(this.onDrag && (this.dragAll || b.items.some((i) => i.attrs?.['data-drag']))));
@@ -298,13 +340,15 @@ export class Figure {
       const want = prev ? prev.nextSibling : this.root.firstChild;
       if (g !== want) this.root.insertBefore(g, want);
       const cls = `it ${it.cls}`.trim();
+      const lit = TRACE.test(cls) && !TRACE.test(g.getAttribute('class') || '');   // the highlight comes on now
       if (g.getAttribute('class') !== cls) g.setAttribute('class', cls);
       if ((g.getAttribute('style') || '') !== it.style) g.setAttribute('style', it.style);
       const attrs = it.attrs || {};
       for (const name of Object.keys(g._attrs)) if (!(name in attrs)) g.removeAttribute(name);
       for (const [name, val] of Object.entries(attrs)) if (g.getAttribute(name) !== val) g.setAttribute(name, val);
       g._attrs = attrs;
-      if (g._html !== it.html) { g.innerHTML = it.html; g._html = it.html; }
+      // traced once, as it lights up (not again when the figure only moves or resizes)
+      if (g._html !== it.html) { g.innerHTML = it.html; g._html = it.html; if (lit) trace(g); }
       prev = g;
     }
     for (const [key, g] of this.nodes) if (!seen.has(key)) { g.remove(); this.nodes.delete(key); }

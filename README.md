@@ -69,6 +69,7 @@ tools/                     run by hand, not by the page
   vo/split_vo.py           splits long recorded lines into pieces (cuts at the word times)
 
 docs/lesson-design.md      the lesson design
+docs/narration.md          every line the voice says, one per line (the script for recording)
 ```
 
 ## How it fits together
@@ -78,6 +79,12 @@ docs/lesson-design.md      the lesson design
   `c.choose()` / `c.cards()` (questions with an explanation for every wrong answer and a line on what
   was right), `c.ready()`
   (unlocks Next). Leaving a step cancels its script.
+- **In time with the voice:** a step shows each part of the figure, a label or a stamp when the voice
+  says the word for it: `await c.cue('vertex')` waits for that word (`c.cue()` alone: for the caption
+  to start), `c.on(word, fn)` does the same without holding up the script. Next lights up only once
+  the narration has finished.
+- **Tracing:** a line or an angle that is highlighted (glow, blink, flash, or a `trace` class) has a
+  pen line drawn along it once as the highlight comes on (`src/engine/figure.js`).
 - **The narration** shows one sentence at a time; every line it can say has a recording in
   `assets/vo`, found by a hash of the exact text. Change a line's text and it needs a new recording.
 - **Assets** are one file each: pictures are WebP, the voice is AAC (.m4a). Both play in every browser

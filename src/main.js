@@ -224,6 +224,11 @@ function makeCtx(i, tk) {
     caption: setCaption,
     say: (lines) => guard(dialogue.play(Array.isArray(lines) ? lines : [lines])),
     said: (max = 12000) => guard(dialogue.settled(max)),     // resolves once the narration has been said
+    // resolves when the voice says `word` (no word: when the last caption starts), so a part of the figure,
+    // a label or a stamp comes in the moment the narration names it, never before
+    cue: (word) => guard(dialogue.cue(word)),
+    // run fn when the voice says `word`, without holding up the script (for parts that overlap)
+    on(word, fn) { c.spawn(async () => { await c.cue(word); await fn(); }); },
     talk,
     wait: (ms) => guard(new Promise((r) => { const id = setTimeout(r, reduced() ? Math.min(ms, 120) : ms); later(() => clearTimeout(id)); })),
     tween(ms, fn, ease = 'inOut') {
@@ -368,7 +373,8 @@ function makeCtx(i, tk) {
           wrap.appendChild(entering(cell, k));
           return card;
         });
-        c.stage(wrap);
+        // the cards come in as the question starts being said (not over the sentence before it)
+        dialogue.cue().then(() => { if (!tk.dead) c.stage(wrap); });
       }));
     },
 
@@ -422,6 +428,7 @@ async function go(i, { dir = 1 } = {}) {
   }
   try {
     await STEPS[i].run(c);
+    await c.said();                                      // Next lights up once the narration has finished
     if (!tk.dead) c.ready();
   } catch (e) {
     if (e !== CANCEL) console.error(e);

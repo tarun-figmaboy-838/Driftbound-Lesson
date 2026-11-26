@@ -39,6 +39,16 @@ function wordSpans(text, cls = 'w') {
   return { nodes, words };
 }
 
+// which word of a line `word` falls in (counting from 0), looking from word `from` on; -1 if it is not there
+function wordIndex(text, word, from = 0) {
+  const low = text.toLowerCase(), w = word.toLowerCase();
+  for (let i = low.indexOf(w); i >= 0; i = low.indexOf(w, i + 1)) {
+    const n = (text.slice(0, i).match(/\S+/g) || []).length - (i > 0 && /\S/.test(text[i - 1]) ? 1 : 0);
+    if (n >= from) return n;
+  }
+  return -1;
+}
+
 export class Dialogue {
   constructor(root, { text, mouth = null, speaker = null, blip = null, sr = null, reduced = () => false, muted = () => false } = {}) {
     this.root = root;
@@ -92,6 +102,27 @@ export class Dialogue {
     });
   }
 
+  // resolves when the voice says `word`: in the line being said, or the first line waiting to be said that
+  // has it. With no word, when the last line waiting to be said starts. This is how the figure keeps time
+  // with the narration: a part of the picture comes in the moment the voice names it. Resolves at once if
+  // no such line is coming (and when the line is skipped, cut off or cleared).
+  cue(word = '') {
+    const ps = [this.cur, ...this.queue].filter(Boolean);
+    let p = null, n = 0;
+    if (!word) {
+      p = [...ps].reverse().find((q) => q.kind !== 'hint') || null;
+      if (p === this.cur && p.k > 0) p = null;             // already started
+    } else {
+      for (const q of ps) {
+        if (q.kind === 'hint') continue;                   // praise and hints are not what the figure follows
+        n = wordIndex(q.text, word, q === this.cur ? q.k : 0);
+        if (n >= 0) { p = q; break; }
+      }
+    }
+    if (!p) return Promise.resolve();
+    return new Promise((res) => { (p.cues = p.cues || []).push({ n, fn: res }); });
+  }
+
   // drop what is still waiting to be said (a question answered before it was read out)
   dropQueued() {
     this.queue.forEach((p) => p.resolve?.());
@@ -132,7 +163,7 @@ export class Dialogue {
   // ------------------------------------------------------------ inside
   add(p) {
     return new Promise((res) => {
-      p.resolve = res;
+      p.resolve = () => { this.cueUp(p, Infinity); res(); };   // a piece that is over lets every cue in it go
       if (p.kind === 'hint') {                         // hints go before the rest, in their own order
         const i = this.queue.findIndex((q) => q.kind !== 'hint');
         this.queue.splice(i < 0 ? this.queue.length : i, 0, p);
@@ -229,11 +260,20 @@ export class Dialogue {
       if (this.reduced()) el.classList.add('now');
       p.k++; n++;
     }
+    this.cueUp(p, p.k);
     if (n) {
       if (!p.heard) this.blip?.();
       this.bump();
       this.talkClass();
     }
+  }
+
+  // the cues waiting on a word that has now been said (k: how many words of the piece have been said)
+  cueUp(p, k) {
+    if (!p.cues?.length) return;
+    const due = p.cues.filter((q) => q.n < k);
+    p.cues = p.cues.filter((q) => q.n >= k);
+    due.forEach((q) => q.fn());
   }
 
   // the mouth bumps on each word

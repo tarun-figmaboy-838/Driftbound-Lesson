@@ -31,6 +31,9 @@
 @keyframes blink { 50% { opacity: .35; } }
 .fig-svg .flash { animation: flashin .6s ease-out both; }
 @keyframes flashin { from { opacity: 0; } 35% { opacity: 1; filter: brightness(2.2); } to { opacity: 1; } }
+/* the light that runs along a highlighted line or round a highlighted angle, once (figure.js plays it) */
+.fig-svg .trace-light { fill: none; stroke: #ffffff; stroke-linecap: round; stroke-linejoin: round; opacity: 0; pointer-events: none;
+  filter: drop-shadow(0 0 4px var(--glow, #fff)) drop-shadow(0 0 10px var(--glow, #fff)); }
 .fig-svg .tagpop { animation: flashin .5s ease-out both; }
 .fig-svg .pulse-ring { fill: none; transform-box: fill-box; transform-origin: center; animation: ring 1.3s ease-out infinite; }
 @keyframes ring { from { transform: scale(.7); opacity: 1; } to { transform: scale(2.3); opacity: 0; } }

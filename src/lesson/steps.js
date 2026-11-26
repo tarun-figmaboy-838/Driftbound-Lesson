@@ -182,13 +182,15 @@ const RECALL = [
       b.dot('o', O, { r: 5 });
       if (s.ring) b.pulse('ring', O);
     },
+    // each card's diagram follows its sentence: a part moves the moment the voice names it (c.cue)
     async play(v, c) {                       // the second ray turns away from the first: the turn is the angle
       v.set({ t: 0, ring: 0 });
-      await c.wait(200);
-      await v.to({ t: 55 }, 1100, 'inOut');
-      v.set({ ring: 1 });
+      await c.cue('rays');
+      c.spawn(() => v.to({ t: 55 }, 1100, 'inOut'));
+      await c.cue('point');
+      v.set({ ring: 1 });                    // the same point rings
       c.sound.pop();
-      await c.wait(1200);
+      await c.said();
       v.set({ ring: 0 });
     },
   },
@@ -206,14 +208,15 @@ const RECALL = [
     },
     async play(v, c) {                       // same vertex, one common arm, no overlap
       v.set({ a: 0, b: 0, ring: 0, glow: 0, blink: 0 });
-      await v.to({ a: 1 }, 500, 'out');
-      await v.to({ b: 1 }, 500, 'out');
+      await v.to({ a: 1 }, 400, 'out');
+      await v.to({ b: 1 }, 400, 'out');
+      await c.cue('vertex');
       v.set({ ring: 1 });
-      await c.wait(1300);
+      await c.cue('common');
       v.set({ ring: 0, glow: 1 });
-      await c.wait(1500);
+      await c.cue('overlap');
       v.set({ glow: 0, blink: 1 });
-      await c.wait(1400);
+      await c.said();
       v.set({ blink: 0 });
     },
   },
@@ -235,7 +238,9 @@ const RECALL = [
     },
     async play(v, c) {                       // the two angles fill the straight line: half a turn
       v.set({ w: 0, sw: 0 });
+      await c.cue('linear');
       await v.to({ w: 1 }, 700, 'out');
+      await c.cue('adds');
       await v.to({ sw: 180 }, 1200, 'inOut');
       c.sound.pop();
     },
@@ -263,9 +268,10 @@ const RECALL = [
     },
     async play(v, c) {                       // 110° and 70° slide together: the outer arms make a straight line
       v.set({ j: 0, line: 0 });
-      await c.wait(300);
+      await c.cue('Adjacent');
       await v.to({ j: 1 }, 1200, 'inOut');
-      v.set({ line: 1 });
+      await c.cue('linear');
+      v.set({ line: 1 });                    // the straight line as "linear pair" is said
       c.sound.snap();
     },
   },
@@ -287,12 +293,13 @@ const RECALL = [
     },
     async play(v, c) {                       // a copy of one angle turns half a turn and lands on the opposite one
       v.set({ sp: -1, eq: 0 });
-      await c.wait(250);
+      await c.cue('opposite');
       v.set({ sp: 0 });
       await v.to({ sp: 180 }, 1400, 'inOut');
-      v.set({ sp: -1, eq: 1 });
+      await c.cue('equal');
+      v.set({ sp: -1, eq: 1 });              // the two 50° show as "equal" is said
       c.sound.snap();
-      await c.wait(1200);
+      await c.said();
     },
   },
 ];
@@ -402,17 +409,24 @@ export const STEPS = [
           b.label('nb', at(O, s.t, L), 'B', s.t, 26);
         }
       });
+      // each part comes in as the voice names it: the rays, the point they start from, then the angle
       c.caption('Do you remember how an angle is formed?');
-      await c.wait(300);
-      await v.to({ o: 1 }, 420, 'back');                   // the point
-      await v.to({ a: 1 }, 520, 'out');                    // the first ray
-      await v.to({ b: 1 }, 480, 'out');                    // the second ray, lying on the first
-      await v.to({ t: 48 }, 900, 'inOut');                 // ... turns away: the turn is the angle
-      await c.wait(350);
+      await c.said();
       c.caption('Two rays starting from the same point form an angle.');
-      v.set({ names: true, ring: true });
+      await c.cue('rays');
+      c.spawn(async () => {
+        await v.to({ o: 1 }, 300, 'back');                 // the point
+        await v.to({ a: 1 }, 450, 'out');                  // the first ray
+        await v.to({ b: 1 }, 400, 'out');                  // the second ray, lying on the first
+      });
+      await c.cue('point');
+      v.set({ ring: true });                               // the same point: it rings
       c.sound.pop();
-      await c.wait(1600);
+      await c.cue('angle');
+      await v.to({ t: 48 }, 900, 'inOut');                 // the second ray turns away: the turn is the angle
+      v.set({ names: true });
+      await c.said();
+      await c.wait(600);
       v.set({ ring: false });
     },
   },
@@ -439,11 +453,11 @@ export const STEPS = [
         { d: 128, t: 'Obtuse', cap: 'And what type is this?', got: 'Obtuse: more than 90°.' },
       ];
       for (const [k, R] of ROUNDS.entries()) {
+        if (k) await c.said();                             // the praise first; then the arm turns with the next question
         c.caption(R.cap);
-        if (k) { v.set({ val: false, sq: false }); await v.to({ t: R.d }, 800, 'inOut'); }
+        if (k) { await c.cue(); v.set({ val: false, sq: false }); await v.to({ t: R.d }, 800, 'inOut'); }
         await c.choose({ options: ['Acute', 'Right', 'Obtuse'], answer: R.t, why: TYPE_WHY[R.d], got: R.got });
         v.set({ sq: R.d === 90 });
-        await c.wait(1200);
       }
     },
   },
@@ -475,21 +489,24 @@ export const STEPS = [
       c.sound.snap();
       await c.wait(700);
 
-      v.set({ ring: true });                               // the shared vertex rings while it is named
       c.caption('They have the same vertex.');
-      await c.said(); await c.wait(700);
+      await c.cue('vertex');
+      v.set({ ring: true });                               // the shared vertex rings as it is named
+      await c.said(); await c.wait(500);
 
-      v.set({ ring: false, arm: true });                   // the shared arm lights up, the outer arms dim
       c.caption('They also have one common arm.');
-      await c.said(); await c.wait(700);
+      await c.cue('common');
+      v.set({ ring: false, arm: true });                   // the shared arm lights up, the outer arms dim
+      await c.said(); await c.wait(500);
 
-      v.set({ arm: false, blink: true });                  // the two angles blink in turn, side by side
       c.caption('The two angles do not overlap.');
-      await c.said(); await c.wait(600);
+      await c.cue('overlap');
+      v.set({ arm: false, blink: true });                  // the two angles blink in turn, side by side
+      await c.said(); await c.wait(400);
       v.set({ blink: false });
       c.caption('We call these adjacent angles.');
+      await c.cue('adjacent');
       c.stamp('Adjacent angles');
-      await c.wait(900);
     },
   },
 
@@ -519,18 +536,20 @@ export const STEPS = [
       c.fig.box(...LIN_BOX);
       const v = c.view({ l: 0, c: 0, w: 0, t: 58, glow: false }, linearFig);
       c.caption('What happens if a ray starts from a point on a straight line?');
-      await c.wait(250);
-      await v.to({ l: 1 }, 700, 'out');                    // line AB draws out from O
-      await c.wait(150);
-      await v.to({ c: 1 }, 650, 'out');                    // ray OC grows from O
-      await c.wait(600);
+      await c.cue('ray');
+      await v.to({ c: 1 }, 650, 'out');                    // ray OC grows from O as it is named
+      await c.cue('straight');
+      await v.to({ l: 1 }, 700, 'out');                    // then line AB draws out through O
+      await c.said();
       c.caption('We get a pair of adjacent angles.');
-      await v.to({ w: 1 }, 700, 'out');
-      await c.wait(1500);
+      await c.cue('adjacent');
+      await v.to({ w: 1 }, 700, 'out');                    // the two angles fill in
+      await c.said();
       c.caption('As both angles lie on a straight line, we call them a linear pair.');
+      await c.cue('straight');
       v.set({ glow: true });
+      await c.cue('linear');
       c.stamp('Linear pair');
-      await c.wait(900);
     },
   },
 
@@ -541,7 +560,7 @@ export const STEPS = [
       c.fig.box(...LIN_BOX);
       const v = c.view({ l: 1, c: 1, w: 1, t: 65, right: null, left: null, prot: null }, linearFig);
       c.caption('Let’s measure both angles.');
-      await c.wait(300);
+      await c.cue('measure');
       v.s.prot = { r: 60, a0: 0, from: 0, needle: 0 };     // ∠COB: from OB (0°) round to OC
       await c.tween(1000, (k) => { v.s.prot.needle = 65 * k; v.s.right = deg(65 * k); v.draw(); }, 'inOut');
       c.sound.pop();
@@ -551,7 +570,9 @@ export const STEPS = [
       c.sound.pop();
       await c.wait(300);
       v.set({ prot: null });
+      await c.said();
       c.caption('What do the two angles add up to?');
+      await c.cue('add');
       c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('x', 'x')}`);
       await c.choose({
         options: [170, 180, 190], answer: 180, fmt: deg,
@@ -571,7 +592,7 @@ export const STEPS = [
     id: 'linearMove', ch: 2, gate: true, title: 'Move the ray', lockHint: 'Drag point C to go on.',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 1, c: 1, w: 1, t: 65, handle: true, hint: true }, (b, s) => {
+      const v = c.view({ l: 1, c: 1, w: 1, t: 65, handle: true, hint: false }, (b, s) => {
         s.right = deg(s.t);
         s.left = deg(180 - s.t);
         linearFig(b, s);
@@ -593,6 +614,7 @@ export const STEPS = [
       v.draw();
       c.caption('What happens if we move the ray?');
       c.talk(crew('Drag point C.'));
+      c.on('Drag', () => { if (!moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
       c.ready();
       c.praise(true, 'You moved ray OC.');
@@ -609,14 +631,24 @@ export const STEPS = [
       c.fig.box(...LIN_BOX);
       const v = c.view({ l: 1, c: 1, w: 1, t: 62, sweep: null, right: '∠1', left: '∠2' }, linearFig);
       c.caption('A linear pair always adds to 180°.');
+      await c.cue('linear');
       c.readout(`${S('o', '∠1')}${OP('+')}${S('a', '∠2')}${OP('=')}${S('g', '180°')}`);
-      await c.wait(500);
-      v.set({ sweep: { r: 40, from: 0, at: 0, label: '' } });   // along the two angles' edge
+      await c.cue('adds');
+      v.set({ sweep: { r: 40, from: 0, at: 0, label: '' } });   // along the two angles' edge, reaching 180° as it is said
       await c.tween(1200, (k) => { v.s.sweep.at = 180 * k; v.s.sweep.label = deg(180 * k); v.draw(); }, 'inOut');
-      await c.wait(900);
+      await c.said();
+      await c.wait(500);
       c.caption('If a ray stands on a straight line,');                // the rule in two parts; the second joins the line
       c.say(crew('the two adjacent angles formed add up to 180°.')).catch(() => {});
+      await c.cue('straight');
+      v.set({ glow: true });                               // the straight line lights up as it is named
+      await c.cue('adjacent');
+      v.set({ blink: true });                              // the two angles blink in turn
+      await c.cue('180°');
       c.sound.stamp();
+      c.burst(c.els.readout, { count: 12, spread: 130 });
+      await c.said();
+      v.set({ blink: false });
     },
   },
 
@@ -663,12 +695,15 @@ export const STEPS = [
       await c.wait(300);
       c.sound.whoosh();
       await res.view.to({ j: 1 }, 1400, 'inOut');          // the 110° angle slides over and turns onto the 70° one
-      res.view.set({ line: true, names: true });
+      c.caption('Their outer arms lie on a straight line.');
+      await c.cue('straight');
+      res.view.set({ line: true });                        // the outer arms light up as one line as it is said
       c.sound.snap();
       c.burst(res.card.querySelector('[data-k="ab"]') || res.card, { count: 18 });
-      c.caption('Their outer arms lie on a straight line.');
-      await c.wait(1700);
+      await c.said();
+      await c.wait(400);
       c.caption('Adjacent angles that add to 180° form a linear pair.');
+      await c.cue('180°');
       c.readout(`${S('o', '70°')}${OP('+')}${S('a', '110°')}${OP('=')}${S('g', '180°')}`);
     },
   },
@@ -702,12 +737,14 @@ export const STEPS = [
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 0, q: 0, t: 55, pq: false, fill: [null, null, null, null], names: [0, 0, 0, 0], wcls: [] }, crossFig);
       c.caption('What happens when two straight lines cross?');
-      await c.wait(250);
-      await v.to({ l: 1 }, 650, 'out');
+      await c.cue('two');
+      await v.to({ l: 1 }, 650, 'out');                  // one line, then the other as they cross
+      await c.cue('cross');
       await v.to({ q: 1 }, 650, 'out');
       v.set({ pq: true });
-      await c.wait(700);
+      await c.said();
       c.caption('Four angles are formed.');
+      await c.cue('Four');
       for (let k = 0; k < 4; k++) {                      // counted round O one by one
         v.s.fill[k] = 'dim';
         v.s.wcls[k] = 'flash';
@@ -735,10 +772,12 @@ export const STEPS = [
         },
         got: '∠3 faces ∠1 across O.',
       });
-      v.set({ fill: ['orange', 'dim', 'orange', 'dim'] });
-      await c.wait(900);
+      v.set({ fill: ['orange', 'dim', 'orange', 'dim'], wcls: ['', '', 'trace', ''] });   // ∠3 lights up, traced
+      await c.said();
+      await c.wait(300);
       c.caption('Which angle is opposite ∠2?');
-      v.set({ fill: ['orange', 'aqua', 'orange', 'dim'] });
+      await c.cue('∠2');
+      v.set({ fill: ['orange', 'aqua', 'orange', 'dim'], wcls: ['', 'trace', '', ''] });   // ∠2 lights up as it is named
       await c.choose({
         options: ['∠1', '∠3', '∠4'], answer: '∠4',
         why: {
@@ -748,9 +787,11 @@ export const STEPS = [
         got: '∠4 faces ∠2 across O.',
       });
       c.ready();
-      v.set({ fill: ['orange', 'aqua', 'orange', 'aqua'], taps: false });
+      v.set({ fill: ['orange', 'aqua', 'orange', 'aqua'], wcls: ['', '', '', 'trace'], taps: false });
       c.fig.onTap = null;
+      await c.said();
       c.caption('These are vertically opposite angle pairs.');
+      await c.cue('vertically');
       c.stamp('Vertically opposite');
     },
   },
@@ -762,7 +803,7 @@ export const STEPS = [
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], vals: [null, null, null, null], prot: null }, crossFig);
       c.caption('Let’s measure the angles.');
-      await c.wait(300);
+      await c.cue('measure');
       // the protractor on line AB: above it for ∠1 and ∠2, below it for ∠3 and ∠4; the needle swings from
       // line AB to line PQ (at 55° and 235°)
       const MEAS = [[0, 0, 0, 55], [1, 0, 180, 55], [2, 180, 180, 235], [3, 180, 360, 235]];
@@ -774,11 +815,12 @@ export const STEPS = [
       }
       await c.wait(300);
       v.set({ prot: null });
+      await c.said();
       c.caption('Vertically opposite angles are equal.');
-      c.readout(`${S('o', '∠1 = ∠3 = 55°')}${OP('•')}${S('a', '∠2 = ∠4 = 125°')}`);
-      await c.wait(800);
-      // a copy of ∠1 turns half a turn round O and lands exactly on ∠3 (the values step aside for it; the
-      // readout keeps them)
+      c.on('equal', () => c.readout(`${S('o', '∠1 = ∠3 = 55°')}${OP('•')}${S('a', '∠2 = ∠4 = 125°')}`));
+      // as "vertically opposite" is said, a copy of ∠1 turns half a turn round O and lands exactly on ∠3
+      // (the values step aside for it; the readout keeps them)
+      await c.cue('opposite');
       const vals = [...v.s.vals], names = [...v.s.names];
       v.set({ vals: [null, null, null, null], names: [1, 0, 1, 0] });
       v.s.spin = { o: O, a: 0, b: 55, r: 38, len: 118, rot: 0, done: false };
@@ -797,9 +839,9 @@ export const STEPS = [
     id: 'rotate', ch: 4, gate: true, title: 'Turn the line', lockHint: 'Drag the line to go on.',
     async run(c) {
       c.fig.box(...CROSS_BOX);
-      const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], handle: true, hint: true }, (b, s) => {
+      const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], handle: true, hint: false, moved: false }, (b, s) => {
         const t = deg(s.t), u = deg(180 - s.t);
-        s.vals = s.hint ? [null, null, null, null] : [t, u, t, u];   // the values come with the first drag (the hint hand stands there)
+        s.vals = s.moved ? [t, u, t, u] : [null, null, null, null];   // the values come with the first drag (the hint hand stands there)
         crossFig(b, s);
       });
       const sums = () => c.readout(`${S('o', `∠1 = ∠3 = ${deg(v.s.t)}`)}${OP('•')}${S('a', `∠2 = ∠4 = ${deg(180 - v.s.t)}`)}`);
@@ -808,7 +850,7 @@ export const STEPS = [
       const setT = (t) => {
         t = Math.round(clamp(t, 20, 160));
         moved += Math.abs(t - v.s.t);
-        v.set({ t, hint: false });
+        v.set({ t, hint: false, moved: true });
         sums();
         if (moved >= 50) finish();
       };
@@ -819,6 +861,7 @@ export const STEPS = [
       sums();
       c.caption('Does that still happen if we rotate a line?');
       c.talk(crew('Drag the line.'));
+      c.on('Drag', () => { if (!v.s.moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
       c.ready();
       c.praise(true, 'You turned the line.');
@@ -860,7 +903,8 @@ export const STEPS = [
         await c.said();                                    // the line before has been said
         await c.wait(P === PLAN[0] ? 300 : 1100);          // a moment to look at the working
         c.caption(P.cap);
-        v.set({ fill: P.fill, glow: P.glow, sweep: null });
+        await c.cue();                                     // the figure and the working change as the line starts
+        v.set({ fill: P.fill, glow: P.glow, sweep: null, wcls: P.fill.map((f) => (f ? 'trace' : '')) });   // the angles that light up are traced
         if (!eq.el.isConnected) c.els.readout.replaceChildren(eq.el);
         const working = P.go();
         working.catch(() => {});                           // a step left mid-way: its working stops quietly
@@ -890,16 +934,21 @@ export const STEPS = [
         { k: 1, name: '∠2', fill: 'aqua', opts: [68, 112, 122], ans: 112, why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] }, got: '180° − 68° = 112°.' },
         { k: 3, name: '∠4', fill: 'aqua', opts: [68, 112, 132], ans: 112, why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] }, got: '∠4 is opposite ∠2: 112°.' },
       ];
+      await c.cue('three');
       for (const Q of QS) {
+        if (Q !== QS[0]) await c.said();                   // the praise for the one before, then the next angle lights up
         v.s.fill[Q.k] = 'sun';
         v.s.vals[Q.k] = 'x';
         v.s.vcls = [];
         v.s.vcls[Q.k] = 'blink';
+        v.s.wcls = [];
+        v.s.wcls[Q.k] = 'trace';                           // the angle asked about is traced as it lights up
         v.draw();
         await c.choose({ options: Q.opts, answer: Q.ans, fmt: deg, why: Q.why, got: Q.got });
         v.s.fill[Q.k] = Q.fill;
         v.s.vals[Q.k] = deg(Q.ans);
         v.s.vcls = [];
+        v.s.wcls = [];
         v.draw();
         await c.wait(700);
       }
@@ -1095,8 +1144,8 @@ export const STEPS = [
       await relayout(() => { home(last); root.classList.add('is-done'); });
       c.caption('You learned all about angles!');
       c.sound.right();
-      await c.wait(700);
-      c.ready();                                        // Launch mission arrives
+      await c.said();
+      c.ready();                                        // Launch mission arrives once that has been said
       c.sound.pop();
 
       // tapping a card later: the drone flies back, projects onto it and explains it again
