@@ -64,6 +64,7 @@ const shared = {};                       // across steps (the mission-check scor
 let cur = -1;
 let token = null;
 let maxCh = 0;
+let syncDev = () => {};                  // ?dev=1: keeps the jump list on the step being shown
 
 // Overlays any figure can switch on through its state: a protractor measuring an angle (s.prot), a
 // glowing arc sweeping round (s.sweep) and a ghost copy of an angle turning round the vertex (s.spin).
@@ -394,6 +395,7 @@ async function go(i, { dir = 1 } = {}) {
   token = tk;
   const first = cur === -1;
   cur = i;
+  syncDev(i);
   maxCh = Math.max(maxCh, STEPS[i].ch);
   dialogue.clear();
   $('narration').classList.toggle('quiet', !!STEPS[i].quiet);
@@ -470,7 +472,7 @@ document.addEventListener('visibilitychange', () => {
 
 // keyboard: → / Enter next, ← back, Space finishes the line being typed (or moves to the next one)
 window.addEventListener('keydown', (e) => {
-  if (e.target.closest?.('[data-drag], [data-tap], .fig-svg')) return;   // arrows there move the figure, not the lesson
+  if (e.target.closest?.('[data-drag], [data-tap], .fig-svg, .dev')) return;   // arrows there move the figure (or the jump list), not the lesson
   const onButton = e.target.tagName === 'BUTTON';
   if (e.key === 'ArrowRight' || (e.key === 'Enter' && !onButton)) { next(); e.preventDefault(); }
   else if (e.key === 'ArrowLeft') { back(); e.preventDefault(); }
@@ -482,6 +484,7 @@ const scene = createScene($('room-pic'));
 
 // start once the fonts used on the figures are ready (or after a short wait)
 const params = new URLSearchParams(location.search);
+const dev = params.get('dev') === '1';
 const start = Math.max(0, Math.min(STEPS.length - 1, Number(params.get('step')) || 0));
 maxCh = STEPS[start].ch;
 const fonts = ['400 20px "Lilita One"', '600 18px "Fredoka"', '400 18px "Noto Sans Math"'];
@@ -490,12 +493,12 @@ const ready = Promise.race([Promise.all([fontsIn, scene.loaded]), new Promise((r
 
 // the start banner: the play button starts the intro (src/intro/intro.js: into the satellite, through its gate,
 // down the corridor into the hall, where a drone brings the screen), then the lesson. The tap also lets
-// the browser start the voice. A link to a given step (?step=N) skips both.
+// the browser start the voice. A link to a given step (?step=N) or ?dev=1 skips both.
 const banner = $('start');
 function begin() {
   ready.finally(() => { document.body.classList.add('is-on'); go(start); });
 }
-if (params.has('step')) { banner.remove(); begin(); }
+if (params.has('step') || dev) { banner.remove(); begin(); }
 else {
   // Enter or Space also starts (the button is not focused at load, so no focus ring shows on it)
   const onKey = (e) => {
@@ -517,6 +520,30 @@ else {
     $('play').animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.6)', opacity: 0 }], { duration: 350, easing: 'ease-in', fill: 'forwards' });
     playIntro({ banner, sound }).then(begin);
   });
+}
+
+// ---------------------------------------------------------------- ?dev=1: jump to any step
+// For the people building the lesson, not for students: a list of every step in the top corner, with
+// ‹ › beside it. Picking a step opens it at once, past any locked Next. The address keeps the step
+// (?dev=1&step=N), so a reload stays on it.
+if (dev) {
+  const panel = h(`<nav class="dev" aria-label="Jump to a step">
+    <button type="button" data-d="-1" aria-label="Previous step">‹</button>
+    <select aria-label="Step">${STEPS.map((s, i) => `<option value="${i}">${i} · ${esc(s.title || CHAPTERS[s.ch].name)}</option>`).join('')}</select>
+    <button type="button" data-d="1" aria-label="Next step">›</button>
+  </nav>`);
+  const pick = panel.querySelector('select');
+  const jump = (i) => { if (i >= 0 && i < STEPS.length && i !== cur) go(i, { dir: i < cur ? -1 : 1 }); };
+  pick.addEventListener('change', () => { jump(Number(pick.value)); pick.blur(); });
+  panel.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => jump(cur + Number(b.dataset.d))));
+  syncDev = (i) => {
+    pick.value = String(i);
+    const q = new URLSearchParams(location.search);
+    q.set('step', String(i));
+    history.replaceState(null, '', `?${q}`);
+  };
+  syncDev(start);
+  document.body.appendChild(panel);
 }
 
 window.lesson = { go, get index() { return cur; }, steps: STEPS, memory, shared, dialogue };   // for testing from the console

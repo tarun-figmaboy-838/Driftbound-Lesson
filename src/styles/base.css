@@ -22,3 +22,11 @@ button { font: inherit; color: inherit; }
 
 /* icons inside buttons take the text size */
 .ico { width: 1em; height: 1em; display: inline-block; flex: none; overflow: visible; }
+
+/* ?dev=1: the jump list in the top corner, for the people building the lesson (see main.js) */
+.dev { position: fixed; z-index: 80; top: max(8px, env(safe-area-inset-top)); left: max(8px, env(safe-area-inset-left)); display: flex; gap: 4px; padding: 4px;
+  border-radius: 10px; background: rgba(5, 11, 38, .85); border: 1px solid rgba(61, 220, 242, .5); font: 600 13px/1 var(--font-ui); }
+.dev button, .dev select { height: 28px; border: 0; border-radius: 6px; background: rgba(61, 220, 242, .16); color: #f4f8ff; font: inherit; cursor: pointer; }
+.dev button { width: 28px; font-size: 18px; }
+.dev select { max-width: min(60vw, 280px); padding: 0 6px; }
+.dev select option { color: #000; }

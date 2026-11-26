@@ -22,6 +22,7 @@ Or run `python3 serve.py` and open http://127.0.0.1:8124.
 
 It must be served (opened from `file://`, the browser blocks the modules; Play then says so). The
 fonts load from Google Fonts. `?step=12` opens a given step directly, skipping the banner and intro.
+`?dev=1` adds a jump list in the top corner to open any step (past locked Next); a reload stays on it.
 
 ## Project map
 
