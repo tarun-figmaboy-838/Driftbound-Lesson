@@ -145,6 +145,15 @@ export class Dialogue {
   hush() {
     this.gen++;
     this.speaker?.stop();
+    // the voice stops in the middle of a line (the sound switched off, the line tapped): its words carry on at
+    // reading pace from where they are, instead of waiting for a voice that will not come
+    const p = this.cur;
+    if (p && !p.ended) {
+      p.timing = null;
+      p.ended = true;
+      p.started = true;
+      p.t = (p.words[p.k]?.at ?? 0) / PACE;
+    }
     this.speaking = 0;
     this.talkClass();
     this.lips(null);
