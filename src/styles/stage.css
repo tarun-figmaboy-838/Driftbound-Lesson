@@ -7,7 +7,7 @@
 .view.is-custom > .fig { visibility: hidden; }
 .view:not(.is-custom):not(.is-side) > .custom { display: none; }
 /* a panel beside the figure: the figure on the left, the panel on the right */
-.view.is-side { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); column-gap: 20px; }
+.view.is-side { grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; }   /* the panel as wide as its lines; the drawing takes the rest */
 .view.is-side > .custom { grid-area: 1 / 2; align-self: center; animation: side-in .65s cubic-bezier(.22, 1, .36, 1) both; }
 @keyframes side-in { from { opacity: 0; transform: translateX(60px) scale(.94); } }
 .is-tall .view.is-side > .custom { animation-name: side-up; }
@@ -24,7 +24,7 @@
 .fig-svg .ink-h { fill: #050f33; stroke: #050f33; stroke-linejoin: round; }
 .fig-svg .ink-f { fill: #050f33; }
 .fig-svg .t { paint-order: stroke; stroke: #050f33; stroke-linejoin: round; }
-.fig-svg text { transform-box: fill-box; transform-origin: center; }   /* a label grows from its middle */
+.fig-svg .it { transform-box: fill-box; transform-origin: center; }   /* a label pops in from its own middle */
 .fig-svg .t-x { font-family: var(--font-x); font-style: italic; font-weight: 700; }   /* the unknown x */
 .fig-svg .t-ang { stroke: none; pointer-events: none; }
 /* the angle sign comes from a thin maths font: stroke it so it is as heavy as the text around it */

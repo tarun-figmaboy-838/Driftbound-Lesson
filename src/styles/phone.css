@@ -32,13 +32,13 @@
 .is-tall .eqs { row-gap: 6px; padding: 8px 10px 8px 20px; border-radius: 18px; }
 .is-tall .eqs__row { padding: 4px 8px 6px; column-gap: 8px; border-radius: 14px; }
 .is-tall .eqs__row.is-given { padding: 0; }
-.is-tall .eqs .pick__btn { --cap: 20px; height: 40px; min-width: 100px; font-size: 16px; }
+.is-tall .eqs .pick__btn { --cap: 20px; height: 40px; width: 128px; min-width: 0; font-size: 16px; }
 .is-tall .eqs .pick__opt.pill { --cap: 18px; height: 34px; font-size: 15px; min-width: 60px; }
 .is-tall .eqs .tag { padding: .04em .36em .1em; }
 .is-tall .eqs__row.is-focus::before { left: -17px; border-width: 7px 0 7px 10px; margin-top: -7px; }
 .is-tall .eqs__eq { font-size: 18px; }
 .is-tall .eqs { --menu-h: 54px; padding-bottom: calc(8px + var(--menu-h)); }
-.is-tall .eqs:has(.pick.is-open) { padding-bottom: 8px; }
+.is-tall .eqs:has(.pick.is-open), .is-tall .eqs.is-done { padding-bottom: 8px; }
 .is-tall .cards { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); align-items: stretch; gap: 12px; padding: 2px 6px; }
 .is-tall .cards > span { aspect-ratio: auto; height: 100%; }
 .is-tall .cards.solved > span.kept { grid-column: 1; grid-row: 2; }

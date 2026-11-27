@@ -203,6 +203,26 @@ export class Dialogue {
   }
 
   // lay a piece out in the line, its words hidden until they are said
+  // a sentence too long for the bar's room (it would need a line more, and push the lesson below down) is set a
+  // little smaller, so it fits: worked out for the whole sentence (this piece and the pieces queued to join it)
+  // before it starts, so the size never changes half way through
+  fit(p) {
+    const t = this.text, bar = t.parentNode;
+    if (!bar) return;
+    let whole = p.text;
+    for (const q of this.queue) { if (!q.join) break; whole += ` ${q.text}`; }
+    const cs = getComputedStyle(bar);
+    const room = parseFloat(cs.minHeight) - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const keep = [...t.childNodes];
+    t.classList.remove('fit1', 'fit2');
+    t.textContent = whole;
+    if (room > 0 && t.scrollHeight > room + 1) {
+      t.classList.add('fit1');
+      if (t.scrollHeight > room + 1) t.classList.replace('fit1', 'fit2');
+    }
+    t.replaceChildren(...keep);
+  }
+
   begin(p) {
     this.cur = p;
     const { nodes, words } = wordSpans(p.text);
@@ -210,6 +230,7 @@ export class Dialogue {
       this.text.append(document.createTextNode(' '), ...nodes);
       if (p.kind === 'line') this.base = `${this.base} ${p.text}`.trim();
     } else {                                           // a new sentence takes the line
+      this.fit(p);
       this.text.replaceChildren(...nodes);
       if (p.kind !== 'hint') this.base = p.text;
     }

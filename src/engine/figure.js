@@ -18,13 +18,11 @@ const NS = 'http://www.w3.org/2000/svg';
 const TRACE = /(^|\s)(glow|blink2?|flash|trace|trace-rev)(\s|$)/;
 const BACKWARDS = /(^|\s)(blink|trace-rev)(\s|$)/;
 
-// a label (an angle's name or value) new to the figure grows in softly instead of popping up, so it comes in
-// with the tracing of its angle
+// a label (an angle's name or value) new to the figure pops in calmly: it fades in from a little smaller, from
+// its own middle, with no bounce (a bounce read as a jump), as its angle is traced
 function appear(g) {
   if (reduced() || !g.querySelector('text') || g.querySelector('[data-drag], .trace-light')) return;
-  g.querySelectorAll('text').forEach((t) => t.animate([
-    { opacity: 0, transform: 'scale(.55)' }, { opacity: 1, transform: 'scale(1.08)', offset: 0.7 }, { opacity: 1, transform: 'none' },
-  ], { duration: 650, easing: 'cubic-bezier(.22, 1, .36, 1)' }));
+  g.animate([{ opacity: 0, transform: 'scale(.82)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.2, .8, .2, 1)' });
 }
 
 // the tracing: the pen line draws from one end to the other (out along an arm, round the arc, back along

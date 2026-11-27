@@ -52,7 +52,7 @@
    and glows gold with a pointer bouncing beside it; one answered keeps its colours with a green rim; one still
    to come waits, greyed. The = signs (or the questions) line up, the lists after them */
 .eqs { position: relative; display: grid; grid-template-columns: max-content max-content; justify-content: center; align-content: center; row-gap: 12px;
-  padding: 20px 22px 20px 34px; border-radius: 26px;
+  width: fit-content; max-width: 100%; margin: 0 auto; padding: 20px 22px 20px 34px; border-radius: 26px;
   background: linear-gradient(180deg, rgba(36, 74, 160, .72), rgba(14, 32, 92, .82));
   box-shadow: 0 0 0 3px var(--ink), inset 0 0 0 2px rgba(127, 243, 255, .38), inset 0 3px 0 rgba(255, 255, 255, .16), 0 18px 34px rgba(4, 8, 40, .5); }
 .eqs__row { position: relative; grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; column-gap: 14px; padding: 10px 14px 12px;
@@ -86,7 +86,7 @@
    answered one stays bright */
 .eqs__row.is-dim:not(.is-right) { filter: grayscale(.9) brightness(.78); transform: scale(.97); }
 .eqs__row.is-right { box-shadow: 0 0 0 2.5px var(--ink), 0 0 0 4px rgba(141, 230, 70, .85), 0 0 18px rgba(141, 230, 70, .35), inset 0 2px 0 rgba(255, 255, 255, .18), inset 0 -4px 0 rgba(8, 18, 70, .55); }
-.eqs .pick__btn { min-width: 140px; }
+.eqs .pick__btn { width: 168px; min-width: 0; }   /* one width, Choose or the answer: the panel never changes size */
 /* in the answer panel the options open inside their own slot, on a line under its equation (the slot grows):
    they never cover the next slot */
 .eqs .pick { display: contents; }
@@ -100,6 +100,9 @@
    foot and handed to the slot that opens (so opening a list never moves or resizes anything round it) */
 .eqs { --menu-h: 82px; padding-bottom: calc(20px + var(--menu-h)); }
 .eqs:has(.pick.is-open) { padding-bottom: 20px; }
+/* every answer in: no list will open again, so the panel closes up round its lines, smoothly (on phones the
+   drawing above grows into the room it gives back, frame by frame) */
+.eqs.is-done { padding-bottom: 20px; transition: padding-bottom .6s cubic-bezier(.22, 1, .36, 1); }
 
 /* the list: a capsule that says the type chosen (Choose until then); tapped, the three types open below it
    as buttons (blue capsules) in a row; a wrong one turns red and is crossed out */

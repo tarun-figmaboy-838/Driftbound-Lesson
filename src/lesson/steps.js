@@ -929,7 +929,7 @@ export const STEPS = [
             c.spawn(async () => {
               await c.said();
               if (!open) focus();
-              if (ROWS.every((r) => r.found)) finish();
+              if (ROWS.every((r) => r.found)) { panel.classList.add('is-done'); finish(); }   // all in: the panel closes up
             });
           },
         }).el);
@@ -1160,7 +1160,7 @@ export const STEPS = [
               c.sound.pop();
               await c.said();
               if (!open) focus();
-              if (ROWS.every((r) => r.found)) finish();
+              if (ROWS.every((r) => r.found)) { panel.classList.add('is-done'); finish(); }   // all in: the panel closes up
             });
           },
         })).el);
