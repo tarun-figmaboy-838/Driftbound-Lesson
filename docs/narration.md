@@ -5,22 +5,18 @@ A right angle is exactly 90°, a square corner.
 This one is smaller than that.
 Obtuse angles are bigger than 90°.
 This one is smaller than a square corner.
-Acute: less than 90°.
 Acute angles are smaller than 90°.
 This one makes a perfect square corner.
 This one is exactly a square corner.
-A right angle: exactly 90°.
 This one opens wider than a square corner.
 A right angle is exactly 90°.
 This one opens wider than that.
-Obtuse: more than 90°.
 Choose a type for each angle to go on.
 Complementary angles add up to 90°.
 Which pair is complementary?
 45° + 55° = 100°.
 Complementary angles make exactly 90°.
 35° + 65° = 100°.
-30° + 60° = 90°.
 What if these two angles share a point and an arm?
 They have the same vertex.
 They also have one common arm.
@@ -31,7 +27,6 @@ Which pair is adjacent?
 They share a vertex and an arm,
 but the orange angle covers the blue one: they overlap.
 Same vertex, but no common arm: there’s a gap between the two angles.
-Same vertex, a common arm, no overlap.
 Tap the adjacent pair to go on.
 What happens if a ray starts from a point on a straight line?
 We get a pair of adjacent angles.
@@ -41,11 +36,9 @@ What do the two angles add up to?
 Not quite.
 60 + 110 = 170, and 5 + 5 = 10 more.
 A bit too much.
-65° + 115° = 180°.
 Add the two angles and pick the total.
 What happens if we move the ray?
 Drag point C.
-You moved ray OC.
 The angles change, but their total stays 180°.
 Drag point C to go on.
 A linear pair always adds to 180°.
@@ -56,14 +49,12 @@ Find the missing angle in this linear pair.
 A linear pair must make exactly 180°.
 138° + 52° = 190°.
 That’s more than a straight line.
-52° + 128° = 180°.
 Pick the missing angle to go on.
 Supplementary angles add up to 180°.
 Which pair is supplementary?
 85° + 85° = 170°.
 Supplementary angles make exactly 180°.
 100° + 70° = 170°.
-110° + 70° = 180°.
 What if these two supplementary angles become adjacent?
 Their outer arms lie on a straight line.
 Adjacent angles that add to 180° form a linear pair.
@@ -73,7 +64,6 @@ Which pair must form a linear pair?
 but they aren’t adjacent: no shared vertex, no shared arm.
 They’re adjacent, but 65° + 95° = 160°,
 so the outer arms don’t make a straight line.
-Adjacent, and 115° + 65° = 180°.
 Tap the pair that must form a linear pair.
 What happens when two straight lines cross?
 Four angles are formed.
@@ -82,14 +72,14 @@ Which angle is opposite ∠1?
 Opposite angles only share the vertex.
 ∠4 is next to ∠1: they share an arm.
 Look straight across the vertex.
-∠3 faces ∠1 across O.
 Which angle is opposite ∠2?
 ∠1 is next to ∠2: they share an arm.
 Look straight across O.
 ∠3 is next to ∠2: they share an arm.
-∠4 faces ∠2 across O.
 That’s ∠1 itself.
 That’s ∠2 itself.
+That’s ∠3 itself.
+That’s ∠4 itself.
 Find the angle facing it across O.
 These are vertically opposite angle pairs.
 Find the opposite angle to go on.
@@ -97,7 +87,6 @@ Let’s measure the angles.
 Vertically opposite angles are equal.
 Does that still happen if we rotate a line?
 Drag the line.
-You turned the line.
 Yes: vertically opposite angles stay equal.
 Drag the line to go on.
 Let’s see why it happens.
@@ -110,16 +99,13 @@ That’s 90° − 68°.
 ∠3 is opposite ∠1, so they’re equal.
 112° would make a linear pair with ∠1.
 But ∠3 is opposite ∠1.
-∠3 is opposite ∠1: 68°.
 ∠2 is next to ∠1, not opposite.
 Together they make a linear pair: 180°.
 68° + 122° = 190°.
 A linear pair makes exactly 180°.
-180° − 68° = 112°.
 ∠4 is opposite ∠2, not ∠1.
 68° + 132° = 200°.
 ∠1 and ∠4 make a linear pair: 180°.
-∠4 is opposite ∠2: 112°.
 Choose a value for each angle to go on.
 Recall
 You learned all about angles!

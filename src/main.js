@@ -41,17 +41,15 @@ const dialogue = new Dialogue($('narration'), {
 });
 const fig = new Figure(els.fig);
 
-// praise when the student gets something right, in the narration line: the co-pilot says a word of praise
-// and then `got`, a few words on what the student got right, as one line ("Great job! Acute: less than
-// 90°."); then the line goes back to the caption. A different word each time.
+// praise when the student gets something right, in the narration line: only a word of praise ("Great job!",
+// "Well done!", "Amazing work!", in turn), no explanation after it; then the line goes back to the caption.
 const PRAISE = ['Great job!', 'Well done!', 'Amazing work!'];   // the only words of praise, in turn
 let praiseAt = 0;
-function praise(firstTry = true, got = '') {   // (right first time or after a miss: the same words)
+function praise() {
   const text = PRAISE[praiseAt++ % PRAISE.length];
   dialogue.dropQueued();                                   // the question is answered: it need not be read now
   dialogue.play([                                         // a short hold after it: the lesson goes on
-    { text, mood: 'praise', hold: got ? null : 0.6 },
-    got && { text: got, mood: 'praise', hold: 0.6, join: true },
+    { text, mood: 'praise', hold: 0.6 },
   ]);
 }
 
@@ -292,8 +290,8 @@ function makeCtx(i, tk) {
     },
     controls(...items) { els.controls.replaceChildren(...items.map((el, k) => entering(el, k))); },
 
-    // answer buttons; resolves with { wrong } once the right one is tapped. got: what the praise says was right
-    choose({ options, answer, fmt = (v) => `${v}`, why = {}, got = '', onWrong = null }) {
+    // answer buttons; resolves with { wrong } once the right one is tapped
+    choose({ options, answer, fmt = (v) => `${v}`, why = {}, onWrong = null }) {
       return guard(new Promise((resolve) => {
         let wrong = 0;
         const btns = options.map((v) => {
@@ -308,7 +306,7 @@ function makeCtx(i, tk) {
               btns.forEach((o) => { if (o !== b && !o.disabled) o.classList.add('is-off'); });
               sound.right();
               burstAt(b);
-              praise(wrong === 0, got);
+              praise();
               resolve({ wrong, value: v });
             } else {
               wrong++;
@@ -336,7 +334,7 @@ function makeCtx(i, tk) {
     // the middle; then it resolves with { wrong, view, card, unframe }. view is the card's figure;
     // unframe() lets the card's frame go and its figure grow to fill the screen, for a step whose next
     // idea uses that same figure (it carries on from there)
-    cards({ items, answer, why = {}, got = '' }) {
+    cards({ items, answer, why = {} }) {
       return guard(new Promise((resolve) => {
         let wrong = 0;
         const wrap = h('<div class="cards"></div>');
@@ -358,7 +356,7 @@ function makeCtx(i, tk) {
               cards.forEach((o) => { if (o !== card && !o.classList.contains('is-wrong')) o.classList.add('is-off'); });
               sound.right();
               burstAt(card, { count: 20, spread: 160 });
-              praise(wrong === 0, got);
+              praise();
               settleCard(wrap, card).then(() => resolve({ wrong, view: views[it.id], card, unframe: () => unframeCard(wrap, card, it.figure) }));
             } else {
               wrong++;

@@ -3,7 +3,11 @@
 /* ---------------------------------------------------------------- the room (picture), dimmed behind the screen */
 .room { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: #050b26; }
 .room__pic { position: absolute; left: 0; top: 0; max-width: none; display: block; transform-origin: 0 0; opacity: 0; transition: opacity .8s ease; }
-.is-on .room__pic { opacity: 1; }
+.is-on .room__pic { opacity: 1; transition: opacity .8s ease, filter 1.2s ease; }
+/* once the lesson is on, the hall behind it goes soft and a little darker: its curved lines (the window
+   band, the floor rings) no longer show sharp next to the straight lines of the drawing, where they made
+   level lines look tilted, and the hologram stands out. During the intro walk the hall stays sharp */
+.is-on:not(.intro-run) .room__pic { filter: blur(5px) brightness(.82); }
 .room::after { content: ''; position: absolute; inset: 0;
   background: radial-gradient(ellipse 75% 70% at 50% 45%, rgba(3, 8, 30, .25), rgba(3, 8, 30, .78)); transition: opacity 1.4s ease; }
 /* during the intro the hall is lit; the lights go down as the projector brings the lesson */

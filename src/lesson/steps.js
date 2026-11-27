@@ -40,8 +40,9 @@ function pointO(b, oDir = 270) {
   b.dot('po', O, { r: 7 });
   b.label('no', O, 'O', oDir, 26);
 }
-// a value or a name in an angle: a number (26), the unknown ? (30) or a name like ∠1 (22)
-const tagOpts = (v, color) => (v === '?' ? { size: 30, color } : v.startsWith('∠') ? { size: 22, color, font: 'name' } : { size: 26, color });
+// a value or a name in an angle: a number (26), the unknown x (30; the sum under the figure writes it ?) or a
+// name like ∠1 (22)
+const tagOpts = (v, color) => (v === 'x' ? { size: 30, color, font: 'x' } : v.startsWith('∠') ? { size: 22, color, font: 'name' } : { size: 26, color });
 
 // ray OC standing on a straight line (deck slides 14-23): the right angle (orange) and the left one (aqua)
 const LIN_BOX = [-158, -38, 158, 140];
@@ -78,7 +79,7 @@ function crossFig(b, s) {
   W.forEach(([a, z], k) => {
     const f = s.fill?.[k];
     if (s.names?.[k]) b.text(`n${k}`, at(O, mid(a, z), 64), `∠${k + 1}`, { font: 'name', size: 21, color: TXT[f] || '#fff', cls: back(k) });
-    if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: s.vals[k] === '?' ? 30 : 26, color: TXT[f] || '#fff', cls: cls(s.vcls?.[k], back(k)), font: 'num' });
+    if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: s.vals[k] === 'x' ? 30 : 26, color: TXT[f] || '#fff', cls: cls(s.vcls?.[k], back(k)), font: s.vals[k] === 'x' ? 'x' : 'num' });
     if (s.taps) b.tap(`t${k}`, `∠${k + 1}`, { o: O, a: a + 3, b: z - 3, r: 96 }, `Angle ${k + 1}`);
   });
   if (s.handle) b.handle('hp', 'p', at(O, t, 126), { label: 'The end of the line. Drag it, or use the arrow keys, to rotate the line.', now: t, min: 20, max: 160, hint: s.hint });
@@ -386,7 +387,7 @@ const PAIR_CARDS = (pairs) => Object.entries(pairs).map(([id, [a1, a2]]) => ({
 // right one locks in (green), is praised, and the list closes for good. pickGroup(c) keeps one list open at
 // a time and closes it on a tap elsewhere or Escape; group.list({...}) makes one list:
 //   label     what it is for (said by screen readers)    options, answer, fmt   the answers
-//   why, got  what is said for a wrong answer, and what the praise says was right
+//   why       what is said for a wrong answer
 //   onOpen, onClose, onRight   the figure follows: light the angle while it is chosen, and so on
 function pickGroup(c) {
   const lists = [];
@@ -400,7 +401,7 @@ function pickGroup(c) {
   document.addEventListener('keydown', onKey);
   c.later(() => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', onKey); });
   return {
-    list({ label, options, answer, fmt = (v) => `${v}`, why = {}, got = '', onOpen, onClose, onRight }) {
+    list({ label, options, answer, fmt = (v) => `${v}`, why = {}, onOpen, onClose, onRight }) {
       const el = h(`<div class="pick">
         <div class="pick__menu" role="group" aria-label="${esc(label)}">${options.map((o) => `<button type="button" class="pill pill--blue pick__opt" data-v="${esc(String(o))}">${angles(esc(fmt(o)))}</button>`).join('')}</div>
         <button type="button" class="pill pick__btn" aria-haspopup="true" aria-expanded="false" aria-label="${esc(label)}: choose"><span class="v">Choose</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none"/></svg></button>
@@ -431,7 +432,7 @@ function pickGroup(c) {
           btn.setAttribute('aria-label', `${label}: ${fmt(v)}`);
           c.sound.right();
           c.burst(btn);
-          c.praise(wrong === 0, got);
+          c.praise();
           onRight?.();
         } else {                                         // wrong: said why, crossed out, it can open again
           wrong++;
@@ -522,9 +523,9 @@ export const STEPS = [
     async run(c) {
       const TYPES = ['Acute', 'Right', 'Obtuse'];
       const ANGLES = [                                     // not in size order: each one has to be looked at
-        { d: 128, t: 'Obtuse', got: 'Obtuse: more than 90°.' },
-        { d: 52, t: 'Acute', got: 'Acute: less than 90°.' },
-        { d: 90, t: 'Right', got: 'A right angle: exactly 90°.' },
+        { d: 128, t: 'Obtuse' },
+        { d: 52, t: 'Acute' },
+        { d: 90, t: 'Right' },
       ];
       c.caption('What type is each angle?');
       const wrap = h('<div class="tcards"></div>');
@@ -538,7 +539,7 @@ export const STEPS = [
         const f = c.mini(card.querySelector('.tcard__mini'), TYPE_BOX, () => {}, { kMin: 0.6, kMax: 1.2, pad: 10 });
         const v = c.view({ sq: false, lit: false }, (b, s) => typeFig(b, A.d, s), f);
         const list = group.list({
-          label: `Angle ${k + 1}`, options: TYPES, answer: A.t, why: TYPE_WHY[A.d], got: A.got,
+          label: `Angle ${k + 1}`, options: TYPES, answer: A.t, why: TYPE_WHY[A.d],
           onOpen: () => focus(card), onClose: () => focus(null),
           onRight: () => {
             focus(null);
@@ -571,7 +572,6 @@ export const STEPS = [
         items: PAIR_CARDS({ A: [30, 60], B: [45, 55], C: [35, 65] }),
         answer: 'A',
         why: { B: ['45° + 55° = 100°.', 'Complementary angles make exactly 90°.'], C: ['35° + 65° = 100°.', 'Complementary angles make exactly 90°.'] },
-        got: '30° + 60° = 90°.',
       });
       c.ready();
       await c.wait(500);
@@ -620,7 +620,6 @@ export const STEPS = [
           A: ['They share a vertex and an arm,', 'but the orange angle covers the blue one: they overlap.'],
           C: 'Same vertex, but no common arm: there’s a gap between the two angles.',
         },
-        got: 'Same vertex, a common arm, no overlap.',
       });
     },
   },
@@ -677,7 +676,6 @@ export const STEPS = [
           170: ['Not quite.', '60 + 110 = 170, and 5 + 5 = 10 more.'],
           190: ['A bit too much.', '60 + 110 = 170, and 5 + 5 = 10 more.'],
         },
-        got: '65° + 115° = 180°.',
       });
       c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('g', '180°')}`);
       await c.wait(900);
@@ -725,7 +723,7 @@ export const STEPS = [
       c.on('Drag', () => { demo = false; if (!moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
       c.ready();
-      c.praise(true, 'You moved ray OC.');
+      c.praise();
       c.caption('The angles change, but their total stays 180°.');
       c.sound.right();
       await c.wait(1200);
@@ -765,7 +763,7 @@ export const STEPS = [
     id: 'linearFind', ch: 2, gate: true, title: 'Find the missing angle', lockHint: 'Pick the missing angle to go on.',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 1, c: 1, w: 1, t: 52, right: '52°', left: '?' }, linearFig);
+      const v = c.view({ l: 1, c: 1, w: 1, t: 52, right: '52°', left: 'x' }, linearFig);
       c.caption('Find the missing angle in this linear pair.');
       await c.choose({
         options: [118, 128, 138], answer: 128, fmt: deg,
@@ -773,7 +771,6 @@ export const STEPS = [
           118: ['118° + 52° = 170°.', 'A linear pair must make exactly 180°.'],
           138: ['138° + 52° = 190°.', 'That’s more than a straight line.'],
         },
-        got: '52° + 128° = 180°.',
       });
       v.set({ left: '128°' });
       await c.wait(900);
@@ -793,7 +790,6 @@ export const STEPS = [
         items: Object.entries(PAIRS).map(([id, [a1, a2]]) => ({ id, label: `${a1}° and ${a2}°`, box: JOIN_BOX, state: { j: 0 }, draw: joinFig(a1, a2) })),
         answer: 'A',
         why: { B: ['85° + 85° = 170°.', 'Supplementary angles make exactly 180°.'], C: ['100° + 70° = 170°.', 'Supplementary angles make exactly 180°.'] },
-        got: '110° + 70° = 180°.',
       });
       c.ready();
       await c.wait(500);
@@ -832,7 +828,6 @@ export const STEPS = [
           B: ['65° + 115° = 180°,', 'but they aren’t adjacent: no shared vertex, no shared arm.'],
           C: ['They’re adjacent, but 65° + 95° = 160°,', 'so the outer arms don’t make a straight line.'],
         },
-        got: 'Adjacent, and 115° + 65° = 180°.',
       });
     },
   },
@@ -853,9 +848,10 @@ export const STEPS = [
       await c.said();
       c.caption('Four angles are formed.');
       await c.cue('Four');
-      for (let k = 0; k < 4; k++) {                      // counted round O one by one
+      for (let k = 0; k < 4; k++) {                      // counted round O one by one: each is traced and gets its name
         v.s.fill[k] = 'dim';
         v.s.wcls[k] = 'flash';
+        v.s.names[k] = 1;
         v.draw();
         c.sound.tick(k);
         await c.wait(520);
@@ -878,7 +874,6 @@ export const STEPS = [
           '∠2': ['∠2 is next to ∠1: they share an arm.', 'Opposite angles only share the vertex.'],
           '∠4': ['∠4 is next to ∠1: they share an arm.', 'Look straight across the vertex.'],
         },
-        got: '∠3 faces ∠1 across O.',
       });
       v.set({ fill: ['orange', 'dim', 'orange', 'dim'], wcls: ['', '', 'trace', ''] });   // ∠3 lights up, traced
       await c.said();
@@ -892,7 +887,6 @@ export const STEPS = [
           '∠1': ['∠1 is next to ∠2: they share an arm.', 'Look straight across O.'],
           '∠3': ['∠3 is next to ∠2: they share an arm.', 'Look straight across O.'],
         },
-        got: '∠4 faces ∠2 across O.',
       });
       c.ready();
       v.set({ fill: ['orange', 'aqua', 'orange', 'aqua'], wcls: ['', '', '', 'trace'], taps: false });
@@ -985,7 +979,7 @@ export const STEPS = [
       c.on('Drag', () => { demo = false; if (!v.s.moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
       c.ready();
-      c.praise(true, 'You turned the line.');
+      c.praise();
       c.caption('Yes: vertically opposite angles stay equal.');
       c.sound.right();
     },
@@ -1005,9 +999,9 @@ export const STEPS = [
       const BOTH = [L1[0], L1[1], L1[2], L1[3], L2[0], L2[1], L2[2]];
       c.caption('Let’s see why it happens.');
       const PLAN = [
-        { cap: '∠1 and ∠2 form a linear pair.', fill: ['orange', 'aqua', null, null], glow: 'ab', arc: [0, 180],
+        { cap: '∠1 and ∠2 form a linear pair.', fill: ['orange', 'aqua', null, null], trace: ['trace-rev', 'trace', '', ''], glow: 'ab', arc: [0, 180],
           go: () => show([L1]) },
-        { cap: '∠2 and ∠3 form another linear pair.', fill: [null, 'aqua', 'orange', null], glow: 'pq', arc: [55, 235],
+        { cap: '∠2 and ∠3 form another linear pair.', fill: [null, 'aqua', 'orange', null], trace: ['', 'trace-rev', 'trace', ''], glow: 'pq', arc: [55, 235],
           go: () => show([L1, L2]) },
         // both lines equal the same 180°: the two totals merge, and ∠2 + ∠3 moves up beside ∠1 + ∠2
         { cap: 'Both totals include the same ∠2.', fill: ['orange', 'aqua', 'orange', null], glow: null, arc: null,
@@ -1025,7 +1019,7 @@ export const STEPS = [
         await c.wait(P === PLAN[0] ? 300 : 1100);          // a moment to look at the working
         c.caption(P.cap);
         await c.cue();                                     // the figure and the working change as the line starts
-        v.set({ fill: P.fill, glow: P.glow, sweep: null, wcls: P.fill.map((f) => (f ? 'trace' : '')) });   // the angles that light up are traced
+        v.set({ fill: P.fill, glow: P.glow, sweep: null, wcls: P.trace || P.fill.map((f) => (f ? 'trace' : '')) });   // the angles that light up are traced (a pair like doors)
         if (!eq.el.isConnected) c.els.readout.replaceChildren(eq.el);
         const working = P.go();
         working.catch(() => {});                           // a step left mid-way: its working stops quietly
@@ -1050,23 +1044,26 @@ export const STEPS = [
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', null, null, null], vcls: [], wcls: [], focus: null, uses: [] }, crossFig);
       c.caption('Can you find the other three angles if ∠1 is 68°?');
-      // each angle has its equation (the rule that finds it from what is known) and a list of values; k is
-      // the angle in the figure, uses the angles its equation takes its value from
+      // each angle has the rule that finds it (why0), its equation worked out from what is known (eq; a 'mid'
+      // step is left out on phones, where the line is short), and a list of values; k is the angle in the
+      // figure, uses the angles its equation takes its value from
       const ROWS = [
-        { k: 2, name: '∠3', eq: [['o', '∠3'], ['op', '='], ['o', '∠1']], uses: [0], fill: 'orange', opts: [22, 68, 112], ans: 68,
-          why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] }, got: '∠3 is opposite ∠1: 68°.' },
-        { k: 1, name: '∠2', eq: [['a', '∠2'], ['op', '='], ['g', '180°'], ['op', '−'], ['o', '∠1']], uses: [0], fill: 'aqua', opts: [68, 112, 122], ans: 112,
-          why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] }, got: '180° − 68° = 112°.' },
-        { k: 3, name: '∠4', eq: [['a', '∠4'], ['op', '='], ['a', '∠2']], uses: [1], fill: 'aqua', opts: [68, 112, 132], ans: 112,
-          why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] }, got: '∠4 is opposite ∠2: 112°.' },
+        { k: 2, name: '∠3', why0: 'Opposite angles are equal', eq: [['o', '∠3'], ['op', '='], ['o', '∠1']], uses: [0], fill: 'orange', opts: [22, 68, 112], ans: 68,
+          why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] } },
+        { k: 1, name: '∠2', why0: 'A linear pair adds to 180°', eq: [['a', '∠2'], ['op', '='], ['g mid', '180°'], ['op mid', '−'], ['o mid', '∠1'], ['op mid', '='], ['g', '180°'], ['op', '−'], ['o', '68°']], uses: [0], fill: 'aqua', opts: [68, 112, 122], ans: 112,
+          why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] } },
+        { k: 3, name: '∠4', why0: 'Opposite angles are equal', eq: [['a', '∠4'], ['op', '='], ['a', '∠2']], uses: [1], fill: 'aqua', opts: [68, 112, 132], ans: 112,
+          why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] } },
       ];
       const span = ([cls, t]) => `<span class="${cls}">${angles(esc(t))}</span>`;
-      const panel = h(`<div class="eqs"><div class="eqs__row is-given"><span class="eqs__eq">${[['o', '∠1'], ['op', '='], ['o', '68°']].map(span).join('')}</span></div></div>`);
+      // the working, one step under another: what is given, then each angle with the rule that finds it and its
+      // equation; the list of values stands right after the equation's last = sign
+      const panel = h(`<div class="eqs"><div class="eqs__row is-given"><span class="eqs__why">Given</span><div class="eqs__line"><span class="eqs__eq">${[['o', '∠1'], ['op', '='], ['o', '68°']].map(span).join('')}</span></div></div></div>`);
       const given = panel.firstChild;
       let finish, open = null;
       const done = new Promise((r) => { finish = r; });
       // one equation is in focus: the one whose list is open, or else the first one not found yet. Its row
-      // and its angle light up (the angle shows ?), the angles it uses stay clear, the rest steps back
+      // and its angle light up (the angle shows x), the angles it uses stay clear, the rest steps back
       const focus = () => {
         const R = open || ROWS.find((r) => !r.found);
         ROWS.forEach((r) => {
@@ -1074,7 +1071,7 @@ export const STEPS = [
           r.row.classList.toggle('is-dim', !!R && r !== R);
           if (!r.found) {
             v.s.fill[r.k] = r === R ? 'sun' : 'dim';
-            v.s.vals[r.k] = r === R ? '?' : null;
+            v.s.vals[r.k] = r === R ? 'x' : null;
           }
         });
         given.classList.toggle('is-dim', !!R && !R.uses.includes(0));
@@ -1086,9 +1083,9 @@ export const STEPS = [
       };
       const group = pickGroup(c);
       ROWS.forEach((R) => {
-        R.row = h(`<div class="eqs__row"><span class="eqs__eq">${R.eq.map(span).join('')}<span class="op">=</span></span></div>`);
-        R.row.appendChild(group.list({
-          label: R.name, options: R.opts, answer: R.ans, fmt: deg, why: R.why, got: R.got,
+        R.row = h(`<div class="eqs__row"><span class="eqs__why">${esc(R.why0)}</span><div class="eqs__line"><span class="eqs__eq">${R.eq.map(span).join('')}<span class="op">=</span></span></div></div>`);
+        R.row.querySelector('.eqs__line').appendChild(group.list({
+          label: R.name, options: R.opts, answer: R.ans, fmt: deg, why: R.why,
           onOpen: () => { open = R; focus(); },
           onClose: () => { if (open === R) open = null; focus(); },
           onRight: () => {

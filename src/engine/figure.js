@@ -11,9 +11,21 @@ import { esc, reduced } from './ui.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 // a line or an angle that is highlighted (glowing, blinking, flashing in, or marked 'trace') is traced
-// as the highlight comes on: a bright pen line draws itself along it, so the eye follows the shape the
-// voice is naming
-const TRACE = /(^|\s)(glow|blink2?|flash|trace)(\s|$)/;
+// as the highlight comes on: a bright pen line draws itself along it (along an angle's arc only), so the eye
+// follows the shape the voice is naming. Two angles side by side are traced like a pair of doors opening:
+// both arcs start at the arm they share and swing away from it at the same time, so the first of the pair
+// ('blink', or 'trace-rev') is traced backwards
+const TRACE = /(^|\s)(glow|blink2?|flash|trace|trace-rev)(\s|$)/;
+const BACKWARDS = /(^|\s)(blink|trace-rev)(\s|$)/;
+
+// a label (an angle's name or value) new to the figure grows in softly instead of popping up, so it comes in
+// with the tracing of its angle
+function appear(g) {
+  if (reduced() || !g.querySelector('text') || g.querySelector('[data-drag], .trace-light')) return;
+  g.querySelectorAll('text').forEach((t) => t.animate([
+    { opacity: 0, transform: 'scale(.55)' }, { opacity: 1, transform: 'scale(1.08)', offset: 0.7 }, { opacity: 1, transform: 'none' },
+  ], { duration: 650, easing: 'cubic-bezier(.22, 1, .36, 1)' }));
+}
 
 // the tracing: the pen line draws from one end to the other (out along an arm, round the arc, back along
 // the other arm for an angle), stays a moment, then fades into the highlight
@@ -23,7 +35,7 @@ function trace(g) {
     const L = p.getTotalLength?.() || 0;
     if (L < 4) return;
     const tip = p.classList.contains('tip');               // the pen's glowing tip, at the front of the line
-    const timing = { duration: Math.min(1700, 900 + L * 1.5), delay: p.classList.contains('later') ? 700 : 0, easing: 'ease-in-out', fill: 'both' };
+    const timing = { duration: Math.min(1700, 900 + L * 1.5), easing: 'ease-in-out', fill: 'both' };
     p.style.strokeDasharray = tip ? `0.1px ${n(L + 2)}px` : `${n(L + 1)}px ${n(L + 1)}px`;
     p.animate(tip ? [
       { strokeDashoffset: '0px', opacity: 1 },
@@ -57,11 +69,10 @@ class Builder {
 
   // the tracing of a highlighted item (its outline d): a pen line and its glowing tip, on the top layer so
   // nothing drawn over the item hides it. It exists only while the item is highlighted, so it is traced as
-  // the highlight comes on. later: traced a moment after (the second of two angles blinking in turn)
-  light(key, d, w, color, later = false) {
-    const l = later ? ' later' : '';
+  // the highlight comes on
+  light(key, d, w, color) {
     this.lights.push({ key: `${key}~trace`, cls: 'trace', attrs: null, style: `--glow:${color}`,
-      html: `<path class="trace-light${l}" d="${d}" stroke-width="${n(w)}"/><path class="trace-light tip${l}" d="${d}" stroke-width="${n(w * 2.6)}"/>` });
+      html: `<path class="trace-light" d="${d}" stroke-width="${n(w)}"/><path class="trace-light tip" d="${d}" stroke-width="${n(w * 2.6)}"/>` });
   }
 
   // a straight stroke from p to q with a navy outline under it; arrowheads optional
@@ -109,8 +120,11 @@ class Builder {
     let html = `<path d="${d}" fill="${fill}"/>`;
     if (edge && sweep < 359.8) html += `<path d="M${pa[0]} ${pa[1]}A${R} ${R} 0 ${big} 0 ${pb[0]} ${pb[1]}" fill="none" stroke="${edge}" stroke-width="${n(2.6 * this.k)}" stroke-linecap="round"/>`;
     this.push(key, html, { cls, style: `--glow:${edge || '#fff'}` });
-    // highlighted: traced round (out along one arm, round the arc, back along the other)
-    if (sweep < 359.8 && TRACE.test(cls)) this.light(key, d, 4 * this.k, edge || '#fff', /blink2/.test(cls));
+    // highlighted: its arc is traced (backwards for the first of a pair, so the two open like doors)
+    if (sweep < 359.8 && TRACE.test(cls)) {
+      const arc = BACKWARDS.test(cls) ? `M${pb[0]} ${pb[1]}A${R} ${R} 0 ${big} 1 ${pa[0]} ${pa[1]}` : `M${pa[0]} ${pa[1]}A${R} ${R} 0 ${big} 0 ${pb[0]} ${pb[1]}`;
+      this.light(key, arc, 4.6 * this.k, edge || '#fff');
+    }
   }
 
   // the little square that marks a right angle (a = direction of the first arm)
@@ -330,6 +344,7 @@ export class Figure {
     for (const it of items) {
       seen.add(it.key);
       let g = this.nodes.get(it.key);
+      const fresh = !g;                                   // drawn for the first time now
       if (!g) {
         g = document.createElementNS(NS, 'g');
         g.setAttribute('data-k', it.key);
@@ -348,7 +363,7 @@ export class Figure {
       for (const [name, val] of Object.entries(attrs)) if (g.getAttribute(name) !== val) g.setAttribute(name, val);
       g._attrs = attrs;
       // traced once, as it lights up (not again when the figure only moves or resizes)
-      if (g._html !== it.html) { g.innerHTML = it.html; g._html = it.html; if (lit) trace(g); }
+      if (g._html !== it.html) { g.innerHTML = it.html; g._html = it.html; if (lit) trace(g); if (fresh && this.fn) appear(g); }
       prev = g;
     }
     for (const [key, g] of this.nodes) if (!seen.has(key)) { g.remove(); this.nodes.delete(key); }

@@ -50,8 +50,6 @@ def lines():
     out += re.findall(r"c\.caption\(\s*" + Q, src)                       # captions
     out += re.findall(r"crew\(\s*" + Q, src)                             # instructions
     out += re.findall(r"\b(?:lockHint|cap|rule)\s*:\s*" + Q, src)        # lock hints, questions, recall
-    out += re.findall(r"\bgot\s*:\s*" + Q, src)                         # what the praise says was right
-    out += re.findall(r"c\.praise\(\s*\w+\s*,\s*" + Q, src)             # ... after a hands-on task
     # wrong-answer explanations: the values inside every why: { ... } and the TYPE_WHY table
     blocks = re.findall(r"why:\s*\{(.*?)\}\s*[,}]", src, re.S)
     t = src.index('const TYPE_WHY = {')
@@ -69,8 +67,8 @@ def lines():
     out += re.findall(r"\{\s*text:\s*" + Q + r",\s*mood:\s*'hint'\s*\}", src)   # a hint piece given as { text, mood }
     main = (ROOT / 'src' / 'main.js').read_text()
     out += re.findall(r"s\.lockHint \|\| " + Q, main)
-    p = main.index('const PRAISE = {')                                # the praise lines
-    out += re.findall(Q, main[p:main.index('};', p)])
+    p = main.index('const PRAISE = [')                                # the praise words
+    out += re.findall(Q, main[p:main.index('];', p)])
     seen, res = set(), []
     for s in map(unq, out):
         if s and s not in seen:

@@ -17,7 +17,8 @@
   --hexagon: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%);
 
   /* fonts: Fredoka for text, Lilita One for numbers; Noto Sans Math (a subset) supplies the angle and
-     minus signs, which the game fonts lack */
+     minus signs, which the game fonts lack; a serif italic for the unknown x on the figures */
+  --font-x: "Cambria Math", Cambria, Georgia, "Times New Roman", serif;
   --font-display: "Lilita One", "Noto Sans Math", "Fredoka", system-ui, sans-serif;
   --font-ui: "Fredoka", "Noto Sans Math", "Nunito", system-ui, sans-serif;
 }
