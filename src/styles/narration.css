@@ -4,7 +4,7 @@
    The hexagon at its left is the voice's mouth: its wave moves while the caption or a hint is spoken. */
 /* a floating glass bar at the top of the hologram: the voice and the caption */
 .caption { position: relative; width: 100%; margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 18px;
-  padding: 8px 64px 8px 8px; border-radius: 40px;
+  padding: 8px 80px 8px 8px; border-radius: 40px;
   background: linear-gradient(90deg, rgba(8, 24, 70, .88), rgba(8, 24, 70, .72)); box-shadow: inset 0 0 0 1.5px rgba(127, 243, 255, .5), 0 0 24px rgba(61, 220, 242, .25); }
 .caption h1 { margin: 0; font: 700 clamp(18px, .95rem + .6vw, 26px)/1.25 var(--font-ui); color: #ffffff; letter-spacing: .005em; text-wrap: balance; }
 /* the bar keeps two lines' height (the line stays plain text: a flex box would drop the spaces between the

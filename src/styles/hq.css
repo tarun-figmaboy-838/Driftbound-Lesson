@@ -14,7 +14,9 @@
 .intro-run .room::after { opacity: 0; }
 
 /* the sound button sits in the screen's header row, on the right */
-.mute { position: fixed; z-index: 6; top: calc(var(--sy) + 18px + (clamp(18px, .95rem + .6vw, 26px) * 2.5 + 16px - 44px) / 2); left: calc(var(--sx) + var(--sw) - 32px - 44px); display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+/* set into the rounded end of the narration bar: centred in its half circle (the bar's end is at the screen's
+   right edge less the stage's 32px; its half circle's radius is half the bar's height, at most 40px) */
+.mute { position: fixed; z-index: 6; top: calc(var(--sy) + 18px + (clamp(18px, .95rem + .6vw, 26px) * 2.5 + 16px - 44px) / 2); left: calc(var(--sx) + var(--sw) - 32px - min(40px, (clamp(18px, .95rem + .6vw, 26px) * 2.5 + 16px) / 2) - 22px); display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
   border: 0; border-radius: 50%; cursor: pointer; background: rgba(6, 18, 54, .9); box-shadow: inset 0 0 0 1.5px rgba(127, 243, 255, .75), 0 0 14px rgba(61, 220, 242, .3);
   transition: box-shadow .2s ease, transform .2s ease; }
 @media (hover: hover) { .mute:hover { transform: scale(1.06); box-shadow: inset 0 0 0 1.5px var(--holo), 0 0 20px rgba(61, 220, 242, .55); } }
