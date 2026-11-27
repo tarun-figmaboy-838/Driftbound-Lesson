@@ -7,8 +7,8 @@
 .is-tall .next-wrap { grid-area: next; }
 .is-tall .stage { padding: 14px 8px 12px; row-gap: 10px; }
 .is-tall .caption { column-gap: 12px; padding: 2px 52px 10px 2px; }
-.is-tall .caption h1 { min-height: 3.75em; }   /* three lines' height kept on phones */
-.is-tall .mute { top: calc(var(--sy) + 12px); left: calc(var(--sx) + var(--sw) - 12px - 40px); width: 40px; height: 40px; }
+.is-tall .caption { min-height: calc(18px * 3.75 + 12px); }   /* three lines' height kept on phones */
+.is-tall .mute { top: calc(var(--sy) + 14px + (18px * 3.75 + 12px - 40px) / 2 - 4px); left: calc(var(--sx) + var(--sw) - 12px - 40px); width: 40px; height: 40px; }
 .is-tall .voice { width: 44px; height: 44px; gap: 2px; }
 .is-tall { --pw: 124px; }
 /* a panel beside the figure goes under it */
