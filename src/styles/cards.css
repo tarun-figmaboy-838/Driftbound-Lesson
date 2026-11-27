@@ -96,13 +96,10 @@
 .eqs .pick.is-open .pick__menu { transform: none; animation: menu-in .32s cubic-bezier(.34, 1.56, .64, 1) both; }
 .eqs .pick__menu::before { left: auto; right: 58px; translate: 0 0; }
 @keyframes menu-in { from { opacity: 0; transform: translateY(-8px) scale(.85); } }
-/* the panel keeps one height whether a list is open or not: room for the open list's line is kept at its
-   foot and handed to the slot that opens (so opening a list never moves or resizes anything round it) */
-.eqs { --menu-h: 82px; padding-bottom: calc(20px + var(--menu-h)); }
-.eqs:has(.pick.is-open) { padding-bottom: 20px; }
-/* every answer in: no list will open again, so the panel closes up round its lines, smoothly (on phones the
-   drawing above grows into the room it gives back, frame by frame) */
-.eqs.is-done { padding-bottom: 20px; transition: padding-bottom .6s cubic-bezier(.22, 1, .36, 1); }
+/* the panel is as tall as its lines; a list that opens extends it downwards into the free room below, without
+   taking room in the layout (its line's height, --menu-h, is given back below it), so nothing round it moves */
+.eqs { --menu-h: 82px; }
+.eqs:has(.pick.is-open) { margin-bottom: calc(-1 * var(--menu-h)); }
 
 /* the list: a capsule that says the type chosen (Choose until then); tapped, the three types open below it
    as buttons (blue capsules) in a row; a wrong one turns red and is crossed out */
