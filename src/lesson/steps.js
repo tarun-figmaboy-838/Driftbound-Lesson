@@ -1016,18 +1016,18 @@ export const STEPS = [
   },
 
   // ============================================================ RECALL (the last step launches the game)
-  // deck slide 43: recall. A drone flies in and stops in the middle; it projects the five cards one by one
-  // as holograms in its beam, each card's diagram shows the idea while the voice says the deck's sentence,
-  // and the card flies down into the tray. When all five are collected the drone leaves and the tray
-  // opens into the collection; tapping a card brings the drone back to explain it again.
+  // deck slide 43: recall. A drone flies in and stops above the middle: it is the voice that explains. The
+  // five shapes rise one by one out of the floor projector's light as holograms (no card), each shape shows
+  // the idea while the voice says the deck's sentence, then its card forms round it and it flies to its
+  // place. When all five are collected the drone leaves and the cards open into the collection; tapping a
+  // card brings the drone back to explain it again.
   {
     id: 'recall', quiet: true, ch: 5, title: 'Recall', next: 'Launch mission', launch: true, nextAfter: true,   // Launch mission arrives once the recall is done
     async run(c) {
       c.caption('Recall');
-      const root = h(`<div class="recall"><div class="recall__beam" aria-hidden="true"><i></i></div><div class="recall__stage"></div><div class="recall__slots"></div><div class="drone" aria-hidden="true">${droneMarkup()}</div></div>`);
+      const root = h(`<div class="recall"><div class="recall__stage"></div><div class="recall__slots"></div><div class="drone" aria-hidden="true">${droneMarkup()}</div></div>`);
       const slots = root.querySelector('.recall__slots');
       const stage = root.querySelector('.recall__stage');
-      const beam = root.querySelector('.recall__beam');
       const drone = root.querySelector('.drone');
       c.stage(root);
       // while the drone is here, it is the one talking: the mouth moves to its screen (and back when it leaves)
@@ -1036,7 +1036,7 @@ export const STEPS = [
       c.later(() => mouthOnDrone(false));
       // each card's place in the collection (invisible until the card lands); while the drone works, four of
       // them wait at the sides (data-pos 0-3: left and right, top row then bottom row) and the last card
-      // stays in the middle. Each card waits off stage until the drone brings it
+      // stays in the middle. Each card waits off stage until its shape rises in the projector's light
       const cards = RECALL.map((R, i) => {
         const slot = h('<div class="rslot"></div>');
         if (i < 4) slot.dataset.pos = String(i);
@@ -1055,7 +1055,7 @@ export const STEPS = [
         drone.style.setProperty('--tilt', `${tilt}deg`);
         if (now) { void drone.offsetWidth; drone.style.transition = ''; }
       };
-      const hoverOver = (el) => {                         // where the drone hovers to project onto el
+      const hoverOver = (el) => {                         // where the drone hovers to explain el (above it)
         const rr = root.getBoundingClientRect(), r = el.getBoundingClientRect();
         return [r.left - rr.left + r.width / 2 - drone.offsetWidth / 2, Math.max(0, r.top - rr.top - drone.offsetHeight - 40)];
       };
@@ -1074,28 +1074,15 @@ export const STEPS = [
         mouthOnDrone(false);
       };
 
-      // ---- the projection: a cone of light from the drone's emitter down over the card
-      const beamOn = (el) => {
-        const rr = root.getBoundingClientRect(), d = drone.getBoundingClientRect(), r = el.getBoundingClientRect();
-        const top = d.top - rr.top + d.height * 0.95;    // the emitter: the glowing tip under the drone's body
-        const pad = r.width * 0.12;
-        Object.assign(beam.style, {
-          left: `${r.left - rr.left - pad}px`, width: `${r.width + 2 * pad}px`,
-          top: `${top}px`, height: `${r.bottom - rr.top + pad * 2.2 - top}px`,
-        });
-        beam.style.setProperty('--e', `${d.width * 0.11}px`);
-        root.classList.add('beam-on');
-        drone.classList.add('beam');
-      };
-      const beamOff = () => { root.classList.remove('beam-on'); drone.classList.remove('beam'); };
-
-      // ---- the card forms in the light: from a speck at the emitter, growing down the beam, flickering in
+      // ---- the shape rises out of the floor projector's light: from a speck at its lens, growing up the light,
+      // flickering in (the drone does not project: it only talks)
       const release = async (el) => {
         el.classList.add('in', 'is-holo', 'is-bare');   // no card yet: the shape is a hologram in the light
         if (c.reduced) return;
-        const d = drone.getBoundingClientRect(), r = el.getBoundingClientRect();
-        const dx = d.left + d.width / 2 - (r.left + r.width / 2);
-        const dy = d.top + d.height * 0.92 - (r.top + r.height / 2);
+        const p = document.querySelector('.projector__img')?.getBoundingClientRect(), r = el.getBoundingClientRect();
+        const lens = p && p.width ? [p.left + p.width / 2, p.top + p.height * 0.27] : [innerWidth / 2, innerHeight];
+        const dx = lens[0] - (r.left + r.width / 2);
+        const dy = lens[1] - (r.top + r.height / 2);
         await c.until(el.animate([
           { transform: `translate(${dx}px, ${dy}px) scale(.04, .02)`, opacity: 0, filter: 'brightness(3) saturate(0)' },
           { transform: `translate(${dx * 0.6}px, ${dy * 0.6}px) scale(.3, .12)`, opacity: 0.9, filter: 'brightness(2.6) saturate(.2)', offset: 0.3 },
@@ -1194,14 +1181,12 @@ export const STEPS = [
           const f = c.mini(k.el.querySelector('.rcard__fig'), k.R.box, () => {}, { kMin: 0.5, kMax: 1.7, pad: 10 });
           k.v = c.view({ ...k.R.start }, k.R.draw, f);
         }
-        beamOn(stage);
         c.sound.pop();
         const fig = k.el.querySelector('.rcard__fig');
         fig.classList.add('is-waiting');                 // the card comes first, empty
         await release(k.el);
         await drawIn(fig);                               // then its shape draws in
         await explain(k);
-        beamOff();                                       // the light goes back into the emitter
         await c.wait(c.reduced ? 0 : 280);
         if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 200); } else await cardForms(k.el);
       }
@@ -1235,10 +1220,8 @@ export const STEPS = [
               k.el.classList.add('is-on');
               await relayout(() => { stage.appendChild(k.el); k.slot.classList.add('away'); root.classList.remove('is-done'); }, { stagger: 30 });
               if (!c.reduced) await flyIn(hoverOver(stage));
-              beamOn(stage);
               k.el.classList.add('is-holo', 'is-bare');
               await explain(k);
-              beamOff();
               await cardForms(k.el);
               k.el.classList.remove('is-holo', 'is-on');
               await c.wait(c.reduced ? 0 : 280);

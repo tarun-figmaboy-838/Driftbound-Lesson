@@ -1,8 +1,8 @@
 /* The recall: the drone, its light, the cards, the side places and the collection. */
 
-/* ---------------------------------------------------------------- the recall: a hologram drone (Figma AI art)
-   projects each square card (Figma AI art) in the middle, then the card flies down into the tray; at the end
-   the tray opens into the collection. --dw / --dh: the drone's size; --big: the projected card; --tray: a slot */
+/* ---------------------------------------------------------------- the recall: a drone (Figma AI art) explains each
+   shape, which rises in the floor projector's light in the middle; its square card (Figma AI art) forms round it
+   and it flies to its place; at the end the cards open into the collection. --dw / --dh: the drone's size; --big: the projected card; --tray: a slot */
 .recall { position: relative; height: 100%; container-type: size;
   --dw: clamp(130px, 14cqw, 210px); --dh: calc(var(--dw) * .448);
   --big: min(calc(100cqh - var(--dh) - 80px), 40cqw, 330px);
@@ -40,7 +40,7 @@
 .rcard__fig { position: relative; min-height: 0; margin-top: 4%; transition: transform .5s ease; }
 .rcard__fig.is-waiting { visibility: hidden; }   /* the card comes in first; its shape draws in after */
 .rcard.in { opacity: 1; }
-/* in the beam the card glows like a hologram */
+/* in the light the shape (and its card) glows like a hologram */
 .rcard.is-holo { filter: drop-shadow(0 0 18px rgba(127, 243, 255, .55)); }
 /* while the drone explains it there is no card: the shape floats in the light as a solid hologram. It is
    bigger, has depth (a darker layer under its lines, like the side of a solid piece) and turns slowly in
@@ -72,22 +72,6 @@
 .is-talking .drone__screen i:nth-child(4) { --amp: 88%; animation-delay: -.05s; }
 @keyframes drone-talk { from { height: 12%; } to { height: var(--amp, 60%); } }
 .caption.mouth-on-drone .voice { visibility: hidden; }
-/* the emitter lights up while it projects */
-.drone__flare { position: absolute; left: 50%; top: 92%; width: 46%; height: 30%; translate: -50% -50%; border-radius: 50%; opacity: 0; pointer-events: none;
-  background: radial-gradient(closest-side, #ffffff, rgba(160, 248, 255, .85) 35%, rgba(127, 243, 255, 0)); transition: opacity .25s;
-  animation: drone-bob 1.4s ease-in-out infinite alternate; }
-.drone.beam .drone__flare { opacity: 1; }
-/* the beam: a cone of light from the emitter (narrow top, --e wide) spreading over the card. The blur on the
-   outer element softens the cone's clipped edges. */
-.recall__beam { position: absolute; z-index: 1; pointer-events: none; opacity: 0; filter: blur(2px); transform: scaleY(0); transform-origin: 50% 0;
-  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent); mask-image: linear-gradient(180deg, #000 62%, transparent);
-  transition: transform .35s cubic-bezier(.3, .7, .4, 1), opacity .3s; }
-.recall__beam i { position: absolute; inset: 0; clip-path: polygon(calc(50% - var(--e, 20px) / 2) 0, calc(50% + var(--e, 20px) / 2) 0, 100% 100%, 0 100%);
-  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, .08) 0 2px, transparent 2px 7px),
-    linear-gradient(180deg, rgba(220, 254, 255, .95), rgba(127, 243, 255, .5) 22%, rgba(127, 243, 255, .2) 70%, rgba(127, 243, 255, .3));
-  animation: beam-flicker 2.4s ease-in-out infinite; }
-@keyframes beam-flicker { 0%, 100% { opacity: 1; } 45% { opacity: .82; } 50% { opacity: .95; } 55% { opacity: .78; } }
-.recall.beam-on .recall__beam { opacity: 1; transform: none; }
 .is-tall .recall { --dw: 112px; --tray: min(calc((100cqw - 4 * 8px) / 5), 16cqh); --big: min(calc(100cqh - var(--dh) - var(--tray) - 84px), 78cqw); }
 /* phones: no room at the sides, so the tray is a row along the bottom (it stays centred as it grows) */
 .is-tall .recall:not(.is-done) .recall__slots { top: auto; bottom: 4px; display: grid; justify-content: center; gap: 8px;
@@ -96,6 +80,6 @@
 .is-tall .recall.is-done .recall__slots { top: calc(var(--dh) + 12px); gap: 12px;
   --cell: min(calc((100cqw - 12px) / 2), calc((100cqh - var(--dh) - 12px - 24px) / 3)); grid-template-columns: repeat(2, var(--cell)); }
 .is-tall .recall.is-done .rslot:last-child { grid-column: 1 / -1; justify-self: center; width: var(--cell); }
-@media (prefers-reduced-motion: reduce) { .drone, .recall__beam { display: none; } .rcard.is-bare .rcard__fig { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .drone { display: none; } .rcard.is-bare .rcard__fig { animation: none; } }
 /* lip sync on the drone's screen (see narration.css) */
 .lipsync .drone__screen i { animation: none; height: calc(12% + var(--lv, 0) * 78%); transition: height 60ms linear; }
