@@ -1042,6 +1042,10 @@ export const STEPS = [
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['dim', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], glow: null, sweep: null }, crossFig);
       const eq = eqnBoard();
+      // the row under the drawing keeps room for the working's two lines, so the drawing does not move when the
+      // second line comes in
+      c.els.readout.style.minHeight = 'calc(2.2em + 34px)';
+      c.later(() => { c.els.readout.style.minHeight = ''; });
       const show = (lines, merge) => c.until(eq.show(lines, { merge, reduced: c.reduced }));
       // the terms; each keeps its key, so it glides from one line of the working to the next
       const L1 = [['a1', '∠1', 'o'], ['p1', '+', 'op'], ['b1', '∠2', 'a'], ['e1', '=', 'op'], ['t1', '180°', 'g']];

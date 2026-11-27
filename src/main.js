@@ -325,6 +325,9 @@ function makeCtx(i, tk) {
     // to make room (figure.js), the panel slides in, and its lines drop in one after another
     side(node) {
       node?.querySelectorAll('.eqs__row').forEach((r, k) => r.style.setProperty('--i', k));
+      fig.glideNext = true;                                // (only this change: it lapses if none comes)
+      const t = setTimeout(() => { fig.glideNext = false; }, 900);
+      later(() => { clearTimeout(t); fig.glideNext = false; });
       els.custom.replaceChildren(...(node ? [node] : []));
       els.stage.classList.toggle('is-side', !!node);
     },

@@ -15,7 +15,6 @@
 /* its lines drop in one after another (backwards: afterwards each line's own lift and dim take over) */
 .view.is-side .eqs__row { animation: row-in .5s cubic-bezier(.34, 1.56, .64, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 220ms); }
 @keyframes row-in { from { opacity: 0; transform: translateY(-14px) scale(.9); } }
-.stage:has(.view.is-side) > .readout:empty { display: none; }   /* no empty row under it: the drawing gets the room */
 
 /* ---------------------------------------------------------------- figure (SVG) */
 .fig-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; touch-action: manipulation; outline: none; }

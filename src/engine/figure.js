@@ -280,9 +280,9 @@ export class Figure {
     this.onNudge = null;        // (id, delta) => void   arrow keys on a handle
     this.dragAll = null;        // handle id that any press on the figure drags (easier on phones)
     this.dragging = null;
-    // when the room for the drawing changes while it is shown (a panel comes in beside it, a line of narration
-    // wraps, a label appears under it), the drawing glides and scales to its new place instead of jumping; a
-    // change of the window's own size just redraws
+    // when its room changes on purpose while it is shown (glideNext: a panel comes in beside it) the drawing
+    // glides and scales to its new place; otherwise it is redrawn in place. Its room is kept steady (the
+    // narration bar and the row under it keep their height), so it does not move about
     this.win = [innerWidth, innerHeight];
     this.ro = new ResizeObserver(() => this.render());
     this.ro.observe(host);
@@ -358,8 +358,11 @@ export class Figure {
     this.drawn = true;
     const winChanged = this.win[0] !== innerWidth || this.win[1] !== innerHeight;
     this.win = [innerWidth, innerHeight];
-    // its room changed size (not the window): it glides over (see glide)
-    if (was && !winChanged && (Math.abs(was.w - this.lastBox.width) > 1 || Math.abs(was.h - this.lastBox.height) > 1)) this.glide(was);
+    // its room changed size on purpose (a panel came in beside it: glideNext): it glides over (see glide)
+    if (was && this.glideNext && !winChanged && (Math.abs(was.w - this.lastBox.width) > 1 || Math.abs(was.h - this.lastBox.height) > 1)) {
+      this.glideNext = false;
+      this.glide(was);
+    }
     const b = new Builder(this);
     this.fn(b);
     b.items.push(...b.lights);                             // the tracing, over the whole figure
