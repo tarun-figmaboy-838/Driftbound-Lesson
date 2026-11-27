@@ -1,22 +1,20 @@
 Do you remember how an angle is formed?
 Two rays starting from the same point form an angle.
-Which type of angle is this?
+What type is each angle?
 A right angle is exactly 90°, a square corner.
 This one is smaller than that.
 Obtuse angles are bigger than 90°.
 This one is smaller than a square corner.
 Acute: less than 90°.
-What type is it now?
 Acute angles are smaller than 90°.
 This one makes a perfect square corner.
 This one is exactly a square corner.
 A right angle: exactly 90°.
-And what type is this?
 This one opens wider than a square corner.
 A right angle is exactly 90°.
 This one opens wider than that.
 Obtuse: more than 90°.
-Tap a name for the angle to go on.
+Choose a type for each angle to go on.
 Complementary angles add up to 90°.
 Which pair is complementary?
 45° + 55° = 100°.

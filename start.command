@@ -1,5 +1,5 @@
 #!/bin/sh
-# Driftbound Briefing launcher (macOS): double-click to open the angle lesson.
+# Drone Defense Briefing launcher (macOS): double-click to open the angle lesson.
 # Serves this folder on your own Mac only (127.0.0.1) and opens it in your browser.
 cd "$(dirname "$0")" || exit 1
 PORT=8124

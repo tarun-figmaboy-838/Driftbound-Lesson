@@ -1,15 +1,13 @@
 // The HQ backdrop and the screen layout.
 //
 // The room is a picture made with Figma AI (assets/ui/bg): the command HQ inside the satellite, a wide
-// version for landscape screens and a tall one for phones. The lesson's screen is a big digital
-// rectangle projected onto the front wall, where the DRIFTBOUND hologram stands (tools/ui/hall_wall.py);
-// the picture shows the calm hall around it: the domed ceiling, the window band onto the planet, the
-// glowing floor ring.
+// version for landscape screens and a tall one for phones. The lesson floats as a hologram in front of
+// the front wall's big screen, in the light of a projector on the floor (hq.css); the picture shows the
+// calm hall around it: the domed ceiling, the window band onto the planet, the glowing floor ring.
 // The screen's rectangle is handed to the CSS as --sx, --sy, --sw, --sh (px).
 
 const PICS = {
-  // where the lesson's screen goes on the front wall, in picture pixels: x0, y0, x1, y1 (the pictures
-  // had a screen there; it is painted out now)
+  // the front wall's screen, in picture pixels: x0, y0, x1, y1 (the lesson is centred on it)
   wide: { src: 'assets/ui/bg/hq-wide.webp', w: 1536, h: 1024, screen: [388, 278, 1147, 617] },
   tall: { src: 'assets/ui/bg/hq-tall.webp', w: 1024, h: 1536, screen: [111, 363, 912, 757] },
 };

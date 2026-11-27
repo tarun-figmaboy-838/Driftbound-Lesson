@@ -1,7 +1,7 @@
 """Make the lesson's voice-over with Kokoro (open source, Apache-2.0, runs locally, free).
 
 The narrator is the game's co-pilot: Kokoro's af_heart voice with the same light robot shimmer and radio
-sound as in Driftbound. Every line the narration can say is collected from src/lesson/steps.js and src/main.js
+sound as in Drone Defense. Every line the narration can say is collected from src/lesson/steps.js and src/main.js
 (captions, instructions, hints, the recall cards). Each file is named after a hash of the line exactly
 as the screen shows it, so the lesson finds it by itself (src/engine/voice.js). The manifest also keeps the time
 each word starts, so the words on screen light up exactly as they are said.

@@ -1,4 +1,4 @@
-"""Local server for the Driftbound Briefing (the angle lesson).
+"""Local server for the Drone Defense Briefing (the angle lesson).
 
 Same as `python3 -m http.server`, but it serves this folder no matter where it is started from
 and tells the browser to check every file for changes, so a normal reload always runs the latest code.
@@ -23,5 +23,5 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
 
 port = int(sys.argv[1]) if len(sys.argv) > 1 else 8124
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-print(f'Driftbound Briefing is running at http://127.0.0.1:{port}  (close this window to stop it)')
+print(f'Drone Defense Briefing is running at http://127.0.0.1:{port}  (close this window to stop it)')
 http.server.ThreadingHTTPServer(('127.0.0.1', port), NoCacheHandler).serve_forever()

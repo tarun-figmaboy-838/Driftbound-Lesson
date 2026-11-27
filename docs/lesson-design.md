@@ -1,6 +1,6 @@
 # Lines & Angles, Class 2: lesson design
 
-This document is for the designers and educators working on Driftbound. It describes the lesson that
+This document is for the designers and educators working on Drone Defense. It describes the lesson that
 students take before the game: where its content comes from, how each step works, and how it
 connects to the game.
 
@@ -26,11 +26,12 @@ one continuous camera move with no cuts:
    through the gate, down the corridor and through its far doorway into the command hall. The gate,
    the corridor and the hall each stand at their own distance, so near things grow faster than far
    ones, and the walk stops exactly on the lesson's view of the hall.
-4. It looks all the way round the hall (a full turn), slowing at each wall: the surveillance
-   monitors, the entrance it came through, the map table, and back to the front wall, where the
-   DRIFTBOUND hologram rises from a projector table (there is no screen yet).
-5. A drone flies in and projects the screen; the screen forms top to bottom like a hologram while the
-   hall's lights go down, and the drone flies off. Then the lesson starts.
+4. It comes into the hall facing the surveillance monitors (the 2nd wall) and turns right, slowing at
+   each wall: the entrance it came through, the map table, and the front wall with its big screen.
+5. The projector on the floor in front of the screen wakes up (it rises into view and its lights come
+   on), a column of light rises from it, and the lesson forms in that light from the bottom up,
+   flickering in like a hologram, while the hall's lights go down. Then the lesson starts. The lesson
+   has no panel: it floats in the projector's light.
 
 Skip (or Escape) goes straight to the lesson; with reduced motion the intro is left out.
 
@@ -138,12 +139,12 @@ Kept to what the interactions need:
 - The intro's gate (cut into its frame and two door halves), corridor (its far doorway cut open) and
   the hall's right, back and left walls (stitched with the front into one strip for the full turn) are
   Figma AI pictures (`assets/ui/intro/`).
-- The start banner, title, play button, recall drone, recall card and hint hand are Figma AI pictures
-  (`assets/ui/start/`, `assets/ui/recall/`).
+- The start banner, title, play button, recall drone, recall card, hint hand and the hall's projector
+  are Figma AI pictures (`assets/ui/start/`, `assets/ui/recall/`, `assets/ui/hint/`, `assets/ui/hall/`).
+  The title and the projector were made on flat green and cut out with `tools/ui/cut_green.py`.
 - The HQ background is two pictures made with Figma AI (`assets/ui/bg/`): a wide one for landscape
-  screens and a tall one for phones. `src/engine/scene.js` places the lesson screen on the front wall,
-  where the pictures had a screen; `tools/ui/hall_wall.py` paints that screen out and adds the
-  DRIFTBOUND hologram and its projector table.
+  screens and a tall one for phones. `src/engine/scene.js` centres the lesson on the front wall's
+  screen.
 - The buttons are the capsules from the POLYGON Figma file (source art in `tools/ui/polygon/`).
 - The UI kit is in Figma (https://www.figma.com/design/tyeZIE8dPEVxyAIccfBrov). Its screens show an
   earlier layout.

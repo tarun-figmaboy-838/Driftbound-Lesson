@@ -28,17 +28,30 @@
 .recall.is-done .recall__slots { display: grid; justify-content: center; align-content: center; gap: 18px; grid-auto-flow: row;
   --cell: min(calc((100cqw - 4 * 18px) / 5), calc(100cqh - 2 * var(--dh) - 104px), 290px);   /* room above a card for the drone */
   grid-template-columns: repeat(5, var(--cell)); grid-auto-rows: var(--cell); }
-.rcard { position: absolute; inset: 0; display: grid; grid-template-rows: 24.6% minmax(0, 1fr); padding: 0 8% 8%; border: 0; border-radius: 12px;
-  container-type: inline-size; color: #fff; font: inherit; text-align: center; cursor: pointer; opacity: 0;
-  background: url(../../assets/ui/recall/card.webp) center / 100% 100% no-repeat; transition: filter .3s, transform .3s; }
+.rcard { position: absolute; inset: 0; isolation: isolate; display: grid; grid-template-rows: 24.6% minmax(0, 1fr); padding: 0 8% 8%; border: 0; border-radius: 12px;
+  container-type: inline-size; color: #fff; font: inherit; text-align: center; cursor: pointer; opacity: 0; background: none;
+  transition: filter .3s, transform .3s; }
+/* the card itself (Figma AI art), behind the title and the shape: it fades away while the shape is explained */
+.rcard::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: url(../../assets/ui/recall/card.webp) center / 100% 100% no-repeat; transition: opacity .5s ease; }
 .rcard:disabled { cursor: default; }
 /* the title sits in the card's header band */
 .rcard b { align-self: center; padding-top: 3%; text-wrap: balance; font: 700 clamp(9px, 7.4cqi, 20px)/1.1 var(--font-ui); color: var(--holo); text-shadow: 0 0 10px rgba(127, 243, 255, .45); }
-.rcard__fig { position: relative; min-height: 0; margin-top: 4%; }
+.rcard__fig { position: relative; min-height: 0; margin-top: 4%; transition: transform .5s ease; }
 .rcard__fig.is-waiting { visibility: hidden; }   /* the card comes in first; its shape draws in after */
 .rcard.in { opacity: 1; }
 /* in the beam the card glows like a hologram */
 .rcard.is-holo { filter: drop-shadow(0 0 18px rgba(127, 243, 255, .55)); }
+/* while the drone explains it there is no card: the shape floats in the light as a solid hologram. It is
+   bigger, has depth (a darker layer under its lines, like the side of a solid piece) and turns slowly in
+   3D; its title floats above it. When it is collected the card forms round it again */
+.rcard.is-bare::before { opacity: 0; }
+.rcard.is-bare .rcard__fig { animation: holo-turn 4.5s ease-in-out infinite alternate; }
+.rcard.is-bare .rcard__fig .fig-svg { filter: drop-shadow(0 3px 0 rgba(10, 46, 120, .95)) drop-shadow(0 6px 0 rgba(10, 46, 120, .55)) drop-shadow(0 0 12px rgba(127, 243, 255, .6)); }
+@keyframes holo-turn {
+  from { transform: perspective(700px) rotateX(14deg) rotateY(-16deg) scale(1.14); }
+  to { transform: perspective(700px) rotateX(14deg) rotateY(16deg) scale(1.14); }
+}
 .rcard.is-on b { color: #ffe9a8; }
 @media (hover: hover) { .recall.is-done .rcard:not(:disabled):not(.is-on):hover { transform: translateY(-3px); filter: drop-shadow(0 0 14px rgba(127, 243, 255, .5)); } }
 .rcard:focus-visible { outline: 3px solid var(--holo); outline-offset: 3px; }
@@ -83,6 +96,6 @@
 .is-tall .recall.is-done .recall__slots { top: calc(var(--dh) + 12px); gap: 12px;
   --cell: min(calc((100cqw - 12px) / 2), calc((100cqh - var(--dh) - 12px - 24px) / 3)); grid-template-columns: repeat(2, var(--cell)); }
 .is-tall .recall.is-done .rslot:last-child { grid-column: 1 / -1; justify-self: center; width: var(--cell); }
-@media (prefers-reduced-motion: reduce) { .drone, .recall__beam { display: none; } }
+@media (prefers-reduced-motion: reduce) { .drone, .recall__beam { display: none; } .rcard.is-bare .rcard__fig { animation: none; } }
 /* lip sync on the drone's screen (see narration.css) */
 .lipsync .drone__screen i { animation: none; height: calc(12% + var(--lv, 0) * 78%); transition: height 60ms linear; }

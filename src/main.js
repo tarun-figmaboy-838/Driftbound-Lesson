@@ -1,4 +1,4 @@
-// Lines & Angles: the training run before Driftbound.
+// Lines & Angles: the training run before Drone Defense.
 //
 // A step player. Each step in src/lesson/steps.js is a short async script: it sets the caption, draws on the
 // holo-screen, narrates, and waits for the student. Next (under the screen) is the one call to

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Lines &amp; Angles · Driftbound flight training</title>
-  <meta name="description" content="Lines & Angles, class 2: adjacent angles, linear pairs and vertically opposite angles, trained on the ship before the Driftbound mission." />
+  <title>Lines &amp; Angles · Drone Defense flight training</title>
+  <meta name="description" content="Lines & Angles, class 2: adjacent angles, linear pairs and vertically opposite angles, trained on the ship before the Drone Defense mission." />
   <meta name="theme-color" content="#0b1030" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,16 +35,12 @@
   <!-- the start banner (Figma AI art): the satellite HQ in orbit, and one play button in the centre -->
   <div class="start" id="start">
     <img class="start__pic" src="assets/ui/start/banner.webp" alt="" draggable="false" />
-    <h1 class="start__title"><img src="assets/ui/start/title.webp" alt="Driftbound" draggable="false" /></h1>
+    <h1 class="start__title"><img src="assets/ui/start/title.webp" alt="Drone Defense" draggable="false" /></h1>
     <button class="start__play" id="play" type="button" aria-label="Play"><img src="assets/ui/start/play.webp" alt="" draggable="false" /></button>
   </div>
   <main class="hq">
-    <!-- the lesson screen: a big digital display laid over the picture's screen -->
+    <!-- the lesson: a hologram floating in the projector's light, in front of the hall's screen -->
     <section class="screen" id="screen" aria-labelledby="caption">
-      <i class="holo holo--hex" aria-hidden="true"></i>
-      <i class="holo holo--glow" aria-hidden="true"></i>
-      <i class="holo holo--scan" aria-hidden="true"></i>
-      <i class="corner c1" aria-hidden="true"></i><i class="corner c2" aria-hidden="true"></i><i class="corner c3" aria-hidden="true"></i><i class="corner c4" aria-hidden="true"></i>
       <div class="stage" id="glass-in">
         <!-- the narration: one line, said aloud word by word; the bars are the voice's mouth -->
         <div class="caption" id="narration">
@@ -58,6 +54,11 @@
         <div class="readout" id="readout" aria-live="polite"></div>
       </div>
     </section>
+    <!-- the projector on the floor (Figma AI art) and its column of light, which the lesson floats in -->
+    <div class="projector" aria-hidden="true">
+      <div class="projector__beam"><i class="holo holo--dots"></i><i class="holo holo--glow"></i><i class="holo holo--scan"></i></div>
+      <img class="projector__img" src="assets/ui/hall/projector.webp" alt="" draggable="false" />
+    </div>
 
     <!-- under the screen, aligned to its edges: Back, the answers, Next -->
     <div class="bar">

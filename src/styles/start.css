@@ -16,7 +16,7 @@
 .start__play:focus-visible { outline: 3px solid var(--holo); outline-offset: 10px; }
 .start.is-going { pointer-events: none; }
 /* the game title (Figma AI logo): drifts in like a ghost, then floats gently */
-.start__title { position: absolute; z-index: 1; top: max(3vh, 14px); left: 0; right: 0; width: min(88vw, 88vh, 720px); margin: 0 auto;
+.start__title { position: absolute; z-index: 1; top: max(3vh, 14px); left: 0; right: 0; width: min(88vw, 58vh, 560px); margin: 0 auto;
   pointer-events: none; animation: ghost-in .9s cubic-bezier(.22, 1, .36, 1) .15s both; }
 .start__title img { display: block; width: 100%; height: auto; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .5)); animation: title-float 4s ease-in-out 1.1s infinite alternate; }
 @keyframes title-float { from { transform: translateY(0); } to { transform: translateY(-6px); } }

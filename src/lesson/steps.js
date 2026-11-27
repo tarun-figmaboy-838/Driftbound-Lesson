@@ -377,6 +377,17 @@ const PAIR_CARDS = (pairs) => Object.entries(pairs).map(([id, [a1, a2]]) => ({
   id, label: `${a1}° and ${a2}°`, box: PAIR_BOX, state: { j: 0, sq: false }, draw: (b, s) => pairMini(b, a1, a2, s),
 }));
 
+// one angle for the angle types step: arm OA (aqua) along the bottom, arm OB (sun) at d degrees. Once its
+// type is found (s.lit) the angle is traced, and a right angle gets its square mark (s.sq)
+const TYPE_BOX = [-44, -14, 66, 62];
+function typeFig(b, d, s) {
+  b.wedge('w', O, 0, d, 24, { fill: FILL.orange, edge: C.orange, cls: s.lit ? 'trace' : '' });
+  b.ray('oa', O, 0, 60, { color: C.aqua });
+  b.ray('ob', O, d, 60, { color: C.sun });
+  b.dot('o', O, { r: 6 });
+  if (s.sq) b.square('sq', O, 0, 11);
+}
+
 const TYPE_WHY = {
   52: { Right: ['A right angle is exactly 90°, a square corner.', 'This one is smaller than that.'], Obtuse: ['Obtuse angles are bigger than 90°.', 'This one is smaller than a square corner.'] },
   90: { Acute: ['Acute angles are smaller than 90°.', 'This one makes a perfect square corner.'], Obtuse: ['Obtuse angles are bigger than 90°.', 'This one is exactly a square corner.'] },
@@ -431,34 +442,83 @@ export const STEPS = [
     },
   },
 
-  // deck slides 4-6: acute, right or obtuse (arm OB turns between the questions)
+  // deck slides 4-6: acute, right or obtuse. All three angles are on the screen at once, each with its own
+  // list of types under it. A wrong pick is explained and the list can be opened again (that type is
+  // crossed out); the right one locks in, green, and the angle is traced. Next opens once all three are set.
   {
-    id: 'types', ch: 0, gate: true, title: 'Angle types', lockHint: 'Tap a name for the angle to go on.',
+    id: 'types', ch: 0, gate: true, title: 'Angle types', lockHint: 'Choose a type for each angle to go on.',
     async run(c) {
-      c.fig.box(-92, -40, 160, 146);
-      const L = 132;
-      const v = c.view({ t: 52, val: false, sq: false }, (b, s) => {
-        b.wedge('w', O, 0, s.t, 36, { fill: FILL.orange, edge: C.orange });
-        b.ray('oa', O, 0, L, { color: C.aqua });
-        b.ray('ob', O, s.t, L, { color: C.sun });
-        b.dot('o', O, { r: 7 });
-        b.label('no', O, 'O', 245, 25);
-        b.label('na', [L, 0], 'A', 300, 25);
-        b.label('nb', at(O, s.t, L), 'B', s.t, 26);
-        if (s.sq) b.square('sq', O, 0, 17);
-      });
-      const ROUNDS = [
-        { d: 52, t: 'Acute', cap: 'Which type of angle is this?', got: 'Acute: less than 90°.' },
-        { d: 90, t: 'Right', cap: 'What type is it now?', got: 'A right angle: exactly 90°.' },
-        { d: 128, t: 'Obtuse', cap: 'And what type is this?', got: 'Obtuse: more than 90°.' },
+      const TYPES = ['Acute', 'Right', 'Obtuse'];
+      const ANGLES = [                                     // not in size order: each one has to be looked at
+        { d: 128, t: 'Obtuse', got: 'Obtuse: more than 90°.' },
+        { d: 52, t: 'Acute', got: 'Acute: less than 90°.' },
+        { d: 90, t: 'Right', got: 'A right angle: exactly 90°.' },
       ];
-      for (const [k, R] of ROUNDS.entries()) {
-        if (k) await c.said();                             // the praise first; then the arm turns with the next question
-        c.caption(R.cap);
-        if (k) { await c.cue(); v.set({ val: false, sq: false }); await v.to({ t: R.d }, 800, 'inOut'); }
-        await c.choose({ options: ['Acute', 'Right', 'Obtuse'], answer: R.t, why: TYPE_WHY[R.d], got: R.got });
-        v.set({ sq: R.d === 90 });
-      }
+      c.caption('What type is each angle?');
+      const wrap = h('<div class="tcards"></div>');
+      let left = ANGLES.length, finish;
+      const done = new Promise((r) => { finish = r; });
+      const closeAll = () => wrap.querySelectorAll('.pick.is-open').forEach((p) => {
+        p.classList.remove('is-open');
+        p.querySelector('.pick__btn').setAttribute('aria-expanded', 'false');
+      });
+      ANGLES.forEach((A, k) => {
+        const card = h(`<div class="tcard"><span class="tcard__mini" aria-hidden="true"></span><div class="pick">
+          <div class="pick__menu" role="group" aria-label="Types for angle ${k + 1}">${TYPES.map((t) => `<button type="button" class="pick__opt" data-v="${t}">${t}</button>`).join('')}</div>
+          <button type="button" class="pill pick__btn" aria-haspopup="true" aria-expanded="false" aria-label="Angle ${k + 1}: choose its type"><span class="v">Choose</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none"/></svg></button>
+        </div></div>`);
+        const pick = card.querySelector('.pick'), btn = card.querySelector('.pick__btn'), label = btn.querySelector('.v');
+        const f = c.mini(card.querySelector('.tcard__mini'), TYPE_BOX, () => {}, { kMin: 0.6, kMax: 1.2, pad: 10 });
+        const v = c.view({ sq: false, lit: false }, (b, s) => typeFig(b, A.d, s), f);
+        let wrong = 0, locked = false;
+        btn.addEventListener('click', () => {               // opens (or closes) this angle's list
+          if (locked || !c.alive) return;
+          const on = !pick.classList.contains('is-open');
+          closeAll();
+          pick.classList.toggle('is-open', on);
+          btn.setAttribute('aria-expanded', String(on));
+          c.sound.tap();
+          if (on && document.activeElement === btn && btn.matches(':focus-visible')) pick.querySelector('.pick__opt:not(:disabled)')?.focus();
+        });
+        pick.querySelectorAll('.pick__opt').forEach((o) => o.addEventListener('click', () => {
+          if (locked || !c.alive) return;
+          closeAll();
+          label.textContent = o.dataset.v;
+          if (o.dataset.v === A.t) {                        // right: it locks in
+            locked = true;
+            btn.disabled = true;
+            btn.classList.add('is-right');
+            btn.setAttribute('aria-label', `Angle ${k + 1}: ${A.t}`);
+            card.classList.add('is-right');
+            v.set({ sq: A.d === 90, lit: true });           // the angle is traced; a right angle gets its square mark
+            c.sound.right();
+            c.burst(btn);
+            c.praise(wrong === 0, A.got);
+            if (--left === 0) finish();
+          } else {                                          // wrong: said why, crossed out, the list can open again
+            wrong++;
+            o.disabled = true;
+            o.classList.add('is-wrong');
+            btn.classList.remove('shake', 'is-wrong'); void btn.offsetWidth; btn.classList.add('shake', 'is-wrong');
+            c.sound.wrong();
+            c.talk(TYPE_WHY[A.d][o.dataset.v]);
+            c.wait(1100).then(() => { if (!locked) { btn.classList.remove('is-wrong'); label.textContent = 'Choose'; } }).catch(() => {});
+          }
+        }));
+        const cell = h(`<span class="enter" style="--i:${k}"></span>`);
+        cell.addEventListener('animationend', () => cell.classList.remove('enter'), { once: true });
+        cell.appendChild(card);
+        wrap.appendChild(cell);
+      });
+      // a tap anywhere else, or Escape, closes an open list
+      const outside = (e) => { if (!e.target.closest?.('.pick')) closeAll(); };
+      const onKey = (e) => { if (e.key === 'Escape' && wrap.querySelector('.pick.is-open')) { const b = wrap.querySelector('.pick.is-open .pick__btn'); closeAll(); b.focus(); } };
+      document.addEventListener('pointerdown', outside);
+      document.addEventListener('keydown', onKey);
+      c.later(() => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', onKey); });
+      await c.cue();                                       // the three angles come in as the question is said
+      c.stage(wrap);
+      await c.until(done);
     },
   },
 
@@ -980,7 +1040,7 @@ export const STEPS = [
       const cards = RECALL.map((R, i) => {
         const slot = h('<div class="rslot"></div>');
         if (i < 4) slot.dataset.pos = String(i);
-        const el = h('<button type="button" class="rcard" disabled><b></b><span class="rcard__fig" aria-hidden="true"></span></button>');
+        const el = h('<button type="button" class="rcard is-bare" disabled><b></b><span class="rcard__fig" aria-hidden="true"></span></button>');   // bare until it is collected
         el.querySelector('b').textContent = R.term;
         el.setAttribute('aria-label', `${R.term}: ${[].concat(R.rule).join(' ')}`);
         slots.appendChild(slot);
@@ -1031,7 +1091,7 @@ export const STEPS = [
 
       // ---- the card forms in the light: from a speck at the emitter, growing down the beam, flickering in
       const release = async (el) => {
-        el.classList.add('in', 'is-holo');
+        el.classList.add('in', 'is-holo', 'is-bare');   // no card yet: the shape is a hologram in the light
         if (c.reduced) return;
         const d = drone.getBoundingClientRect(), r = el.getBoundingClientRect();
         const dx = d.left + d.width / 2 - (r.left + r.width / 2);
@@ -1064,9 +1124,18 @@ export const STEPS = [
         await c.until(Promise.all(anims.map((a) => a.finished.catch(() => {}))));
       };
 
+      // ---- the card forms round the shape (it comes back from the hologram), before it is collected
+      const cardForms = async (el) => {
+        if (!el.classList.contains('is-bare')) return;
+        el.classList.remove('is-bare');
+        c.sound.pop();
+        await c.wait(c.reduced ? 0 : 550);
+      };
+
       // ---- the card flies down into its slot in the tray and is collected
       const collect = async (k) => {
         const el = k.el;
+        await cardForms(el);
         el.classList.remove('is-holo', 'is-on');
         // its place opens in the tray: the row stays centred, the cards already there slide over
         const there = cards.filter((o) => o !== k && o.slot.classList.contains('got') && o.slot.contains(o.el)).map((o) => [o.el, o.el.getBoundingClientRect()]);
@@ -1134,12 +1203,12 @@ export const STEPS = [
         await explain(k);
         beamOff();                                       // the light goes back into the emitter
         await c.wait(c.reduced ? 0 : 280);
-        if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 200); }
+        if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 200); } else await cardForms(k.el);
       }
       if (!c.reduced) { flyOut(); await c.wait(1000); } else mouthOnDrone(false);
 
       // the drone gone: the cards grow into the big collection, the last one from the middle to its place
-      const home = (k) => { k.el.classList.remove('is-holo', 'is-on'); k.slot.appendChild(k.el); k.slot.classList.add('got'); k.slot.classList.remove('away'); };
+      const home = (k) => { k.el.classList.remove('is-holo', 'is-on', 'is-bare'); k.slot.appendChild(k.el); k.slot.classList.add('got'); k.slot.classList.remove('away'); };
       const last = cards[cards.length - 1];
       await relayout(() => { home(last); root.classList.add('is-done'); });
       c.caption('You learned all about angles!');
@@ -1167,9 +1236,10 @@ export const STEPS = [
               await relayout(() => { stage.appendChild(k.el); k.slot.classList.add('away'); root.classList.remove('is-done'); }, { stagger: 30 });
               if (!c.reduced) await flyIn(hoverOver(stage));
               beamOn(stage);
-              k.el.classList.add('is-holo');
+              k.el.classList.add('is-holo', 'is-bare');
               await explain(k);
               beamOff();
+              await cardForms(k.el);
               k.el.classList.remove('is-holo', 'is-on');
               await c.wait(c.reduced ? 0 : 280);
               if (!c.reduced) { flyOut(); await c.wait(1000); } else mouthOnDrone(false);
