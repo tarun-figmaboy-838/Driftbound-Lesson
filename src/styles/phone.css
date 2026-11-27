@@ -9,18 +9,25 @@
 .is-tall .caption { column-gap: 12px; padding: 2px 52px 10px 2px; }
 .is-tall .mute { top: calc(var(--sy) + 12px); left: calc(var(--sx) + var(--sw) - 12px - 40px); width: 40px; height: 40px; }
 .is-tall .voice { width: 44px; height: 44px; gap: 2px; }
-.is-tall { --pw: 124px; }                     /* the projector, between Back and Next */
+.is-tall { --pw: 124px; }
+/* a panel beside the figure goes under it */
+.is-tall .view.is-side { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; row-gap: 10px; }
+.is-tall .view.is-side > .custom { grid-area: 2 / 1; }                     /* the projector, between Back and Next */
 .is-tall .pill { --cap: 25px; height: 50px; min-width: 84px; font-size: 19px; padding: 0 calc(var(--cap) + 2px) 3px; }
 .is-tall .back { width: 60px; }
 .is-tall .next { min-width: 130px; }
-/* the angle types: one angle a row, its list beside it; the types open in a column over the list's own
-   capsule, so the angle stays in view */
+/* the angle types: one angle a row, its list beside it; the types open in a row under the list's capsule,
+   lined up with its right edge (smaller, so the row fits the card) */
 .is-tall .tcards { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); gap: 10px; padding: 2px 6px; }
 .is-tall .tcard { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr); column-gap: 10px; align-items: center; padding: 6px 12px 6px 6px; }
 .is-tall .tcard__mini { align-self: stretch; }
 .is-tall .pick__btn { min-width: 136px; }
-.is-tall .pick__menu { grid-auto-flow: row; left: 0; right: 0; width: auto; bottom: auto; top: 50%; transform: translate(0, -50%) scale(.96); transform-origin: 50% 50%; }
-.is-tall .pick.is-open .pick__menu { transform: translate(0, -50%); }
+.is-tall .pick__menu { left: auto; right: 0; transform: translateY(-6px) scale(.96); transform-origin: 100% 0; gap: 5px; }
+.is-tall .pick.is-open .pick__menu { transform: none; }
+.is-tall .pick__opt.pill { --cap: 19px; height: 38px; font-size: 16px; }
+.is-tall .eqs { gap: 6px; padding: 10px; }
+.is-tall .eqs__row { font-size: 19px; padding: 4px 6px; }
+.is-tall .eqs .pick__btn { min-width: 118px; }
 .is-tall .cards { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); align-items: stretch; gap: 12px; padding: 2px 6px; }
 .is-tall .cards > span { aspect-ratio: auto; height: 100%; }
 .is-tall .cards.solved > span.kept { grid-column: 1; grid-row: 2; }
@@ -28,7 +35,7 @@
 .is-tall .cards.fill > span.kept { grid-row: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .holo--glow, .holo--scan, .screen, .screen .fig, .projector__glow { animation: none !important; }
+  .holo--scan, .screen, .screen .fig, .projector__glow { animation: none !important; }
   .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
   .fig-svg .hint-hand, .fig-svg .hint-hand-wrap { animation: none; }
   .fig-svg .hand-ripple { animation: none; opacity: .6; }

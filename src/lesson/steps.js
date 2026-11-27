@@ -40,8 +40,8 @@ function pointO(b, oDir = 270) {
   b.dot('po', O, { r: 7 });
   b.label('no', O, 'O', oDir, 26);
 }
-// a value or a name in an angle: a number (26), the unknown x (30) or a name like ∠1 (22)
-const tagOpts = (v, color) => (v === 'x' ? { size: 30, color, font: 'x' } : v.startsWith('∠') ? { size: 22, color, font: 'name' } : { size: 26, color });
+// a value or a name in an angle: a number (26), the unknown ? (30) or a name like ∠1 (22)
+const tagOpts = (v, color) => (v === '?' ? { size: 30, color } : v.startsWith('∠') ? { size: 22, color, font: 'name' } : { size: 26, color });
 
 // ray OC standing on a straight line (deck slides 14-23): the right angle (orange) and the left one (aqua)
 const LIN_BOX = [-158, -38, 158, 140];
@@ -65,17 +65,20 @@ const CROSS_BOX = [-158, -130, 158, 130];
 function crossFig(b, s) {
   const t = s.t;
   const W = [[0, t], [t, 180], [180, 180 + t], [180 + t, 360]];
+  // s.focus: the angle being found (its equation's angles, s.uses, stay clear); the other angles step back
+  const back = (k) => (s.focus != null && k !== s.focus && !s.uses?.includes(k) ? 'dim' : '');
+  const cls = (...c) => c.filter(Boolean).join(' ');
   W.forEach(([a, z], k) => {
     const f = s.fill?.[k];
-    if (f) b.wedge(`w${k}`, O, a, z, 38, { fill: FILL[f], edge: EDGE[f], cls: s.wcls?.[k] || '' });
+    if (f) b.wedge(`w${k}`, O, a, z, 38, { fill: FILL[f], edge: EDGE[f], cls: cls(s.wcls?.[k], back(k)) });
   });
   if (s.l) b.line('ab', [-150 * s.l, 0], [150 * s.l, 0], { color: C.aqua, start: true, end: true, cls: s.glow === 'ab' ? 'glow' : '' });
   if (s.q) b.line('pq', at(O, t + 180, 126 * s.q), at(O, t, 126 * s.q), { color: C.sun, start: true, end: !s.handle, cls: s.glow === 'pq' ? 'glow' : '' });
   pointO(b, 292);
   W.forEach(([a, z], k) => {
     const f = s.fill?.[k];
-    if (s.names?.[k]) b.text(`n${k}`, at(O, mid(a, z), 64), `∠${k + 1}`, { font: 'name', size: 21, color: TXT[f] || '#fff' });
-    if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: s.vals[k] === 'x' ? 30 : 26, color: TXT[f] || '#fff', cls: s.vcls?.[k] || '', font: s.vals[k] === 'x' ? 'x' : 'num' });
+    if (s.names?.[k]) b.text(`n${k}`, at(O, mid(a, z), 64), `∠${k + 1}`, { font: 'name', size: 21, color: TXT[f] || '#fff', cls: back(k) });
+    if (s.vals?.[k]) b.text(`v${k}`, at(O, mid(a, z), 103), s.vals[k], { size: s.vals[k] === '?' ? 30 : 26, color: TXT[f] || '#fff', cls: cls(s.vcls?.[k], back(k)), font: 'num' });
     if (s.taps) b.tap(`t${k}`, `∠${k + 1}`, { o: O, a: a + 3, b: z - 3, r: 96 }, `Angle ${k + 1}`);
   });
   if (s.handle) b.handle('hp', 'p', at(O, t, 126), { label: 'The end of the line. Drag it, or use the arrow keys, to rotate the line.', now: t, min: 20, max: 160, hint: s.hint });
@@ -377,6 +380,75 @@ const PAIR_CARDS = (pairs) => Object.entries(pairs).map(([id, [a1, a2]]) => ({
   id, label: `${a1}° and ${a2}°`, box: PAIR_BOX, state: { j: 0, sq: false }, draw: (b, s) => pairMini(b, a1, a2, s),
 }));
 
+// ---------------------------------------------------------------- a list of answers (a dropdown)
+// A capsule that says the answer chosen ("Choose" until then); tapped, the answers open below it as blue
+// capsules. A wrong one is explained, turns red and is crossed out, and the list can be opened again; the
+// right one locks in (green), is praised, and the list closes for good. pickGroup(c) keeps one list open at
+// a time and closes it on a tap elsewhere or Escape; group.list({...}) makes one list:
+//   label     what it is for (said by screen readers)    options, answer, fmt   the answers
+//   why, got  what is said for a wrong answer, and what the praise says was right
+//   onOpen, onClose, onRight   the figure follows: light the angle while it is chosen, and so on
+function pickGroup(c) {
+  const lists = [];
+  const closeAll = (except) => lists.forEach((l) => { if (l !== except) l.close(); });
+  const outside = (e) => { if (!e.target.closest?.('.pick')) closeAll(); };
+  const onKey = (e) => {
+    const open = lists.find((l) => l.isOpen());
+    if (e.key === 'Escape' && open) { open.close(); open.btn.focus(); }
+  };
+  document.addEventListener('pointerdown', outside);
+  document.addEventListener('keydown', onKey);
+  c.later(() => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', onKey); });
+  return {
+    list({ label, options, answer, fmt = (v) => `${v}`, why = {}, got = '', onOpen, onClose, onRight }) {
+      const el = h(`<div class="pick">
+        <div class="pick__menu" role="group" aria-label="${esc(label)}">${options.map((o) => `<button type="button" class="pill pill--blue pick__opt" data-v="${esc(String(o))}">${angles(esc(fmt(o)))}</button>`).join('')}</div>
+        <button type="button" class="pill pick__btn" aria-haspopup="true" aria-expanded="false" aria-label="${esc(label)}: choose"><span class="v">Choose</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none"/></svg></button>
+      </div>`);
+      const btn = el.querySelector('.pick__btn'), text = btn.querySelector('.v');
+      let wrong = 0, locked = false;
+      const isOpen = () => el.classList.contains('is-open');
+      const show = (on) => { el.classList.toggle('is-open', on); btn.setAttribute('aria-expanded', String(on)); };
+      const l = { el, btn, isOpen, close: () => { if (isOpen()) { show(false); onClose?.(); } } };
+      lists.push(l);
+      btn.addEventListener('click', () => {
+        if (locked || !c.alive) return;
+        const on = !isOpen();
+        closeAll(l);
+        if (on) { show(true); onOpen?.(); } else l.close();
+        c.sound.tap();
+        if (on && btn.matches(':focus-visible')) el.querySelector('.pick__opt:not(:disabled)')?.focus();
+      });
+      el.querySelectorAll('.pick__opt').forEach((o) => o.addEventListener('click', () => {
+        if (locked || !c.alive) return;
+        const v = options.find((x) => String(x) === o.dataset.v);
+        text.innerHTML = angles(esc(fmt(v)));
+        if (v === answer) {                              // right: it locks in
+          locked = true;
+          show(false);
+          btn.disabled = true;
+          btn.classList.add('is-right');
+          btn.setAttribute('aria-label', `${label}: ${fmt(v)}`);
+          c.sound.right();
+          c.burst(btn);
+          c.praise(wrong === 0, got);
+          onRight?.();
+        } else {                                         // wrong: said why, crossed out, it can open again
+          wrong++;
+          l.close();
+          o.disabled = true;
+          o.classList.add('is-wrong');
+          btn.classList.remove('shake', 'is-wrong'); void btn.offsetWidth; btn.classList.add('shake', 'is-wrong');
+          c.sound.wrong();
+          c.talk(why[v]);
+          c.wait(1100).then(() => { if (!locked) { btn.classList.remove('is-wrong'); text.textContent = 'Choose'; } }).catch(() => {});
+        }
+      }));
+      return l;
+    },
+  };
+}
+
 // one angle for the angle types step: arm OA (aqua) along the bottom, arm OB (sun) at d degrees. Once its
 // type is found (s.lit) the angle is traced, and a right angle gets its square mark (s.sq)
 const TYPE_BOX = [-44, -14, 66, 62];
@@ -458,64 +530,29 @@ export const STEPS = [
       const wrap = h('<div class="tcards"></div>');
       let left = ANGLES.length, finish;
       const done = new Promise((r) => { finish = r; });
-      const closeAll = () => wrap.querySelectorAll('.pick.is-open').forEach((p) => {
-        p.classList.remove('is-open');
-        p.querySelector('.pick__btn').setAttribute('aria-expanded', 'false');
-      });
+      const group = pickGroup(c);
+      // while a list is open its card is in focus: the other cards step back (dimmed)
+      const focus = (card) => wrap.querySelectorAll('.tcard').forEach((o) => o.classList.toggle('is-dim', !!card && o !== card));
       ANGLES.forEach((A, k) => {
-        const card = h(`<div class="tcard"><span class="tcard__mini" aria-hidden="true"></span><div class="pick">
-          <div class="pick__menu" role="group" aria-label="Types for angle ${k + 1}">${TYPES.map((t) => `<button type="button" class="pick__opt" data-v="${t}">${t}</button>`).join('')}</div>
-          <button type="button" class="pill pick__btn" aria-haspopup="true" aria-expanded="false" aria-label="Angle ${k + 1}: choose its type"><span class="v">Choose</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none"/></svg></button>
-        </div></div>`);
-        const pick = card.querySelector('.pick'), btn = card.querySelector('.pick__btn'), label = btn.querySelector('.v');
+        const card = h('<div class="tcard"><span class="tcard__mini" aria-hidden="true"></span></div>');
         const f = c.mini(card.querySelector('.tcard__mini'), TYPE_BOX, () => {}, { kMin: 0.6, kMax: 1.2, pad: 10 });
         const v = c.view({ sq: false, lit: false }, (b, s) => typeFig(b, A.d, s), f);
-        let wrong = 0, locked = false;
-        btn.addEventListener('click', () => {               // opens (or closes) this angle's list
-          if (locked || !c.alive) return;
-          const on = !pick.classList.contains('is-open');
-          closeAll();
-          pick.classList.toggle('is-open', on);
-          btn.setAttribute('aria-expanded', String(on));
-          c.sound.tap();
-          if (on && document.activeElement === btn && btn.matches(':focus-visible')) pick.querySelector('.pick__opt:not(:disabled)')?.focus();
-        });
-        pick.querySelectorAll('.pick__opt').forEach((o) => o.addEventListener('click', () => {
-          if (locked || !c.alive) return;
-          closeAll();
-          label.textContent = o.dataset.v;
-          if (o.dataset.v === A.t) {                        // right: it locks in
-            locked = true;
-            btn.disabled = true;
-            btn.classList.add('is-right');
-            btn.setAttribute('aria-label', `Angle ${k + 1}: ${A.t}`);
+        const list = group.list({
+          label: `Angle ${k + 1}`, options: TYPES, answer: A.t, why: TYPE_WHY[A.d], got: A.got,
+          onOpen: () => focus(card), onClose: () => focus(null),
+          onRight: () => {
+            focus(null);
             card.classList.add('is-right');
-            v.set({ sq: A.d === 90, lit: true });           // the angle is traced; a right angle gets its square mark
-            c.sound.right();
-            c.burst(btn);
-            c.praise(wrong === 0, A.got);
+            v.set({ sq: A.d === 90, lit: true });             // the angle is traced; a right angle gets its square mark
             if (--left === 0) finish();
-          } else {                                          // wrong: said why, crossed out, the list can open again
-            wrong++;
-            o.disabled = true;
-            o.classList.add('is-wrong');
-            btn.classList.remove('shake', 'is-wrong'); void btn.offsetWidth; btn.classList.add('shake', 'is-wrong');
-            c.sound.wrong();
-            c.talk(TYPE_WHY[A.d][o.dataset.v]);
-            c.wait(1100).then(() => { if (!locked) { btn.classList.remove('is-wrong'); label.textContent = 'Choose'; } }).catch(() => {});
-          }
-        }));
+          },
+        });
+        card.appendChild(list.el);
         const cell = h(`<span class="enter" style="--i:${k}"></span>`);
         cell.addEventListener('animationend', () => cell.classList.remove('enter'), { once: true });
         cell.appendChild(card);
         wrap.appendChild(cell);
       });
-      // a tap anywhere else, or Escape, closes an open list
-      const outside = (e) => { if (!e.target.closest?.('.pick')) closeAll(); };
-      const onKey = (e) => { if (e.key === 'Escape' && wrap.querySelector('.pick.is-open')) { const b = wrap.querySelector('.pick.is-open .pick__btn'); closeAll(); b.focus(); } };
-      document.addEventListener('pointerdown', outside);
-      document.addEventListener('keydown', onKey);
-      c.later(() => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', onKey); });
       await c.cue();                                       // the three angles come in as the question is said
       c.stage(wrap);
       await c.until(done);
@@ -633,7 +670,7 @@ export const STEPS = [
       await c.said();
       c.caption('What do the two angles add up to?');
       await c.cue('add');
-      c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('x', 'x')}`);
+      c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('q', '?')}`);
       await c.choose({
         options: [170, 180, 190], answer: 180, fmt: deg,
         why: {
@@ -659,9 +696,10 @@ export const STEPS = [
       });
       const sum = () => c.readout(`${S('a', deg(180 - v.s.t))}${OP('+')}${S('o', deg(v.s.t))}${OP('=')}${S('g', '180°')}`);
       sum();
-      let moved = 0, finish;
+      let moved = 0, finish, demo = true;
       const done = new Promise((r) => { finish = r; });
       const setT = (t) => {
+        demo = false;                                      // the student's own move ends the demo
         t = Math.round(clamp(t, 15, 165));
         moved += Math.abs(t - v.s.t);
         v.set({ t, hint: false });
@@ -674,7 +712,17 @@ export const STEPS = [
       v.draw();
       c.caption('What happens if we move the ray?');
       c.talk(crew('Drag point C.'));
-      c.on('Drag', () => { if (!moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
+      // as the question is said the ray moves by itself, so the student sees what moving it does (the angles
+      // change, their total stays 180°); it stops when the voice says "Drag point C." and the student moves it
+      c.spawn(async () => {
+        await c.cue('move');
+        const path = [65, 108, 38, 65];
+        for (let i = 1; i < path.length && demo; i++) {
+          const [a, z] = [path[i - 1], path[i]];
+          await c.tween(i === 2 ? 760 : 560, (e) => { if (demo) { v.set({ t: lerp(a, z, e) }); sum(); } }, 'inOut');
+        }
+      });
+      c.on('Drag', () => { demo = false; if (!moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
       c.ready();
       c.praise(true, 'You moved ray OC.');
@@ -717,7 +765,7 @@ export const STEPS = [
     id: 'linearFind', ch: 2, gate: true, title: 'Find the missing angle', lockHint: 'Pick the missing angle to go on.',
     async run(c) {
       c.fig.box(...LIN_BOX);
-      const v = c.view({ l: 1, c: 1, w: 1, t: 52, right: '52°', left: 'x' }, linearFig);
+      const v = c.view({ l: 1, c: 1, w: 1, t: 52, right: '52°', left: '?' }, linearFig);
       c.caption('Find the missing angle in this linear pair.');
       await c.choose({
         options: [118, 128, 138], answer: 128, fmt: deg,
@@ -899,15 +947,17 @@ export const STEPS = [
     id: 'rotate', ch: 4, gate: true, title: 'Turn the line', lockHint: 'Drag the line to go on.',
     async run(c) {
       c.fig.box(...CROSS_BOX);
-      const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], handle: true, hint: false, moved: false }, (b, s) => {
+      const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'aqua', 'orange', 'aqua'], names: [1, 1, 1, 1], handle: true, hint: false, moved: false, demo: false }, (b, s) => {
         const t = deg(s.t), u = deg(180 - s.t);
-        s.vals = s.moved ? [t, u, t, u] : [null, null, null, null];   // the values come with the first drag (the hint hand stands there)
+        s.vals = s.moved || s.demo ? [t, u, t, u] : [null, null, null, null];   // the values come with the demo and the first drag
         crossFig(b, s);
       });
       const sums = () => c.readout(`${S('o', `∠1 = ∠3 = ${deg(v.s.t)}`)}${OP('•')}${S('a', `∠2 = ∠4 = ${deg(180 - v.s.t)}`)}`);
       let moved = 0, finish;
       const done = new Promise((r) => { finish = r; });
+      let demo = true;
       const setT = (t) => {
+        demo = false;                                      // the student's own move ends the demo
         t = Math.round(clamp(t, 20, 160));
         moved += Math.abs(t - v.s.t);
         v.set({ t, hint: false, moved: true });
@@ -921,7 +971,18 @@ export const STEPS = [
       sums();
       c.caption('Does that still happen if we rotate a line?');
       c.talk(crew('Drag the line.'));
-      c.on('Drag', () => { if (!v.s.moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
+      // as the question is said the line turns by itself, so the student sees the opposite angles stay equal;
+      // it stops when the voice says "Drag the line." and the student turns it
+      c.spawn(async () => {
+        await c.cue('rotate');
+        v.set({ demo: true });
+        const path = [55, 95, 30, 55];
+        for (let i = 1; i < path.length && demo; i++) {
+          const [a, z] = [path[i - 1], path[i]];
+          await c.tween(i === 2 ? 760 : 560, (e) => { if (demo) { v.set({ t: lerp(a, z, e) }); sums(); } }, 'inOut');
+        }
+      });
+      c.on('Drag', () => { demo = false; if (!v.s.moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
       c.ready();
       c.praise(true, 'You turned the line.');
@@ -984,34 +1045,68 @@ export const STEPS = [
 
   // deck slide 42: find the other three angles
   {
-    id: 'findThree', ch: 4, gate: true, title: 'Find all four', lockHint: 'Find the angle on the screen to go on.',
+    id: 'findThree', ch: 4, gate: true, title: 'Find all four', lockHint: 'Choose a value for each angle to go on.',
     async run(c) {
       c.fig.box(...CROSS_BOX);
-      const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', null, null, null], vcls: [] }, crossFig);
+      const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', null, null, null], vcls: [], wcls: [], focus: null, uses: [] }, crossFig);
       c.caption('Can you find the other three angles if ∠1 is 68°?');
-      const QS = [
-        { k: 2, name: '∠3', fill: 'orange', opts: [22, 68, 112], ans: 68, why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] }, got: '∠3 is opposite ∠1: 68°.' },
-        { k: 1, name: '∠2', fill: 'aqua', opts: [68, 112, 122], ans: 112, why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] }, got: '180° − 68° = 112°.' },
-        { k: 3, name: '∠4', fill: 'aqua', opts: [68, 112, 132], ans: 112, why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] }, got: '∠4 is opposite ∠2: 112°.' },
+      // each angle has its equation (the rule that finds it from what is known) and a list of values; k is
+      // the angle in the figure, uses the angles its equation takes its value from
+      const ROWS = [
+        { k: 2, name: '∠3', eq: [['o', '∠3'], ['op', '='], ['o', '∠1']], uses: [0], fill: 'orange', opts: [22, 68, 112], ans: 68,
+          why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] }, got: '∠3 is opposite ∠1: 68°.' },
+        { k: 1, name: '∠2', eq: [['a', '∠2'], ['op', '='], ['g', '180°'], ['op', '−'], ['o', '∠1']], uses: [0], fill: 'aqua', opts: [68, 112, 122], ans: 112,
+          why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] }, got: '180° − 68° = 112°.' },
+        { k: 3, name: '∠4', eq: [['a', '∠4'], ['op', '='], ['a', '∠2']], uses: [1], fill: 'aqua', opts: [68, 112, 132], ans: 112,
+          why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] }, got: '∠4 is opposite ∠2: 112°.' },
       ];
-      await c.cue('three');
-      for (const Q of QS) {
-        if (Q !== QS[0]) await c.said();                   // the praise for the one before, then the next angle lights up
-        v.s.fill[Q.k] = 'sun';
-        v.s.vals[Q.k] = 'x';
-        v.s.vcls = [];
-        v.s.vcls[Q.k] = 'blink';
-        v.s.wcls = [];
-        v.s.wcls[Q.k] = 'trace';                           // the angle asked about is traced as it lights up
+      const span = ([cls, t]) => `<span class="${cls}">${angles(esc(t))}</span>`;
+      const panel = h(`<div class="eqs"><div class="eqs__row is-given"><span class="eqs__eq">${[['o', '∠1'], ['op', '='], ['o', '68°']].map(span).join('')}</span></div></div>`);
+      const given = panel.firstChild;
+      let finish, open = null;
+      const done = new Promise((r) => { finish = r; });
+      // one equation is in focus: the one whose list is open, or else the first one not found yet. Its row
+      // and its angle light up (the angle shows ?), the angles it uses stay clear, the rest steps back
+      const focus = () => {
+        const R = open || ROWS.find((r) => !r.found);
+        ROWS.forEach((r) => {
+          r.row.classList.toggle('is-focus', r === R);
+          r.row.classList.toggle('is-dim', !!R && r !== R);
+          if (!r.found) {
+            v.s.fill[r.k] = r === R ? 'sun' : 'dim';
+            v.s.vals[r.k] = r === R ? '?' : null;
+          }
+        });
+        given.classList.toggle('is-dim', !!R && !R.uses.includes(0));
+        v.s.vcls = []; v.s.wcls = [];
+        if (R) { v.s.vcls[R.k] = 'blink'; v.s.wcls[R.k] = 'trace'; }
+        v.s.focus = R ? R.k : null;
+        v.s.uses = R ? R.uses : [];
         v.draw();
-        await c.choose({ options: Q.opts, answer: Q.ans, fmt: deg, why: Q.why, got: Q.got });
-        v.s.fill[Q.k] = Q.fill;
-        v.s.vals[Q.k] = deg(Q.ans);
-        v.s.vcls = [];
-        v.s.wcls = [];
-        v.draw();
-        await c.wait(700);
-      }
+      };
+      const group = pickGroup(c);
+      ROWS.forEach((R) => {
+        R.row = h(`<div class="eqs__row"><span class="eqs__eq">${R.eq.map(span).join('')}<span class="op">=</span></span></div>`);
+        R.row.appendChild(group.list({
+          label: R.name, options: R.opts, answer: R.ans, fmt: deg, why: R.why, got: R.got,
+          onOpen: () => { open = R; focus(); },
+          onClose: () => { if (open === R) open = null; focus(); },
+          onRight: () => {
+            R.found = true;
+            if (open === R) open = null;
+            R.row.classList.add('is-right');
+            v.s.fill[R.k] = R.fill;
+            v.s.vals[R.k] = deg(R.ans);
+            focus();
+            if (ROWS.every((r) => r.found)) finish();
+          },
+        }).el);
+        panel.appendChild(R.row);
+      });
+      await c.cue('three');                                 // the equations come in as the question asks for the other three
+      c.side(panel);
+      focus();
+      await c.until(done);
     },
   },
 

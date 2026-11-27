@@ -44,14 +44,10 @@ const fig = new Figure(els.fig);
 // praise when the student gets something right, in the narration line: the co-pilot says a word of praise
 // and then `got`, a few words on what the student got right, as one line ("Great job! Acute: less than
 // 90°."); then the line goes back to the caption. A different word each time.
-const PRAISE = {
-  first: ['Great job!', 'Well done!', 'Excellent!', 'Nice work!'],   // right first time
-  again: ['You got it!', 'That’s it!'],                               // right after a miss
-};
-const praiseAt = { first: 0, again: 0 };
-function praise(firstTry = true, got = '') {
-  const kind = firstTry ? 'first' : 'again';
-  const text = PRAISE[kind][praiseAt[kind]++ % PRAISE[kind].length];
+const PRAISE = ['Great job!', 'Well done!', 'Amazing work!'];   // the only words of praise, in turn
+let praiseAt = 0;
+function praise(firstTry = true, got = '') {   // (right first time or after a miss: the same words)
+  const text = PRAISE[praiseAt++ % PRAISE.length];
   dialogue.dropQueued();                                   // the question is answered: it need not be read now
   dialogue.play([                                         // a short hold after it: the lesson goes on
     { text, mood: 'praise', hold: got ? null : 0.6 },
@@ -123,7 +119,7 @@ function setCaption(text, again = false) {
 function resetStage() {
   fig.clear();
   els.custom.replaceChildren();
-  els.stage.classList.remove('is-custom');
+  els.stage.classList.remove('is-custom', 'is-side');
   els.readout.replaceChildren();
   els.readout.classList.remove('has-label');
   els.controls.replaceChildren();
@@ -288,6 +284,11 @@ function makeCtx(i, tk) {
     stage(node) {
       els.custom.replaceChildren(...(node ? [node] : []));
       els.stage.classList.toggle('is-custom', !!node);
+    },
+    // a panel beside the figure (the figure stays): on the right, or under it on phones
+    side(node) {
+      els.custom.replaceChildren(...(node ? [node] : []));
+      els.stage.classList.toggle('is-side', !!node);
     },
     controls(...items) { els.controls.replaceChildren(...items.map((el, k) => entering(el, k))); },
 

@@ -31,39 +31,34 @@
 @keyframes holo-float { 50% { transform: translateY(-4px); } }
 
 /* ---------------------------------------------------------------- the projector on the floor, and its light */
-/* the projector (Figma AI art) stands at the bottom, in the middle, its front a little below the window's
-   edge; its lens is 43% of its width up from the projector's bottom. The light comes out of the lens (it is
+/* the projector (Figma AI art) stands at the bottom, in the middle, sunk mostly below the window's edge so it
+   is hardly noticed (only its top rim and glowing lens show); its lens is 43% of its width up from the
+   projector's bottom. The light comes out of the lens (it is
    drawn over the projector, from the lens up, and the lens glows) and rises to the top of the lesson,
-   widening and fading upwards: soft light, fine dots of light, faint violet facets drifting through it,
-   and scan lines */
-.projector { --lens: calc(var(--pw) * .43 - 22px); position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.projector__img { position: absolute; left: calc(var(--sx) + var(--sw) / 2 - var(--pw) / 2); bottom: -22px; width: var(--pw); height: auto;
+   widening and fading upwards. Its edges are soft and nothing in it runs on a slant (a hard slanted edge or
+   pattern behind the drawing makes its level lines look tilted): a soft cone of light, fine dots of light
+   and scan lines, fading out towards the sides and the top */
+.projector { --sink: calc(var(--pw) * .36); --lens: calc(var(--pw) * .43 - var(--sink)); position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.projector__img { position: absolute; left: calc(var(--sx) + var(--sw) / 2 - var(--pw) / 2); bottom: calc(-1 * var(--sink)); width: var(--pw); height: auto;
   filter: drop-shadow(0 0 16px rgba(61, 220, 242, .35)); }
 .projector__beam { position: absolute; left: var(--sx); width: var(--sw); top: calc(var(--sy) - 8px); bottom: var(--lens); transform-origin: 50% 100%;
-  clip-path: polygon(calc(50% - var(--pw) * .2) 100%, calc(50% + var(--pw) * .2) 100%, 98% 0, 2% 0);
-  background: linear-gradient(0deg, rgba(200, 250, 255, .5), rgba(127, 243, 255, .2) 14%, rgba(127, 200, 255, .08) 45%, rgba(140, 130, 255, .04) 80%, transparent);
-  -webkit-mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
   mix-blend-mode: screen; }
+/* the cone: a trapezoid of light, blurred so it has no edge */
+.projector__cone { position: absolute; inset: 0; filter: blur(18px); }
+.projector__cone i { position: absolute; inset: 0; clip-path: polygon(calc(50% - var(--pw) * .2) 100%, calc(50% + var(--pw) * .2) 100%, 92% 0, 8% 0);
+  background: linear-gradient(0deg, rgba(210, 252, 255, .75), rgba(127, 243, 255, .3) 14%, rgba(127, 200, 255, .1) 45%, rgba(140, 130, 255, .04) 80%, transparent); }
 .projector__glow { position: absolute; left: calc(var(--sx) + var(--sw) / 2 - var(--pw) * .3); bottom: calc(var(--lens) - var(--pw) * .055);
   width: calc(var(--pw) * .6); height: calc(var(--pw) * .13); border-radius: 50%; mix-blend-mode: screen;
   background: radial-gradient(closest-side, rgba(235, 255, 255, .95), rgba(150, 245, 255, .55) 45%, rgba(127, 243, 255, 0));
   animation: lens-glow 2.6s ease-in-out infinite; }
 @keyframes lens-glow { 50% { opacity: .75; transform: scale(.94); } }
-.holo { position: absolute; inset: 0; pointer-events: none; }
+.holo { position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask: radial-gradient(ellipse 38% 105% at 50% 100%, #000 25%, rgba(0, 0, 0, .45) 60%, transparent 92%);
+  mask: radial-gradient(ellipse 38% 105% at 50% 100%, #000 25%, rgba(0, 0, 0, .45) 60%, transparent 92%); }
 /* the dots of light the hologram is made of, and its scan lines */
-.holo--dots { opacity: .3;
+.holo--dots { opacity: .26;
   background: repeating-linear-gradient(180deg, rgba(170, 240, 255, .25) 0 1px, transparent 1px 3px),
-    radial-gradient(circle, rgba(185, 245, 255, .95) 0 .9px, transparent 1.5px) 0 0 / 7px 7px;
-  -webkit-mask: linear-gradient(0deg, #000, rgba(0, 0, 0, .35) 60%, transparent); mask: linear-gradient(0deg, #000, rgba(0, 0, 0, .35) 60%, transparent); }
-/* faint violet facets, a patch of them drifting slowly through the light */
-.holo--glow { background: var(--tri) 0 0 / 56px auto; opacity: .22;
-  -webkit-mask: radial-gradient(circle at center, #000 0, transparent 70%) no-repeat; mask: radial-gradient(circle at center, #000 0, transparent 70%) no-repeat;
-  -webkit-mask-size: 42% 62%; mask-size: 42% 62%; animation: hexdrift 16s ease-in-out infinite alternate; }
-@keyframes hexdrift {
-  0% { -webkit-mask-position: -10% -20%; mask-position: -10% -20%; }
-  50% { -webkit-mask-position: 60% 120%; mask-position: 60% 120%; }
-  100% { -webkit-mask-position: 115% 10%; mask-position: 115% 10%; }
-}
+    radial-gradient(circle, rgba(185, 245, 255, .95) 0 .9px, transparent 1.5px) 0 0 / 7px 7px; }
 /* a slow scan line, and a brighter sweep each time the lesson changes */
 .holo--scan { background: linear-gradient(180deg, transparent 0, rgba(127, 243, 255, .12) 48%, rgba(127, 243, 255, .3) 50%, transparent 52%) 0 -40% / 100% 30% no-repeat;
   animation: scan 7s linear infinite; }

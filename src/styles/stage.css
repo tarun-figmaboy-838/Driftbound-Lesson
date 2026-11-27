@@ -5,7 +5,10 @@
 .view > .fig, .view > .custom { grid-area: 1 / 1; min-width: 0; min-height: 0; }
 .fig { position: relative; }
 .view.is-custom > .fig { visibility: hidden; }
-.view:not(.is-custom) > .custom { display: none; }
+.view:not(.is-custom):not(.is-side) > .custom { display: none; }
+/* a panel beside the figure: the figure on the left, the panel on the right */
+.view.is-side { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); column-gap: 24px; }
+.view.is-side > .custom { grid-area: 1 / 2; align-self: center; }
 
 /* ---------------------------------------------------------------- figure (SVG) */
 .fig-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; touch-action: manipulation; outline: none; }
@@ -20,7 +23,6 @@
 .ang { -webkit-text-stroke: .07em currentColor; }
 .fig-svg .t-num { font-family: var(--font-display); letter-spacing: .02em; }
 .fig-svg .t-name { font-family: var(--font-ui); font-weight: 700; }
-.fig-svg .t-x { font-family: var(--font-x); font-style: italic; font-weight: 700; }
 .fig-svg .t-tag { font-family: var(--font-display); letter-spacing: .06em; fill: #ffffff; }
 .fig-svg .it { transition: opacity .26s ease; }
 .fig-svg .dim { opacity: .28; }
@@ -39,11 +41,10 @@
 @keyframes ring { from { transform: scale(.7); opacity: 1; } to { transform: scale(2.3); opacity: 0; } }
 .fig-svg .hit { fill: transparent; }
 .fig-svg .tap { cursor: pointer; outline: none; }
-/* an angle that can be tapped: its outline lights on hover and keyboard focus. No fills, no dashes. */
-.fig-svg .glow-t { fill: none; stroke: var(--holo); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0;
-  filter: drop-shadow(0 0 5px rgba(127, 243, 255, .95)) drop-shadow(0 0 12px rgba(61, 220, 242, .6)); transition: opacity .2s ease; }
+/* an angle that can be tapped: no outline (the pointer shows it can be tapped); reached with the keyboard,
+   it gets a soft light over it, so a keyboard user sees where they are */
+.fig-svg .glow-t { fill: rgba(127, 243, 255, .16); stroke: none; opacity: 0; transition: opacity .2s ease; }
 .fig-svg .tap:focus-visible .glow-t { opacity: 1; }
-@media (hover: hover) { .fig-svg .tap:hover .glow-t { opacity: 1; } }
 .fig-svg .focus { fill: none; stroke: var(--holo); stroke-width: 2.5; opacity: 0; filter: drop-shadow(0 0 6px rgba(127, 243, 255, .9)); }
 .fig-svg .drag:focus-visible .focus { opacity: 1; }
 /* the hint hand: comes in after a moment, then stays on the target and presses it; a ripple pulses
@@ -74,7 +75,7 @@
 .readout .a { color: var(--holo); }
 .readout .g { color: #d4ff7a; }
 .readout .op { color: rgba(255, 255, 255, .65); }
-.readout .x { font-size: 1.12em; }
+.readout .q { font-size: 1.12em; }   /* the unknown: ? */
 /* the proof's working: one line under another; terms glide between lines, cancelled terms are struck out */
 .eqn { position: relative; display: grid; align-content: center; justify-items: center; row-gap: 4px; min-height: calc(2.2em + 4px); }
 .eqn__line { display: flex; align-items: center; gap: .32em; }

@@ -94,8 +94,8 @@ and every drag task has a knob with arrows and also works with the arrow keys.
   uses the card's figure (the complementary pair, which then shows adjacent angles; the supplementary
   pair, which then forms a linear pair), the card's frame goes and the figure stays: it grows to fill the
   screen and carries on.
-- Praise: every right answer and every finished hands-on task gets a short spoken line ("Great job!",
-  "Well done!"...; "You got it!" after a miss), then a few words on what was right ("30° + 60° = 90°.",
+- Praise: every right answer and every finished hands-on task gets a short spoken line, only ever "Great
+  job!", "Well done!" or "Amazing work!" (in turn), then a few words on what was right ("30° + 60° = 90°.",
   "Acute: less than 90°.", "∠3 faces ∠1 across O."), as one line in the narration bar.
 - Key words: in the narration line, the terms the lesson teaches and every angle size are gold.
 - Dragging: point C and the crossing line can be dragged; the numbers update live.

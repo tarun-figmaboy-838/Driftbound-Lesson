@@ -120,13 +120,10 @@ A linear pair makes exactly 180°.
 68° + 132° = 200°.
 ∠1 and ∠4 make a linear pair: 180°.
 ∠4 is opposite ∠2: 112°.
-Find the angle on the screen to go on.
+Choose a value for each angle to go on.
 Recall
 You learned all about angles!
 Great job!
 Well done!
-Excellent!
-Nice work!
-You got it!
-That’s it!
+Amazing work!
 Answer the question to go on.

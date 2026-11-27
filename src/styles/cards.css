@@ -34,7 +34,7 @@
 /* ---------------------------------------------------------------- angle types: three angles, each with a list of types */
 .tcards { height: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); gap: clamp(12px, 1.8vw, 24px); padding: 4px; }
 .tcards > span { display: grid; min-height: 0; }
-.tcard { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; row-gap: 10px; min-height: 0; padding: 10px 10px 16px; border-radius: 12px;
+.tcard { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; row-gap: 10px; min-height: 0; padding: 10px 10px 66px; border-radius: 12px;   /* room under the list for its options */
   background: var(--glass); box-shadow: inset 0 0 0 1.5px var(--holo-line), 0 0 18px rgba(61, 220, 242, .18); transition: box-shadow .25s ease; }
 .tcard::before, .tcard::after { content: ''; position: absolute; width: 16px; height: 16px; border: 0 solid var(--holo); pointer-events: none; }
 .tcard::before { left: 6px; top: 6px; border-width: 2.5px 0 0 2.5px; }
@@ -42,23 +42,44 @@
 .tcard.is-right { box-shadow: inset 0 0 0 2.5px #a6ec3c, 0 0 32px rgba(166, 236, 60, .5); }
 .tcard.is-right::before, .tcard.is-right::after { border-color: #a6ec3c; }
 .tcard__mini { position: relative; min-height: 0; }
-/* the list: a capsule that says the type chosen (Choose until then); tapped, the three types open in a row
-   just above it, under the angle, so the angle stays in view */
+/* while a list is open its card is in focus: the other cards step back */
+.tcard { transition: box-shadow .25s ease, opacity .25s ease; }
+.tcard.is-dim { opacity: .38; }
+
+/* ---------------------------------------------------------------- find all four: the equations beside the figure */
+/* one row per angle: its equation, then its list of values. The row in focus is lit and the rest step back;
+   a row found glows green */
+.eqs { display: grid; gap: 14px; align-content: center; padding: 18px 20px; border-radius: 14px;
+  background: var(--glass); box-shadow: inset 0 0 0 1.5px var(--holo-line), 0 0 22px rgba(61, 220, 242, .2); }
+.eqs__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 12px;
+  font: 400 clamp(20px, .8rem + .8vw, 28px)/1.1 var(--font-display); color: #fff; letter-spacing: .02em;
+  transition: opacity .25s ease, background .25s ease, box-shadow .25s ease; }
+.eqs__row.is-given { justify-content: flex-start; }
+.eqs__eq { display: flex; align-items: center; gap: .3em; white-space: nowrap; }
+.eqs .o { color: #ffc46b; }
+.eqs .a { color: var(--holo); }
+.eqs .g { color: #d4ff7a; }
+.eqs .op { color: rgba(255, 255, 255, .65); }
+.eqs__row.is-focus { background: rgba(255, 224, 102, .1); box-shadow: inset 0 0 0 2px rgba(255, 224, 102, .75), 0 0 20px rgba(255, 197, 49, .3); }
+.eqs__row.is-dim { opacity: .38; }
+.eqs__row.is-right .eqs__eq { text-shadow: 0 0 12px rgba(166, 236, 60, .5); }
+.eqs .pick__btn { min-width: 150px; }
+.eqs .pick__menu { left: auto; right: 0; transform: translateY(-8px) scale(.96); transform-origin: 100% 0; }
+.eqs .pick.is-open .pick__menu { transform: none; }
+
+/* the list: a capsule that says the type chosen (Choose until then); tapped, the three types open below it
+   as buttons (blue capsules) in a row; a wrong one turns red and is crossed out */
 .pick { position: relative; justify-self: center; }
 .pick__btn { min-width: 168px; }
 .pick__btn .ico { width: 20px; height: 20px; fill: none; transition: transform .2s ease; }
 .pick.is-open .pick__btn .ico { transform: rotate(180deg); }
 .pick__btn.is-right .ico { display: none; }
-.pick__menu { position: absolute; z-index: 4; left: 50%; bottom: calc(100% + 8px); display: grid; grid-auto-flow: column; gap: 6px; width: max-content; padding: 6px; border-radius: 12px;
-  background: rgba(6, 18, 54, .96); box-shadow: inset 0 0 0 1.5px var(--holo), 0 0 24px rgba(61, 220, 242, .35);
-  opacity: 0; visibility: hidden; transform: translate(-50%, 8px) scale(.96); transform-origin: 50% 100%;
+.pick__menu { position: absolute; z-index: 4; left: 50%; top: calc(100% + 8px); display: flex; gap: 6px; width: max-content;
+  opacity: 0; visibility: hidden; transform: translate(-50%, -8px) scale(.96); transform-origin: 50% 0;
   transition: opacity .15s ease, transform .2s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .2s; }
 .pick.is-open .pick__menu { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
-.pick__opt { height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: rgba(127, 243, 255, .12); color: #ffffff; font: 600 19px/1 var(--font-ui); cursor: pointer; }
-@media (hover: hover) { .pick__opt:hover:not(:disabled) { background: rgba(127, 243, 255, .3); } }
-.pick__opt:active:not(:disabled) { transform: scale(.97); }
-.pick__opt:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
-.pick__opt.is-wrong { opacity: .4; text-decoration: line-through; cursor: default; }
+.pick__opt.pill { --cap: 22px; height: 44px; min-width: 0; padding: 0 calc(var(--cap) + 2px) 3px; font-size: 18px; }
+.pick__opt.is-wrong { text-decoration: line-through; }
 
 /* ---------------------------------------------------------------- title (deck slide 1) */
 

@@ -46,6 +46,7 @@
 /* while it is explained there is no card: the shape floats in the light as a hologram. It is bigger,
    glows, and turns slowly in 3D; its title floats above it. When it is collected the card forms round it */
 .rcard.is-bare::before { opacity: 0; }
+.rcard.is-bare b { font-size: clamp(18px, 11cqi, 34px); text-shadow: 0 0 14px rgba(255, 210, 90, .45); }   /* its name, big over it */
 .rcard.is-bare .rcard__fig { animation: holo-turn 4.5s ease-in-out infinite alternate; }
 .rcard.is-bare .rcard__fig .fig-svg { filter: drop-shadow(0 0 12px rgba(127, 243, 255, .6)); }
 @keyframes holo-turn {

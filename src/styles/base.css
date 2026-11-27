@@ -18,7 +18,6 @@ body { height: 100dvh; overflow: hidden; color: #f4f8ff; font-family: var(--font
 button { font: inherit; color: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .gone { visibility: hidden; pointer-events: none; }
-.x { font-family: var(--font-x); font-style: italic; font-weight: 700; }
 
 /* icons inside buttons take the text size */
 .ico { width: 1em; height: 1em; display: inline-block; flex: none; overflow: visible; }
