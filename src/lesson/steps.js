@@ -177,7 +177,7 @@ function lineMini(b, { t = 65, other = 180, right = '', left = '' } = {}) {
 
 const RECALL = [
   {
-    term: 'Angles', rule: 'Two rays starting from the same point form an angle.',
+    term: 'Angles', rule: 'When two rays start from the same point, an angle is formed.',
     box: [-18, -18, 78, 70], start: { t: 0, ring: 0 },
     draw(b, s) {
       if (s.t > 0.5) b.wedge('w', O, 0, s.t, 28, { fill: FILL.orange, edge: C.orange });
@@ -496,7 +496,7 @@ export const STEPS = [
       // each part comes in as the voice names it: the rays, the point they start from, then the angle
       c.caption('Do you remember how an angle is formed?');
       await c.said();
-      c.caption('Two rays starting from the same point form an angle.');
+      c.caption('When two rays start from the same point, an angle is formed.');
       await c.cue('rays');
       c.spawn(async () => {
         await v.to({ o: 1 }, 300, 'back');                 // the point
@@ -573,7 +573,7 @@ export const STEPS = [
         answer: 'A',
         why: { B: ['45° + 55° = 100°.', 'Complementary angles make exactly 90°.'], C: ['35° + 65° = 100°.', 'Complementary angles make exactly 90°.'] },
       });
-      c.ready();
+      c.unlock();                                          // answered; Next lights up after the explanation
       await c.wait(500);
       await res.unframe();                                 // the card goes; 30° and 60° stay and fill the screen
       const v = res.view;
@@ -727,7 +727,7 @@ export const STEPS = [
       });
       c.on('Drag', () => { demo = false; if (!moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
-      c.ready();                                         // moving it is exploring, not an answer: no praise
+      c.unlock();                                        // moving it is exploring, not an answer: no praise
       c.caption('The angles change, but their total stays 180°.');
       c.sound.right();
       await c.wait(1200);
@@ -772,8 +772,8 @@ export const STEPS = [
       await c.choose({
         options: [118, 128, 138], answer: 128, fmt: deg,
         why: {
-          118: ['118° + 52° = 170°.', 'A linear pair must make exactly 180°.'],
-          138: ['138° + 52° = 190°.', 'That’s more than a straight line.'],
+          118: ['Not quite!', 'A linear pair always adds to 180°.'],
+          138: ['Not quite!', 'A linear pair always adds to 180°.'],
         },
       });
       // the answer jumps from its button onto the angle, where x was
@@ -798,7 +798,7 @@ export const STEPS = [
         answer: 'A',
         why: { B: ['85° + 85° = 170°.', 'Supplementary angles make exactly 180°.'], C: ['100° + 70° = 170°.', 'Supplementary angles make exactly 180°.'] },
       });
-      c.ready();
+      c.unlock();                                          // answered; Next lights up after the explanation
       await c.wait(500);
       await res.unframe();                                 // the card goes; 110° and 70° stay and fill the screen
       c.caption('What if these two supplementary angles become adjacent?');
@@ -877,37 +877,71 @@ export const STEPS = [
     },
   },
 
-  // deck slides 31-33: which angle is opposite?
+  // deck slides 31-33: which angle is opposite? The figure on the left, the two questions on the right, each
+  // with its list of angles. The question in focus is asked aloud and its angle lights up; a right answer
+  // lights the opposite angle in the same colour
   {
     id: 'opposite', ch: 4, gate: true, title: 'Opposite angles', lockHint: 'Find the opposite angle to go on.',
     async run(c) {
       c.fig.box(...CROSS_BOX);
-      const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], taps: true }, crossFig);
-      c.fig.onTap = (id) => { if (!c.pick?.(id)) c.talk([{ text: `That’s ${id} itself.`, mood: 'hint' }, { text: 'Find the angle facing it across O.', mood: 'hint' }]); };
-      c.caption('Which angle is opposite ∠1?');
-      await c.choose({
-        options: ['∠2', '∠3', '∠4'], answer: '∠3',
-        why: {
-          '∠2': ['∠2 is next to ∠1: they share an arm.', 'Opposite angles only share the vertex.'],
-          '∠4': ['∠4 is next to ∠1: they share an arm.', 'Look straight across the vertex.'],
-        },
+      const v = c.view({ l: 1, q: 1, t: 55, pq: true, fill: ['dim', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], wcls: [] }, crossFig);
+      // k: the angle asked about, to: the one opposite it
+      const ROWS = [
+        { k: 0, to: 2, name: '∠1', cls: 'o', fill: 'orange', cap: 'Which angle is opposite ∠1?', opts: ['∠2', '∠3', '∠4'], ans: '∠3',
+          why: { '∠2': ['∠2 is next to ∠1: they share an arm.', 'Opposite angles only share the vertex.'], '∠4': ['∠4 is next to ∠1: they share an arm.', 'Look straight across the vertex.'] } },
+        { k: 1, to: 3, name: '∠2', cls: 'a', fill: 'aqua', cap: 'Which angle is opposite ∠2?', opts: ['∠1', '∠3', '∠4'], ans: '∠4',
+          why: { '∠1': ['∠1 is next to ∠2: they share an arm.', 'Look straight across O.'], '∠3': ['∠3 is next to ∠2: they share an arm.', 'Look straight across O.'] } },
+      ];
+      const panel = h('<div class="eqs"></div>');
+      const asked = new Set();
+      let open = null, finish;
+      const done = new Promise((r) => { finish = r; });
+      // the question in focus: the one whose list is open, or else the first not answered. Its row is lit, the
+      // other steps back; its angle lights up in its colour (answered pairs keep theirs), and it is asked aloud
+      const focus = () => {
+        const R = open || ROWS.find((r) => !r.found);
+        ROWS.forEach((r) => {
+          r.row.classList.toggle('is-focus', r === R);
+          r.row.classList.toggle('is-dim', !!R && r !== R);
+          v.s.fill[r.k] = r === R || r.found ? r.fill : 'dim';
+          v.s.fill[r.to] = r.found ? r.fill : 'dim';
+        });
+        if (R) v.s.wcls[R.k] = 'trace';
+        v.draw();
+        if (R && !asked.has(R)) { asked.add(R); c.caption(R.cap); }
+      };
+      const group = pickGroup(c);
+      ROWS.forEach((R) => {
+        R.row = h(`<div class="eqs__row"><div class="eqs__line"><span class="eqs__eq"><span class="${R.cls}">${angles(R.name)}</span><span class="op">is opposite</span></span></div></div>`);
+        R.row.querySelector('.eqs__line').appendChild(group.list({
+          label: `${R.name} is opposite`, options: R.opts, answer: R.ans, why: R.why,
+          onOpen: () => { open = R; focus(); },
+          onClose: () => { if (open === R) open = null; focus(); },
+          onRight: () => {
+            R.found = true;
+            if (open === R) open = null;
+            R.row.classList.add('is-right');
+            R.row.classList.remove('is-focus');
+            v.s.fill[R.to] = R.fill;                         // the opposite angle lights up in the same colour, traced
+            v.s.wcls[R.to] = 'trace';
+            v.draw();
+            // one thing at a time: the answer and its praise, then the next question comes into focus
+            c.spawn(async () => {
+              await c.said();
+              if (!open) focus();
+              if (ROWS.every((r) => r.found)) finish();
+            });
+          },
+        }).el);
+        panel.appendChild(R.row);
       });
-      v.set({ fill: ['orange', 'dim', 'orange', 'dim'], wcls: ['', '', 'trace', ''] });   // ∠3 lights up, traced
-      await c.said();
-      await c.wait(300);
-      c.caption('Which angle is opposite ∠2?');
-      await c.cue('∠2');
-      v.set({ fill: ['orange', 'aqua', 'orange', 'dim'], wcls: ['', 'trace', '', ''] });   // ∠2 lights up as it is named
-      await c.choose({
-        options: ['∠1', '∠3', '∠4'], answer: '∠4',
-        why: {
-          '∠1': ['∠1 is next to ∠2: they share an arm.', 'Look straight across O.'],
-          '∠3': ['∠3 is next to ∠2: they share an arm.', 'Look straight across O.'],
-        },
-      });
-      c.ready();
-      v.set({ fill: ['orange', 'aqua', 'orange', 'aqua'], wcls: ['', '', '', 'trace'], taps: false });
-      c.fig.onTap = null;
+      asked.add(ROWS[0]);
+      c.caption(ROWS[0].cap);
+      await c.cue();                                       // the questions come in as the first is asked
+      c.side(panel);
+      focus();
+      await c.until(done);
+      c.unlock();
       await c.said();
       c.caption('These are vertically opposite angle pairs.');
       await c.cue('vertically');
@@ -995,7 +1029,7 @@ export const STEPS = [
       });
       c.on('Drag', () => { demo = false; if (!v.s.moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
-      c.ready();                                         // turning it is exploring, not an answer: no praise
+      c.unlock();                                        // turning it is exploring, not an answer: no praise
       c.caption('Yes: vertically opposite angles stay equal.');
       c.sound.right();
     },
@@ -1108,17 +1142,22 @@ export const STEPS = [
             R.found = true;
             if (open === R) open = null;
             R.row.classList.add('is-right');
-            v.s.fill[R.k] = R.fill;
-            // the value jumps from its list onto the angle, where x was (measured before the figure moves on)
+            R.row.classList.remove('is-focus');
+            // one thing at a time: the value jumps from its list onto the angle where x was, and is praised;
+            // then the next angle comes into focus
             const x = c.fig.root.querySelector(`[data-k="v${R.k}"] text`)?.getBoundingClientRect();
-            focus();
+            v.s.fill[R.k] = R.fill;
+            v.s.vcls = [];
+            v.draw();
             c.spawn(async () => {
               await c.fly(list.btn, x, deg(R.ans), { cls: R.fill === 'orange' ? 'o' : 'a' });
               v.s.vals[R.k] = deg(R.ans);
               v.draw();
               c.sound.pop();
+              await c.said();
+              if (!open) focus();
+              if (ROWS.every((r) => r.found)) finish();
             });
-            if (ROWS.every((r) => r.found)) finish();
           },
         })).el);
         panel.appendChild(R.row);
@@ -1172,7 +1211,7 @@ export const STEPS = [
           { transform: 'scale(1)', opacity: 0.95, filter: 'brightness(1.3)', offset: 0.78 },
           { transform: 'none', opacity: 0.7, offset: 0.86 },
           { transform: 'none', opacity: 1, filter: 'none' },
-        ], { duration: 900, easing: 'cubic-bezier(.3, .6, .3, 1)' }).finished.catch(() => {}));
+        ], { duration: 700, easing: 'cubic-bezier(.3, .6, .3, 1)' }).finished.catch(() => {}));
       };
 
       // ---- then the card's shape draws itself: each line grows from where it starts (a ray from its
@@ -1180,7 +1219,7 @@ export const STEPS = [
       const drawIn = async (fig) => {
         fig.classList.remove('is-waiting');
         if (c.reduced) return;
-        const ms = 750;
+        const ms = 600;
         const anims = [...fig.querySelectorAll('svg [data-k] *')].map((el) => {
           const fill = el.getAttribute('fill');
           if (el.tagName === 'path' && (!fill || fill === 'none') && el.getTotalLength) {
@@ -1198,7 +1237,7 @@ export const STEPS = [
         if (!el.classList.contains('is-bare')) return;
         el.classList.remove('is-bare');
         c.sound.pop();
-        await c.wait(c.reduced ? 0 : 550);
+        await c.wait(c.reduced ? 0 : 420);
       };
 
       // ---- the card flies down into its slot in the tray and is collected
@@ -1219,7 +1258,7 @@ export const STEPS = [
             { transform: 'none', transformOrigin: '0 0' },
             { transform: `translate(${(b.left - a.left) * 0.5}px, ${(b.top - a.top) * 0.35}px) scale(${lerp(1, b.width / a.width, 0.5)})`, transformOrigin: '0 0', offset: 0.45 },
             { transform: `translate(${b.left - a.left}px, ${b.top - a.top}px) scale(${b.width / a.width})`, transformOrigin: '0 0' },
-          ], { duration: 720, easing: 'cubic-bezier(.55, 0, .3, 1)', fill: 'forwards' }).finished.catch(() => {}));
+          ], { duration: 620, easing: 'cubic-bezier(.55, 0, .3, 1)', fill: 'forwards' }).finished.catch(() => {}));
           el.getAnimations().forEach((an) => an.cancel());
         }
         k.slot.appendChild(el);
@@ -1248,7 +1287,7 @@ export const STEPS = [
         c.caption(first, true);
         if (more.length) c.say(more.map((t) => crew(t))).catch(() => {});
         await Promise.all([k.R.play(k.v, c), c.said()]);
-        await c.wait(450);
+        await c.wait(250);
       };
 
       // each shape in turn rises in the light in the middle and is explained, then its card forms and flies
@@ -1266,8 +1305,8 @@ export const STEPS = [
         await release(k.el);
         await drawIn(fig);                               // then its shape draws in
         await explain(k);
-        await c.wait(c.reduced ? 0 : 280);
-        if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 200); } else await cardForms(k.el);
+        await c.wait(c.reduced ? 0 : 120);
+        if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 60); } else await cardForms(k.el);
       }
       await c.wait(c.reduced ? 0 : 500);
 

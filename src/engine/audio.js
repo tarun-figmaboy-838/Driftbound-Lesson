@@ -71,6 +71,8 @@ export class Sound {
   snap() { this.tone('square', 220, 440, 0.06, 0.16, 0, 2400); this.tone('triangle', 880, 1320, 0.18, 0.26, 0.05); }
   stamp() { this.tone('sine', 150, 70, 0.24, 0.42); this.tone('triangle', 660, 990, 0.14, 0.2, 0.09); }
   whoosh() { this.tone('sawtooth', 120, 900, 0.45, 0.1, 0, 1800); }
+  // a number jumping from one place to another: a soft rising zip with a little air
+  zip() { this.tone('sine', 600, 1500, 0.24, 0.11); this.noise(0.2, { f: 1800, f1: 3400, q: 1, peak: 0.025 }); }
   launch() { this.tone('sawtooth', 80, 1500, 1.1, 0.16, 0, 2200); [523, 659, 784, 1047].forEach((f, i) => this.tone('triangle', f, f, 0.26, 0.24, 0.12 + i * 0.08)); }
 
   // filtered noise (air, hiss, a footstep's scuff); the noise is made once and reused

@@ -47,20 +47,23 @@
 .tcard.is-dim { opacity: .38; }
 
 /* ---------------------------------------------------------------- find all four: the equations beside the figure */
-/* the working, one line under another: what is known, then each angle's equation with its list of values
-   right after the = sign. The row in focus is lit and the rest step back; a row found glows green */
-.eqs { display: grid; gap: 10px; align-content: center; padding: 16px 18px; border-radius: 14px;
-  background: var(--glass); box-shadow: inset 0 0 0 1.5px var(--holo-line), 0 0 22px rgba(61, 220, 242, .2); }
-.eqs__row { display: grid; gap: 4px; padding: 8px 12px; border-radius: 12px; transition: opacity .25s ease, background .25s ease, box-shadow .25s ease; }
-.eqs__line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
-  font: 400 clamp(18px, .7rem + .7vw, 26px)/1.1 var(--font-display); color: #fff; letter-spacing: .02em; }
-.eqs__eq { display: flex; align-items: center; gap: .3em; white-space: nowrap; }
+/* the working, one line under another, in one neat column: each line ends on its = sign (or its question) and
+   the lists stand lined up after it. No hard box: the line in focus glows softly, the others stay readable but
+   step back; a line found glows green */
+.eqs { display: grid; grid-template-columns: max-content max-content; justify-content: center; align-content: center; row-gap: 8px;
+  padding: 18px 20px; border-radius: 18px; background: linear-gradient(180deg, rgba(8, 26, 74, .7), rgba(8, 26, 74, .45)); box-shadow: 0 0 34px rgba(61, 220, 242, .12); }
+.eqs__row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; column-gap: 14px; padding: 6px 12px; border-radius: 14px;
+  transition: opacity .25s ease, background .25s ease, box-shadow .25s ease; }
+.eqs__line { display: contents; }
+.eqs__eq { grid-column: 1; justify-self: end; display: flex; align-items: center; gap: .3em; white-space: nowrap;
+  font: 400 clamp(22px, .85rem + .9vw, 32px)/1.1 var(--font-display); color: #fff; letter-spacing: .02em; }
+.eqs .pick { grid-column: 2; justify-self: start; }
 .eqs .o { color: #ffc46b; }
 .eqs .a { color: var(--holo); }
 .eqs .g { color: #d4ff7a; }
-.eqs .op { color: rgba(255, 255, 255, .65); }
-.eqs__row.is-focus { background: rgba(255, 224, 102, .1); box-shadow: inset 0 0 0 2px rgba(255, 224, 102, .75), 0 0 20px rgba(255, 197, 49, .3); }
-.eqs__row.is-dim { opacity: .38; }
+.eqs .op { color: rgba(255, 255, 255, .7); }
+.eqs__row.is-focus { background: rgba(255, 224, 102, .08); box-shadow: 0 0 0 1.5px rgba(255, 224, 102, .4), 0 0 20px rgba(255, 197, 49, .16); }
+.eqs__row.is-dim { opacity: .5; }
 .eqs__row.is-right .eqs__eq { text-shadow: 0 0 12px rgba(166, 236, 60, .5); }
 .eqs .pick__btn { min-width: 140px; }
 .eqs .pick__menu { left: auto; right: 0; transform: translateY(-8px) scale(.96); transform-origin: 100% 0; }

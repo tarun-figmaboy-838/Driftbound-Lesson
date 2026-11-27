@@ -1,5 +1,5 @@
 Do you remember how an angle is formed?
-Two rays starting from the same point form an angle.
+When two rays start from the same point, an angle is formed.
 What type is each angle?
 A right angle is exactly 90°, a square corner.
 This one is smaller than that.
@@ -45,10 +45,7 @@ A linear pair always adds to 180°.
 If a ray stands on a straight line,
 the two adjacent angles formed add up to 180°.
 Find the missing angle in this linear pair.
-118° + 52° = 170°.
-A linear pair must make exactly 180°.
-138° + 52° = 190°.
-That’s more than a straight line.
+Not quite!
 Pick the missing angle to go on.
 Supplementary angles add up to 180°.
 Which pair is supplementary?
@@ -76,11 +73,6 @@ Which angle is opposite ∠2?
 ∠1 is next to ∠2: they share an arm.
 Look straight across O.
 ∠3 is next to ∠2: they share an arm.
-That’s ∠1 itself.
-That’s ∠2 itself.
-That’s ∠3 itself.
-That’s ∠4 itself.
-Find the angle facing it across O.
 These are vertically opposite angle pairs.
 Find the opposite angle to go on.
 Let’s measure the angles.

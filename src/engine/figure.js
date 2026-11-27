@@ -29,13 +29,15 @@ function appear(g) {
 
 // the tracing: the pen line draws from one end to the other (out along an arm, round the arc, back along
 // the other arm for an angle), stays a moment, then fades into the highlight
-function trace(g) {
+// (from: how far into it, in ms, when the figure is redrawn while it runs: it carries on from there)
+function trace(g, from = 0) {
   if (reduced()) return;
+  if (!from) g._traced = performance.now();
   g.querySelectorAll('.trace-light').forEach((p) => {
     const L = p.getTotalLength?.() || 0;
     if (L < 4) return;
     const tip = p.classList.contains('tip');               // the pen's glowing tip, at the front of the line
-    const timing = { duration: Math.min(1700, 900 + L * 1.5), easing: 'ease-in-out', fill: 'both' };
+    const timing = { duration: Math.min(1700, 900 + L * 1.5), delay: -from, easing: 'ease-in-out', fill: 'both' };
     p.style.strokeDasharray = tip ? `0.1px ${n(L + 2)}px` : `${n(L + 1)}px ${n(L + 1)}px`;
     p.animate(tip ? [
       { strokeDashoffset: '0px', opacity: 1 },
@@ -364,7 +366,14 @@ export class Figure {
       for (const [name, val] of Object.entries(attrs)) if (g.getAttribute(name) !== val) g.setAttribute(name, val);
       g._attrs = attrs;
       // traced once, as it lights up (not again when the figure only moves or resizes)
-      if (g._html !== it.html) { g.innerHTML = it.html; g._html = it.html; if (lit) trace(g); if (fresh && this.fn) appear(g); }
+      if (g._html !== it.html) {
+        g.innerHTML = it.html;
+        g._html = it.html;
+        const into = g._traced ? performance.now() - g._traced : Infinity;
+        if (lit) trace(g);
+        else if (into < 1700) trace(g, into);           // redrawn (moved, resized) while being traced: it carries on
+        if (fresh && this.fn) appear(g);
+      }
       prev = g;
     }
     for (const [key, g] of this.nodes) if (!seen.has(key)) { g.remove(); this.nodes.delete(key); }

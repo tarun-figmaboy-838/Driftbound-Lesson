@@ -97,7 +97,7 @@ export async function playIntro({ banner, sound }) {
   window.addEventListener('keydown', onKey);
 
   const proj = document.querySelector('.projector');
-  let pano = null;
+  let pano = null, projShown = false;
   function finish() {
     if (done) return;
     done = true;
@@ -107,6 +107,10 @@ export async function playIntro({ banner, sound }) {
     pano?.remove();
     proj.getAnimations({ subtree: true }).forEach((a) => a.cancel());
     proj.querySelectorAll('.projector__beam, .projector__glow').forEach((el) => { el.style.opacity = ''; });
+    // skipped before the projector came: it comes in softly now, instead of being there at once
+    if (!projShown && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      proj.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 900, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+    }
     [screen, bar, mute].forEach((el) => { el.style.opacity = ''; });
     room.style.transform = '';
     [screen, bar, mute].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
@@ -320,6 +324,7 @@ export async function playIntro({ banner, sound }) {
     skipBtn.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).finished.then(() => skipBtn.remove(), () => {});
     [screen, bar, mute].forEach((el) => { el.style.opacity = '0'; });
     body.classList.remove('intro-run');
+    projShown = true;
     const base = proj.querySelector('.projector__img'), column = proj.querySelector('.projector__beam'), lens = proj.querySelector('.projector__glow');
     const anim = (el, frames, opts) => el.animate(frames, { fill: 'both', ...opts }).finished.catch(() => {});
     column.style.opacity = '0';

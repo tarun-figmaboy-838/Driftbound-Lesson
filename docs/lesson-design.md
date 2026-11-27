@@ -58,7 +58,7 @@ and every drag task has a knob with arrows and also works with the arrow keys.
 
 | # | Deck slides | Caption (from the deck) | What the student does | Gate |
 |---|---|---|---|---|
-| 1 | 2–3 | Do you remember how an angle is formed? / Two rays starting from the same point form an angle. | Watches arm OB turn away from OA: the turn is the angle | |
+| 1 | 2–3 | Do you remember how an angle is formed? / When two rays start from the same point, an angle is formed. | Watches arm OB turn away from OA: the turn is the angle | |
 | 2 | 4–6 | Which type of angle is this? / What type is it now? / And what type is this? | Picks Acute, Right or Obtuse three times; arm OB turns between questions | yes |
 | 3 | 7–12 | Complementary angles add up to 90°. / Which pair is complementary? / What if these two angles share a point and an arm? / They have the same vertex. / They also have one common arm. / The two angles do not overlap. / We call these adjacent angles. | Taps one of three cards. The other cards fade and the right one (30° and 60°) glides to the middle; its frame goes, the two angles stay and fill the screen and slide together into a square corner. Then the shared vertex rings, the shared arm lights up (the outer arms dim) and the two angles blink side by side | yes |
 | 4 | 13 | Which pair is adjacent? | Taps one of three cards | yes |

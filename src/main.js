@@ -284,6 +284,8 @@ function makeCtx(i, tk) {
       Object.assign(chip.style, { left: `${ax}px`, top: `${ay}px` });
       document.body.appendChild(chip);
       later(() => chip.remove());
+      const t = setTimeout(() => sound.zip(), delay);              // it takes off with a soft zip
+      later(() => clearTimeout(t));
       const anim = chip.animate([
         { transform: 'translate(0, 0) scale(1)', opacity: 0 },
         { transform: 'translate(0, -10px) scale(1.25)', opacity: 1, offset: 0.15 },
@@ -418,6 +420,13 @@ function makeCtx(i, tk) {
       tk.ready = true;
       updateNext();
     },
+    // the student has done what the step asks (Next is no longer locked), but the step still has something to
+    // show or say: Next lights up only when the step ends and its narration has been said
+    unlock() {
+      if (tk.dead) return;
+      mem.done = true;
+      updateNext();
+    },
     later,
   };
   return c;
@@ -532,8 +541,15 @@ const ready = Promise.race([Promise.all([fontsIn, scene.loaded]), new Promise((r
 // down the corridor into the hall, where the projector brings the lesson), then the lesson. The tap also lets
 // the browser start the voice. A link to a given step (?step=N) or ?dev=1 skips both.
 const banner = $('start');
-function begin() {
-  ready.finally(() => { document.body.classList.add('is-on'); go(start); });
+// without the film (a link to a step, ?dev=1, reduced motion) the projector comes in softly with the hall: it
+// rises a little into place as the hall fades in, instead of being there at once
+function projectorIn() {
+  if (reduced()) return;
+  document.querySelector('.projector')?.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }],
+    { duration: 900, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+}
+function begin({ film = false } = {}) {
+  ready.finally(() => { document.body.classList.add('is-on'); if (!film) projectorIn(); go(start); });
 }
 if (params.has('step') || dev) { banner.remove(); begin(); }
 else {
@@ -555,7 +571,7 @@ else {
       return;
     }
     $('play').animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.6)', opacity: 0 }], { duration: 350, easing: 'ease-in', fill: 'forwards' });
-    playIntro({ banner, sound }).then(begin);
+    playIntro({ banner, sound }).then(() => begin({ film: true }));
   });
 }
 
