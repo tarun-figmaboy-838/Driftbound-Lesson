@@ -270,6 +270,37 @@ function makeCtx(i, tk) {
       els.readout.innerHTML = angles(html || '');
       if (!was && html) ghost(els.readout);
     },
+    // a number jumps from one place to another, so the student sees where it goes (out of an angle into the
+    // sum, from an answer onto its angle): a copy of it rises from `from`, flies on an arc and lands on `to`
+    // (elements or rectangles), where it shrinks into its place; resolves as it lands
+    fly(from, to, text, { cls = '', delay = 0, ms = 820 } = {}) {
+      const box = (x) => (x?.getBoundingClientRect ? x.getBoundingClientRect() : x);
+      const a = box(from), b = box(to);
+      if (!a || !b || !a.width || reduced() || tk.dead) return Promise.resolve();
+      const ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+      const dx = b.left + b.width / 2 - ax, dy = b.top + b.height / 2 - ay;
+      const lift = Math.min(140, 50 + Math.abs(dx) * 0.35);          // the higher the jump, the further it goes
+      const chip = h(`<span class="fly ${cls}">${angles(esc(text))}</span>`);
+      Object.assign(chip.style, { left: `${ax}px`, top: `${ay}px` });
+      document.body.appendChild(chip);
+      later(() => chip.remove());
+      const anim = chip.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 0 },
+        { transform: 'translate(0, -10px) scale(1.25)', opacity: 1, offset: 0.15 },
+        { transform: `translate(${(dx * 0.5).toFixed(1)}px, ${(dy * 0.5 - lift).toFixed(1)}px) scale(1.15)`, offset: 0.55 },
+        { transform: `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(.9)`, opacity: 1, offset: 0.9 },
+        { transform: `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(.5)`, opacity: 0 },
+      ], { duration: ms, delay, easing: 'cubic-bezier(.45, 0, .35, 1)', fill: 'both' });
+      return guard(anim.finished.then(() => chip.remove(), () => chip.remove()));
+    },
+    // the result of a sum pops into place (with a little burst), once the numbers have jumped into it
+    total(el) {
+      if (!el) return;
+      sound.pop();
+      if (reduced()) return;
+      el.animate([{ transform: 'scale(.4)', opacity: 0 }, { transform: 'scale(1.3)', opacity: 1, offset: 0.6 }, { transform: 'none', opacity: 1 }], { duration: 520, easing: 'ease-out' });
+      burstAt(el, { count: 12, spread: 90 });
+    },
     // the deck's label box ("ADJACENT ANGLES"), shown where the readout goes
     stamp(text) {
       els.readout.classList.add('has-label');

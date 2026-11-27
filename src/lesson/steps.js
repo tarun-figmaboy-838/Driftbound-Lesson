@@ -130,6 +130,7 @@ function pairMini(b, a1, a2, s = {}) {
   const outer = s.arm ? 'dim' : '', shared = s.arm ? 'glow' : '';
   b.wedge('w1', o, 0, a1, R, { fill: FILL.orange, edge: C.orange, cls: s.blink ? 'blink' : '' });
   b.wedge('w2', v2, rot, rot + a2, R, { fill: FILL.aqua, edge: C.aqua, cls: s.blink ? 'blink2' : '' });
+  if (s.sq) b.square('sq', o, 0, 9);            // the right-angle mark of the two together, under the rays
   b.ray('a1', o, 0, L, { color: C.aqua, w: 4.5, cls: outer });
   b.ray('b1', o, a1, L, { color: C.sun, w: 4.5, cls: shared });
   b.ray('a2', v2, rot, L, { color: C.sun, w: 4.5, cls: shared });
@@ -144,7 +145,6 @@ function pairMini(b, a1, a2, s = {}) {
     b.text('v1', at(o, a1 / 2, R + 17), `${a1}°`, { size: 18, color: TXT.orange });
     b.text('v2', at(o, a1 + a2 / 2, R + 17), `${a2}°`, { size: 18, color: TXT.aqua });
   }
-  if (s.sq) b.square('sq', o, 0, 7);            // the right-angle mark, small inside the arcs
 }
 
 // three or four rays from one vertex with two tinted angles (deck slide 13)
@@ -455,10 +455,10 @@ function pickGroup(c) {
 const TYPE_BOX = [-44, -14, 66, 62];
 function typeFig(b, d, s) {
   b.wedge('w', O, 0, d, 24, { fill: FILL.orange, edge: C.orange, cls: s.lit ? 'trace' : '' });
+  if (s.sq) b.square('sq', O, 0, 11);           // the right-angle mark, under the arms
   b.ray('oa', O, 0, 60, { color: C.aqua });
   b.ray('ob', O, d, 60, { color: C.sun });
   b.dot('o', O, { r: 6 });
-  if (s.sq) b.square('sq', O, 0, 11);
 }
 
 const TYPE_WHY = {
@@ -677,7 +677,12 @@ export const STEPS = [
           190: ['A bit too much.', '60 + 110 = 170, and 5 + 5 = 10 more.'],
         },
       });
+      // the two angles' sizes jump out of the figure into the sum's ?, merge there, and the total pops in
+      const q = c.els.readout.querySelector('.q');
+      const label = (k) => c.fig.root.querySelector(`[data-k="${k}"] text`);
+      await Promise.all([c.fly(label('vr'), q, '65°', { cls: 'o' }), c.fly(label('vl'), q, '115°', { cls: 'a', delay: 140 })]);
       c.readout(`${S('o', '65°')}${OP('+')}${S('a', '115°')}${OP('=')}${S('g', '180°')}`);
+      c.total(c.els.readout.querySelector('.g'));
       await c.wait(900);
     },
   },
@@ -722,8 +727,7 @@ export const STEPS = [
       });
       c.on('Drag', () => { demo = false; if (!moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
-      c.ready();
-      c.praise();
+      c.ready();                                         // moving it is exploring, not an answer: no praise
       c.caption('The angles change, but their total stays 180°.');
       c.sound.right();
       await c.wait(1200);
@@ -772,7 +776,10 @@ export const STEPS = [
           138: ['138° + 52° = 190°.', 'That’s more than a straight line.'],
         },
       });
+      // the answer jumps from its button onto the angle, where x was
+      await c.fly(c.els.controls.querySelector('.ans.is-right'), c.fig.root.querySelector('[data-k="vl"] text'), '128°', { cls: 'a' });
       v.set({ left: '128°' });
+      c.sound.pop();
       await c.wait(900);
     },
   },
@@ -809,6 +816,16 @@ export const STEPS = [
       c.caption('Adjacent angles that add to 180° form a linear pair.');
       await c.cue('180°');
       c.readout(`${S('o', '70°')}${OP('+')}${S('a', '110°')}${OP('=')}${S('g', '180°')}`);
+      // the two angles' sizes jump out of the figure into their places in the sum, then the total pops in
+      const [s70, s110, s180] = ['.o', '.a', '.g'].map((x) => c.els.readout.querySelector(x));
+      [s70, s110, s180].forEach((el) => { el.style.visibility = 'hidden'; });
+      const label = (k) => res.card.querySelector(`[data-k="${k}"] text`);
+      await Promise.all([
+        c.fly(label('vq'), s70, '70°', { cls: 'o' }).then(() => { s70.style.visibility = ''; }),
+        c.fly(label('vp'), s110, '110°', { cls: 'a', delay: 160 }).then(() => { s110.style.visibility = ''; }),
+      ]).finally(() => { [s70, s110].forEach((el) => { el.style.visibility = ''; }); });
+      s180.style.visibility = '';
+      c.total(s180);
     },
   },
 
@@ -978,8 +995,7 @@ export const STEPS = [
       });
       c.on('Drag', () => { demo = false; if (!v.s.moved) v.set({ hint: true }); });   // the hand shows where as the voice says it
       await c.until(done);
-      c.ready();
-      c.praise();
+      c.ready();                                         // turning it is exploring, not an answer: no praise
       c.caption('Yes: vertically opposite angles stay equal.');
       c.sound.right();
     },
@@ -1044,21 +1060,20 @@ export const STEPS = [
       c.fig.box(...CROSS_BOX);
       const v = c.view({ l: 1, q: 1, t: 68, pq: true, fill: ['orange', 'dim', 'dim', 'dim'], names: [1, 1, 1, 1], vals: ['68°', null, null, null], vcls: [], wcls: [], focus: null, uses: [] }, crossFig);
       c.caption('Can you find the other three angles if ∠1 is 68°?');
-      // each angle has the rule that finds it (why0), its equation worked out from what is known (eq; a 'mid'
-      // step is left out on phones, where the line is short), and a list of values; k is the angle in the
+      // each angle has its equation (short: from what is known) and a list of values; k is the angle in the
       // figure, uses the angles its equation takes its value from
       const ROWS = [
-        { k: 2, name: '∠3', why0: 'Opposite angles are equal', eq: [['o', '∠3'], ['op', '='], ['o', '∠1']], uses: [0], fill: 'orange', opts: [22, 68, 112], ans: 68,
+        { k: 2, name: '∠3', eq: [['o', '∠3'], ['op', '='], ['o', '∠1']], uses: [0], fill: 'orange', opts: [22, 68, 112], ans: 68,
           why: { 22: ['That’s 90° − 68°.', '∠3 is opposite ∠1, so they’re equal.'], 112: ['112° would make a linear pair with ∠1.', 'But ∠3 is opposite ∠1.'] } },
-        { k: 1, name: '∠2', why0: 'A linear pair adds to 180°', eq: [['a', '∠2'], ['op', '='], ['g mid', '180°'], ['op mid', '−'], ['o mid', '∠1'], ['op mid', '='], ['g', '180°'], ['op', '−'], ['o', '68°']], uses: [0], fill: 'aqua', opts: [68, 112, 122], ans: 112,
+        { k: 1, name: '∠2', eq: [['a', '∠2'], ['op', '='], ['g', '180°'], ['op', '−'], ['o', '∠1']], uses: [0], fill: 'aqua', opts: [68, 112, 122], ans: 112,
           why: { 68: ['∠2 is next to ∠1, not opposite.', 'Together they make a linear pair: 180°.'], 122: ['68° + 122° = 190°.', 'A linear pair makes exactly 180°.'] } },
-        { k: 3, name: '∠4', why0: 'Opposite angles are equal', eq: [['a', '∠4'], ['op', '='], ['a', '∠2']], uses: [1], fill: 'aqua', opts: [68, 112, 132], ans: 112,
+        { k: 3, name: '∠4', eq: [['a', '∠4'], ['op', '='], ['a', '∠2']], uses: [1], fill: 'aqua', opts: [68, 112, 132], ans: 112,
           why: { 68: '∠4 is opposite ∠2, not ∠1.', 132: ['68° + 132° = 200°.', '∠1 and ∠4 make a linear pair: 180°.'] } },
       ];
       const span = ([cls, t]) => `<span class="${cls}">${angles(esc(t))}</span>`;
-      // the working, one step under another: what is given, then each angle with the rule that finds it and its
-      // equation; the list of values stands right after the equation's last = sign
-      const panel = h(`<div class="eqs"><div class="eqs__row is-given"><span class="eqs__why">Given</span><div class="eqs__line"><span class="eqs__eq">${[['o', '∠1'], ['op', '='], ['o', '68°']].map(span).join('')}</span></div></div></div>`);
+      // the working, one line under another: what is known, then each angle's equation with its list of values
+      // right after the = sign
+      const panel = h(`<div class="eqs"><div class="eqs__row is-given"><div class="eqs__line"><span class="eqs__eq">${[['o', '∠1'], ['op', '='], ['o', '68°']].map(span).join('')}</span></div></div></div>`);
       const given = panel.firstChild;
       let finish, open = null;
       const done = new Promise((r) => { finish = r; });
@@ -1083,8 +1098,9 @@ export const STEPS = [
       };
       const group = pickGroup(c);
       ROWS.forEach((R) => {
-        R.row = h(`<div class="eqs__row"><span class="eqs__why">${esc(R.why0)}</span><div class="eqs__line"><span class="eqs__eq">${R.eq.map(span).join('')}<span class="op">=</span></span></div></div>`);
-        R.row.querySelector('.eqs__line').appendChild(group.list({
+        let list;
+        R.row = h(`<div class="eqs__row"><div class="eqs__line"><span class="eqs__eq">${R.eq.map(span).join('')}<span class="op">=</span></span></div></div>`);
+        R.row.querySelector('.eqs__line').appendChild((list = group.list({
           label: R.name, options: R.opts, answer: R.ans, fmt: deg, why: R.why,
           onOpen: () => { open = R; focus(); },
           onClose: () => { if (open === R) open = null; focus(); },
@@ -1093,11 +1109,18 @@ export const STEPS = [
             if (open === R) open = null;
             R.row.classList.add('is-right');
             v.s.fill[R.k] = R.fill;
-            v.s.vals[R.k] = deg(R.ans);
+            // the value jumps from its list onto the angle, where x was (measured before the figure moves on)
+            const x = c.fig.root.querySelector(`[data-k="v${R.k}"] text`)?.getBoundingClientRect();
             focus();
+            c.spawn(async () => {
+              await c.fly(list.btn, x, deg(R.ans), { cls: R.fill === 'orange' ? 'o' : 'a' });
+              v.s.vals[R.k] = deg(R.ans);
+              v.draw();
+              c.sound.pop();
+            });
             if (ROWS.every((r) => r.found)) finish();
           },
-        }).el);
+        })).el);
         panel.appendChild(R.row);
       });
       await c.cue('three');                                 // the equations come in as the question asks for the other three

@@ -73,6 +73,13 @@
   background: var(--glass); box-shadow: inset 0 0 0 1.5px var(--holo-line), 0 0 22px rgba(61, 220, 242, .22);
   font: 400 clamp(20px, .9rem + .9vw, 28px)/1.1 var(--font-display); letter-spacing: .02em; color: #fff; font-variant-numeric: tabular-nums; }
 .readout:empty { visibility: hidden; }
+/* a number on its way from one place to another (out of an angle into the sum, from an answer onto its angle) */
+.fly { position: fixed; z-index: 45; translate: -50% -50%; pointer-events: none; white-space: nowrap; color: #fff;
+  font: 400 clamp(22px, 1rem + .9vw, 30px)/1 var(--font-display); letter-spacing: .02em;
+  text-shadow: 0 0 2px #1d1250, 0 0 2px #1d1250, 0 2px 0 #1d1250, 0 0 16px rgba(127, 243, 255, .75); }
+.fly.o { color: #ffc46b; }
+.fly.a { color: var(--holo); }
+.fly.g { color: #d4ff7a; }
 .readout .o { color: #ffc46b; }
 .readout .a { color: var(--holo); }
 .readout .g { color: #d4ff7a; }

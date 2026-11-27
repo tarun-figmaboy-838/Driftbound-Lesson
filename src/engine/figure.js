@@ -131,7 +131,8 @@ class Builder {
   square(key, o, a, size = 16, { color = '#ffffff', cls = '' } = {}) {
     const p1 = this.P(at(o, a, size)), p2 = this.P(at(at(o, a, size), a + 90, size)), p3 = this.P(at(o, a + 90, size));
     const d = `M${p1[0]} ${p1[1]}L${p2[0]} ${p2[1]}L${p3[0]} ${p3[1]}`;
-    this.push(key, `<path class="ink" d="${d}" stroke-width="${n(6 * this.k)}" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${color}" stroke-width="${n(2.8 * this.k)}" stroke-linejoin="round" stroke-linecap="round"/>`, { cls });
+    // a thin light line with a faint dark edge (drawn under the rays, so a ray inside the corner crosses it cleanly)
+    this.push(key, `<path class="ink" d="${d}" stroke-width="${n(3.6 * this.k)}" stroke-linejoin="round" opacity=".55"/><path d="${d}" fill="none" stroke="${color}" stroke-width="${n(2 * this.k)}" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>`, { cls });
   }
 
   dot(key, p, { r = 6, color = '#ffffff', cls = '' } = {}) {
