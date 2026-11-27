@@ -2,12 +2,13 @@
 //
 // The room is a picture made with Figma AI (assets/ui/bg): the command HQ inside the satellite, a wide
 // version for landscape screens and a tall one for phones. The lesson floats as a hologram in front of
-// the front wall's big screen, in the light of a projector on the floor (hq.css); the picture shows the
+// the plain front wall, in the light of a projector on the floor (hq.css); the picture shows the
 // calm hall around it: the domed ceiling, the window band onto the planet, the glowing floor ring.
 // The screen's rectangle is handed to the CSS as --sx, --sy, --sw, --sh (px).
 
 const PICS = {
-  // the front wall's screen, in picture pixels: x0, y0, x1, y1 (the lesson is centred on it)
+  // where the front wall had its screen (painted out by tools/ui/plain_wall.py), in picture pixels:
+  // x0, y0, x1, y1; the lesson is centred on it
   wide: { src: 'assets/ui/bg/hq-wide.webp', w: 1536, h: 1024, screen: [388, 278, 1147, 617] },
   tall: { src: 'assets/ui/bg/hq-tall.webp', w: 1024, h: 1536, screen: [111, 363, 912, 757] },
 };
@@ -32,7 +33,7 @@ export function createScene(img, root = document.documentElement) {
     const sh = Math.max(220, H - top - below);
     const sx = (W - sw) / 2, sy = top;
 
-    // the picture: the whole hall, just big enough to fill the window, with its screen centred
+    // the picture: the whole hall, just big enough to fill the window, with that place centred
     // behind the lesson screen
     const [x0, y0, x1, y1] = P.screen;
     const s = Math.max(W / P.w, H / P.h) * 1.04;

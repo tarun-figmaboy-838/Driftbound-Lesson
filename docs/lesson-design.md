@@ -27,7 +27,7 @@ one continuous camera move with no cuts:
    the corridor and the hall each stand at their own distance, so near things grow faster than far
    ones, and the walk stops exactly on the lesson's view of the hall.
 4. It comes into the hall facing the surveillance monitors (the 2nd wall) and turns right, slowing at
-   each wall: the entrance it came through, the map table, and the front wall with its big screen.
+   each wall: the entrance it came through, the map table, and the plain front wall.
 5. The projector on the floor in front of the screen wakes up (it rises into view and its lights come
    on), a column of light rises from it, and the lesson forms in that light from the bottom up,
    flickering in like a hologram, while the hall's lights go down. Then the lesson starts. The lesson
@@ -143,8 +143,9 @@ Kept to what the interactions need:
   are Figma AI pictures (`assets/ui/start/`, `assets/ui/recall/`, `assets/ui/hint/`, `assets/ui/hall/`).
   The title and the projector were made on flat green and cut out with `tools/ui/cut_green.py`.
 - The HQ background is two pictures made with Figma AI (`assets/ui/bg/`): a wide one for landscape
-  screens and a tall one for phones. `src/engine/scene.js` centres the lesson on the front wall's
-  screen.
+  screens and a tall one for phones. The pictures had a big screen on the front wall;
+  `tools/ui/plain_wall.py` paints it out (the lesson's hologram floats in front of the plain wall), and
+  `src/engine/scene.js` centres the lesson where it was.
 - The buttons are the capsules from the POLYGON Figma file (source art in `tools/ui/polygon/`).
 - The UI kit is in Figma (https://www.figma.com/design/tyeZIE8dPEVxyAIccfBrov). Its screens show an
   earlier layout.

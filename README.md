@@ -7,9 +7,9 @@ opposite angles and their proof, and the recall. On the last step, Launch missio
 
 It opens on a start banner (the Drone Defense title over the satellite HQ in orbit, and a play button).
 Play runs a short intro film: into the satellite, through its gate, down the corridor into the command
-hall, facing its monitors wall, and round to the front wall with its big screen. A projector on the
+hall, facing its monitors wall, and round to its plain front wall. A projector on the
 floor there wakes up, and the lesson forms in its light: a hologram with no panel, floating in front of
-the screen. The narration is one line at the top, read aloud by a recorded voice (the game's co-pilot,
+the wall. The narration is one line at the top, read aloud by a recorded voice (the game's co-pilot,
 shown as an AI orb); each word lights up as it is said. In the recall, a drone projects the five
 summary cards one by one.
 
@@ -65,6 +65,7 @@ assets/                    only what the page loads
 tools/                     run by hand, not by the page
   ui/encode_images.py      a picture to WebP (settings inside); rebuilds the intro's pictures
   ui/cut_green.py          cuts Figma AI art made on green out of its background (projector, title)
+  ui/plain_wall.py         paints the big screen out of the hall's front wall (backdrops, 360° strip)
   ui/inline_pills.py       builds src/styles/pills.css from tools/ui/polygon (POLYGON capsule art)
   vo/make_vo.py            makes the voice with Kokoro, for every line in steps.js and main.js
   vo/split_vo.py           splits long recorded lines into pieces (cuts at the word times)

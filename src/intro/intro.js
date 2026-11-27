@@ -1,14 +1,14 @@
 // The opening, after Play. The camera flies into the satellite and stops at its entry gate; the gate
 // checks in (its lights blink, a scan sweeps the doors) and slides open; the camera walks in at eye
 // height, down the corridor and through the doorway into the command hall, where it faces the hall's 2nd
-// wall (its monitors); it turns right past the entrance and the hologram table and stops on the front wall
-// with its big screen. The projector in the floor there wakes up and the lesson card forms in its light,
-// as a hologram. Then the lesson starts.
+// wall (its monitors); it turns right past the entrance and the hologram table and stops on the plain
+// front wall. The projector on the floor there wakes up and the lesson forms in its light, as a hologram.
+// Then the lesson starts.
 //
 // Pictures (Figma AI, assets/ui/intro): the gate, cut into its frame and the two door halves (the halves
 // slide under the frame), and the corridor, its far doorway cut open so the real hall (the lesson's own
 // backdrop, assets/ui/bg) is seen through it. The walk is one camera path: the gate, the corridor's far
-// end and the hall's screen wall each stand at their own distance, so near things grow faster than far
+// end and the hall's front wall each stand at their own distance, so near things grow faster than far
 // ones, and the hall arrives exactly at the lesson's framing (no cut, no crossfade). A step bob, a slight
 // sway and roll, and a footstep on each step make it feel like a person walking. Through the doorway the
 // hall is the look-round strip, turned to the 2nd wall, so the walk and the turn are one view.
@@ -23,7 +23,7 @@ const BANNER_Y = 0.45;                                    // the banner's object
 
 // distances along the walk, in corridor lengths (0: in front of the gate, 1: the far doorway)
 const D_GATE = 0.24;          // the gate plane
-const D_WALL = 0.62;          // the hall's screen wall, beyond where the walk stops
+const D_WALL = 0.62;          // the hall's front wall, beyond where the walk stops
 const STEP_HZ = 1.9;          // steps a second at walking pace
 
 const E = EASE;
