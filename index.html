@@ -6,6 +6,9 @@
   <title>Lines &amp; Angles · Drone Defense flight training</title>
   <meta name="description" content="Lines & Angles, class 2: adjacent angles, linear pairs and vertically opposite angles, trained on the ship before the Drone Defense mission." />
   <meta name="theme-color" content="#0b1030" />
+  <!-- the start screen's pictures first: on a slow connection nothing else may hold them up -->
+  <link rel="preload" as="image" href="assets/ui/start/banner.webp" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/ui/start/title.webp" fetchpriority="high" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap" />
@@ -38,6 +41,21 @@
     <h1 class="start__title"><img src="assets/ui/start/title.webp" alt="Drone Defense" draggable="false" /></h1>
     <button class="start__play" id="play" type="button" aria-label="Play"><img src="assets/ui/start/play.webp" alt="" draggable="false" /></button>
   </div>
+  <script>
+    // until its pictures are in and the lesson's code is ready (main.js calls startReady), the start screen shows
+    // a soft loading ring (only if that takes a moment); then all of it comes in together, and Play works at the
+    // first tap. Opened from the folder the code never runs, so it does not wait for it; at most 30 s in any case
+    (function () {
+      var s = document.getElementById('start'), imgs = s.querySelectorAll('img');
+      var left = location.protocol === 'file:' ? 0 : 1;
+      var done = function () { if (--left <= 0) s.classList.remove('is-loading'); };
+      window.startReady = done;
+      for (var i = 0; i < imgs.length; i++) if (!(imgs[i].complete && imgs[i].naturalWidth)) {
+        left++; imgs[i].addEventListener('load', done); imgs[i].addEventListener('error', done);
+      }
+      if (left) { s.classList.add('is-loading'); setTimeout(function () { left = 0; done(); }, 30000); }
+    })();
+  </script>
   <main class="hq">
     <!-- the lesson: a hologram floating in the projector's light, in front of the hall's screen -->
     <section class="screen" id="screen" aria-labelledby="caption">

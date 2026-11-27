@@ -29,4 +29,17 @@
 .start__note { position: absolute; z-index: 1; bottom: calc(var(--play-bottom) + var(--play) + 28px);   /* just above the play button */ left: 16px; right: 16px; margin: 0 auto; width: fit-content; max-width: calc(100% - 32px);
   padding: 10px 18px; border-radius: 999px; background: rgba(3, 10, 36, .82); color: #fff; font: 600 clamp(16px, 2.4vmin, 22px) / 1.2 "Fredoka", system-ui, sans-serif; text-align: center; }
 .start.is-going .start__title { transition: opacity .35s ease-in; opacity: 0; }
+/* a slow connection: a soft loading ring in the middle until the picture and the title are in; then the picture
+   fades in and the title and the play button come in as usual */
+.start__pic { transition: opacity .6s ease; }
+.start.is-loading .start__pic { opacity: 0; }
+.start.is-loading .start__title, .start.is-loading .start__play { visibility: hidden; animation: none; }
+.start.is-loading::before { content: ''; position: absolute; z-index: 2; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%;
+  border: 4px solid rgba(127, 243, 255, .22); border-top-color: var(--holo); animation: start-spin .9s linear infinite, ring-in .3s ease .5s both; }
+@keyframes ring-in { from { opacity: 0; } }   /* shown only if loading takes a moment */
+/* Play tapped before the intro's pictures are in: a ring turns round the play button until they are */
+.start.is-waiting .start__play { animation: none; }
+.start.is-waiting .start__play::after { content: ''; position: absolute; inset: -12%; border-radius: 50%; pointer-events: none;
+  border: 5px solid rgba(255, 255, 255, .25); border-top-color: #ffffff; animation: start-spin .9s linear infinite; }
+@keyframes start-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .start__pic, .start__play, .start__play::before, .start__title, .start__title img { animation: none; } }

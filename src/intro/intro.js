@@ -33,7 +33,17 @@ const SRC = ['gate-frame', 'door-l', 'door-r', 'corridor'].map((f) => `assets/ui
 // left and the front again, blended at the seams; period is one full turn in picture pixels, turn the
 // time a full turn would take; start: where the walk-in faces (a quarter turn: the 2nd wall)
 const PANO = { src: 'assets/ui/intro/hall-360.webp', w: 5920, h: 1024, period: 4384, turn: 6400, start: 0.25 };
-const pics = [...SRC, PANO.src].map((src) => { const i = new Image(); i.decoding = 'async'; i.src = src; return i; });
+// the intro's pictures load once the start screen's are in (main.js), so they do not slow the start screen down
+let pics = null;
+export function loadIntro() {
+  if (!pics) pics = [...SRC, PANO.src].map((src) => { const i = new Image(); i.decoding = 'async'; i.src = src; return i; });
+  return pics;
+}
+// resolves true once every intro picture is ready to show, or false if that takes more than `max` ms
+export function introReady(max = 25000) {
+  const all = Promise.all(loadIntro().map((i) => i.decode().catch(() => {}))).then(() => true);
+  return Promise.race([all, new Promise((r) => setTimeout(() => r(false), max))]);
+}
 
 class Skip extends Error {}
 
@@ -133,7 +143,7 @@ export async function playIntro({ banner, sound }) {
   const still = { x: 0, y: 0, r: 0 };
 
   try {
-    await Promise.race([Promise.all(pics.map((i) => i.decode().catch(() => {}))), new Promise((r) => setTimeout(r, 1500))]);
+    await Promise.race([Promise.all(loadIntro().map((i) => i.decode().catch(() => {}))), new Promise((r) => setTimeout(r, 1500))]);
 
     // ---------------------------------------------------------------- 1. into the satellite
     // the banner zooms towards the station's front (faster and faster), the gate fades in out of a flash

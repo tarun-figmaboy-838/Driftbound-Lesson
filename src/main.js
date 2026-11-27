@@ -11,7 +11,7 @@ import { Sound } from './engine/audio.js';
 import { h, burst, burstAt, esc, angles, reduced, EASE } from './engine/ui.js';
 import { createScene } from './engine/scene.js';
 import { CHAPTERS, STEPS } from './lesson/steps.js';
-import { playIntro } from './intro/intro.js';
+import { playIntro, loadIntro, introReady } from './intro/intro.js';
 
 const GAME_URL = 'https://zathura-teal.vercel.app';
 const CANCEL = Symbol('cancel');
@@ -27,7 +27,11 @@ const sound = new Sound();
 // the recorded voice (the game's co-pilot, made with Kokoro): its lines are decoded once the audio starts;
 // the narration says them in one line beside the AI orb, word by word
 const vo = new Voice(sound);
-const warm = () => vo.ready.then(() => vo.preload());
+// the voice's lines load in the background once the pictures that come first are in (the start screen and the
+// intro's): on a slow connection they would hold the pictures up. A line needed sooner is loaded at once
+let openVoice;
+const voiceGate = new Promise((r) => { openVoice = r; });
+const warm = () => Promise.all([vo.ready, voiceGate]).then(() => vo.preload());
 window.addEventListener('pointerdown', warm, { once: true });
 window.addEventListener('keydown', warm, { once: true });
 const dialogue = new Dialogue($('narration'), {
@@ -551,28 +555,45 @@ function projectorIn() {
 function begin({ film = false } = {}) {
   ready.finally(() => { document.body.classList.add('is-on'); if (!film) projectorIn(); go(start); });
 }
-if (params.has('step') || dev) { banner.remove(); begin(); }
+if (params.has('step') || dev) { banner.remove(); openVoice(); begin(); }
 else {
+  // the intro's pictures load once the start screen's are in; then the voice's lines
+  Promise.all([...banner.querySelectorAll('img')].map((i) => i.decode().catch(() => {})))
+    .then(() => introReady(60000)).then(() => openVoice());
   // Enter or Space also starts (the button is not focused at load, so no focus ring shows on it)
   const onKey = (e) => {
     if (!banner.isConnected) { window.removeEventListener('keydown', onKey, true); return; }
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); window.removeEventListener('keydown', onKey, true); $('play').click(); }
   };
   window.addEventListener('keydown', onKey, true);
-  $('play').addEventListener('click', () => {
-    if (banner.classList.contains('is-going')) return;
+  $('play').addEventListener('click', async () => {
+    if (banner.classList.contains('is-going') || banner.classList.contains('is-loading')) return;
     banner.classList.add('is-going');
     sound.unlock();                                      // inside the tap: lets the voice play in every browser
     warm();
     sound.tap();
-    if (reduced()) {                                     // no film: straight into the lesson
+    const noFilm = () => {                               // straight into the lesson
+      openVoice();
       begin();
       banner.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).onfinish = () => banner.remove();
-      return;
+    };
+    if (reduced()) { noFilm(); return; }
+    // a slow connection: the film waits for its pictures (and the hall's), a ring turning round the play
+    // button; if they do not come within 25 s the lesson starts without the film
+    let ok = await Promise.race([introReady(), new Promise((r) => setTimeout(() => r(null), 150))]);
+    if (ok === null) {
+      banner.classList.add('is-waiting');
+      $('play').setAttribute('aria-busy', 'true');
+      ok = (await Promise.all([introReady(25000), Promise.race([scene.loaded, new Promise((r) => setTimeout(r, 25000))])]))[0];
+      banner.classList.remove('is-waiting');
+      $('play').removeAttribute('aria-busy');
     }
+    if (!ok) { noFilm(); return; }
+    loadIntro();
     $('play').animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.6)', opacity: 0 }], { duration: 350, easing: 'ease-in', fill: 'forwards' });
     playIntro({ banner, sound }).then(() => begin({ film: true }));
   });
+  window.startReady?.();                               // Play works now: the start screen can show it
 }
 
 // ---------------------------------------------------------------- ?dev=1: jump to any step

@@ -43,16 +43,14 @@
 .rcard.in { opacity: 1; }
 /* in the light the shape (and its card) glows like a hologram */
 .rcard.is-holo { filter: drop-shadow(0 0 18px rgba(127, 243, 255, .55)); }
-/* while it is explained there is no card: the shape floats in the light as a hologram. It is bigger,
-   glows, and turns slowly in 3D; its title floats above it. When it is collected the card forms round it */
+/* while it is explained there is no card: the shape floats in the light as a hologram. It is bigger, glows,
+   and drifts gently up and down, always level (never tilted or turned); its name floats above it. When it is
+   collected the card forms round it */
 .rcard.is-bare::before { opacity: 0; }
 .rcard.is-bare b { font-size: clamp(18px, 11cqi, 34px); text-shadow: 0 0 14px rgba(255, 210, 90, .45); }   /* its name, big over it */
-.rcard.is-bare .rcard__fig { animation: holo-turn 4.5s ease-in-out infinite alternate; }
+.rcard.is-bare .rcard__fig { transform: scale(1.14); animation: holo-bob 3.2s ease-in-out infinite alternate; }
 .rcard.is-bare .rcard__fig .fig-svg { filter: drop-shadow(0 0 12px rgba(127, 243, 255, .6)); }
-@keyframes holo-turn {
-  from { transform: perspective(700px) rotateX(14deg) rotateY(-16deg) scale(1.14); }
-  to { transform: perspective(700px) rotateX(14deg) rotateY(16deg) scale(1.14); }
-}
+@keyframes holo-bob { from { transform: translateY(-3px) scale(1.14); } to { transform: translateY(3px) scale(1.14); } }
 .rcard.is-on b { color: #ffe9a8; }
 @media (hover: hover) { .recall.is-done .rcard:not(:disabled):not(.is-on):hover { transform: translateY(-3px); filter: drop-shadow(0 0 14px rgba(127, 243, 255, .5)); } }
 .rcard:focus-visible { outline: 3px solid var(--holo); outline-offset: 3px; }
