@@ -280,6 +280,10 @@ export class Figure {
     this.onNudge = null;        // (id, delta) => void   arrow keys on a handle
     this.dragAll = null;        // handle id that any press on the figure drags (easier on phones)
     this.dragging = null;
+    // when the room for the drawing changes while it is shown (a panel comes in beside it, a line of narration
+    // wraps, a label appears under it), the drawing glides and scales to its new place instead of jumping; a
+    // change of the window's own size just redraws
+    this.win = [innerWidth, innerHeight];
     this.ro = new ResizeObserver(() => this.render());
     this.ro.observe(host);
 
@@ -332,8 +336,30 @@ export class Figure {
 
   draw(fn) { this.fn = fn; this.render(); }
 
+  // the drawing was at screen point `was` (its origin) at scale was.s: it glides from there to where it is now
+  glide(was) {
+    const r = this.host.getBoundingClientRect();
+    const now = { x: r.left + this.ox, y: r.top + this.oy };
+    const k = was.s / this.s, dx = was.x - now.x, dy = was.y - now.y;
+    if (reduced() || (Math.abs(dx) + Math.abs(dy) < 2 && Math.abs(k - 1) < 0.01)) return;
+    this.svg.animate([
+      { transform: `translate(${n(dx)}px, ${n(dy)}px) scale(${k.toFixed(4)})`, transformOrigin: `${n(this.ox)}px ${n(this.oy)}px` },
+      { transform: 'none', transformOrigin: `${n(this.ox)}px ${n(this.oy)}px` },
+    ], { duration: 620, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+  }
+
   render() {
-    if (!this.fn || !this.layout()) return;
+    if (!this.fn) return;
+    // where the drawing was (its origin on screen, its scale, the size of its room) before this layout
+    const B = this.drawn && this.lastBox;
+    const was = B && { x: B.left + this.ox, y: B.top + this.oy, s: this.s, w: B.width, h: B.height };
+    if (!this.layout()) return;
+    this.lastBox = this.host.getBoundingClientRect();
+    this.drawn = true;
+    const winChanged = this.win[0] !== innerWidth || this.win[1] !== innerHeight;
+    this.win = [innerWidth, innerHeight];
+    // its room changed size (not the window): it glides over (see glide)
+    if (was && !winChanged && (Math.abs(was.w - this.lastBox.width) > 1 || Math.abs(was.h - this.lastBox.height) > 1)) this.glide(was);
     const b = new Builder(this);
     this.fn(b);
     b.items.push(...b.lights);                             // the tracing, over the whole figure
@@ -395,6 +421,7 @@ export class Figure {
 
   clear() {
     this.fn = null;
+    this.drawn = false;
     this.root.replaceChildren();
     this.nodes.clear();
     this.onTap = this.onDrag = this.onNudge = null;

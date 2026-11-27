@@ -8,7 +8,13 @@
 .view:not(.is-custom):not(.is-side) > .custom { display: none; }
 /* a panel beside the figure: the figure on the left, the panel on the right */
 .view.is-side { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); column-gap: 20px; }
-.view.is-side > .custom { grid-area: 1 / 2; align-self: center; }
+.view.is-side > .custom { grid-area: 1 / 2; align-self: center; animation: side-in .65s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes side-in { from { opacity: 0; transform: translateX(60px) scale(.94); } }
+.is-tall .view.is-side > .custom { animation-name: side-up; }
+@keyframes side-up { from { opacity: 0; transform: translateY(40px) scale(.96); } }
+/* its lines drop in one after another (backwards: afterwards each line's own lift and dim take over) */
+.view.is-side .eqs__row { animation: row-in .5s cubic-bezier(.34, 1.56, .64, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 220ms); }
+@keyframes row-in { from { opacity: 0; transform: translateY(-14px) scale(.9); } }
 .stage:has(.view.is-side) > .readout:empty { display: none; }   /* no empty row under it: the drawing gets the room */
 
 /* ---------------------------------------------------------------- figure (SVG) */
@@ -28,7 +34,7 @@
 .fig-svg .t-name { font-family: var(--font-ui); font-weight: 700; }
 .fig-svg .t-tag { font-family: var(--font-display); letter-spacing: .06em; fill: #ffffff; }
 .fig-svg .it { transition: opacity .26s ease; }
-.fig-svg .dim { opacity: .28; }
+.fig-svg .dim { opacity: .5; }   /* stepped back, still readable */
 .fig-svg .glow { filter: drop-shadow(0 0 4px var(--glow)) drop-shadow(0 0 10px var(--glow)); animation: glowpulse 1.6s ease-in-out infinite; }
 @keyframes glowpulse { 50% { filter: drop-shadow(0 0 2px var(--glow)) drop-shadow(0 0 4px var(--glow)); } }
 .fig-svg .blink { animation: blink 1.5s ease-in-out infinite; }

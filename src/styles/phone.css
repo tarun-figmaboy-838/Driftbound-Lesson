@@ -39,7 +39,7 @@
 .is-tall .cards.fill > span.kept { grid-row: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .holo--scan, .screen, .screen .fig, .projector__glow, .eqs__row.is-focus::before { animation: none !important; }
+  .holo--scan, .screen, .screen .fig, .projector__glow, .eqs__row.is-focus::before, .view.is-side > .custom, .view.is-side .eqs__row { animation: none !important; }
   .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
   .fig-svg .hint-hand, .fig-svg .hint-hand-wrap { animation: none; }
   .fig-svg .hand-ripple { animation: none; opacity: .6; }

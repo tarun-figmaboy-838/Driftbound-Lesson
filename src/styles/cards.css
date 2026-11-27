@@ -67,8 +67,9 @@
 .eqs .g { color: #d4ff7a; }
 .eqs .op { color: rgba(255, 255, 255, .78); }
 .eqs__eq > .op:only-of-type { font-size: .82em; }
-/* the angle being asked about: a coloured badge, built like a button */
-.eqs .tag { display: inline-flex; align-items: center; padding: .08em .42em .14em; border-radius: 999px; color: #fff; text-shadow: 0 2px 0 var(--ink);
+/* the angle being asked about: a coloured badge, built like a button, its name in ink (white on these light
+   colours is too faint to read) */
+.eqs .tag { display: inline-flex; align-items: center; padding: .08em .42em .14em; border-radius: 999px; color: var(--ink) !important; text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
   box-shadow: 0 0 0 2.5px var(--ink), inset 0 2px 0 rgba(255, 255, 255, .45), inset 0 -3px 0 rgba(0, 0, 0, .22); }
 .eqs .tag.o { background: linear-gradient(180deg, #ffbf5e, #f08a16); }
 .eqs .tag.a { background: linear-gradient(180deg, #8ff6ff, #23b7da); }

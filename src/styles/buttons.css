@@ -2,7 +2,7 @@
 
 /* ---------------------------------------------------------------- buttons: the POLYGON capsule kit (3-slice, caps never stretch) */
 .bar { position: fixed; z-index: 2; left: var(--sx); width: var(--sw); top: calc(var(--sy) + var(--sh) + 18px);
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 16px; padding: 0 2px; }
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; column-gap: 16px; padding: 0 2px; }   /* equal sides: the answers stand in the very middle */
 /* the POLYGON capsules: a left cap, a stretching middle and a right cap, as plain background layers */
 .pill { --cap: 27px;
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .35em; height: 54px; min-width: 112px; margin: 0; padding: 0 calc(var(--cap) + 6px) 3px; cursor: pointer;
@@ -13,12 +13,13 @@
 @media (hover: hover) { .pill:hover:not(:disabled):not([aria-disabled="true"]) { transform: translateY(-2px); filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .4)) brightness(1.06); } }
 .pill:active:not(:disabled):not([aria-disabled="true"]) { transform: translateY(2px) scale(.97); transition-duration: 60ms; }
 .pill:focus-visible { outline: 3px solid var(--holo); outline-offset: 4px; border-radius: 999px; }
-.pill--blue, .pill.is-right, .pill.is-wrong { color: #ffffff; text-shadow: 0 2px 0 rgba(0, 20, 70, .45); }
+/* white labels on the blue, green and red capsules: a dark outline round each letter keeps them readable */
+.pill--blue, .pill.is-right, .pill.is-wrong { color: #ffffff; text-shadow: 0 0 2px var(--ink), 0 0 2px var(--ink), 0 2px 0 var(--ink); }
 .pill.is-right { pointer-events: none; animation: pop 420ms ease-out; }
 .pill.is-wrong { opacity: .85; cursor: default; }
 .pill.is-off { filter: grayscale(.9) brightness(.7); opacity: .75; pointer-events: none; }   /* greyed, not faded (fading turns gold muddy) */
 .pill .ico { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.back { min-width: 0; width: 66px; padding: 0; }
+.back { min-width: 0; width: 66px; padding: 0; justify-self: start; }
 .back .ico { width: 24px; height: 24px; fill: none; stroke-width: 3.4; }
 .next { min-width: 150px; text-transform: uppercase; letter-spacing: .04em; }
 .next[aria-disabled="true"] { filter: grayscale(.85) brightness(.85); opacity: .7; cursor: not-allowed; }

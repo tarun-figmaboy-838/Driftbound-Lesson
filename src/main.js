@@ -321,8 +321,10 @@ function makeCtx(i, tk) {
       els.custom.replaceChildren(...(node ? [node] : []));
       els.stage.classList.toggle('is-custom', !!node);
     },
-    // a panel beside the figure (the figure stays): on the right, or under it on phones
+    // a panel beside the figure (the figure stays): on the right, or under it on phones. The figure glides over
+    // to make room (figure.js), the panel slides in, and its lines drop in one after another
     side(node) {
+      node?.querySelectorAll('.eqs__row').forEach((r, k) => r.style.setProperty('--i', k));
       els.custom.replaceChildren(...(node ? [node] : []));
       els.stage.classList.toggle('is-side', !!node);
     },
