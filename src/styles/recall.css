@@ -42,12 +42,11 @@
 .rcard.in { opacity: 1; }
 /* in the light the shape (and its card) glows like a hologram */
 .rcard.is-holo { filter: drop-shadow(0 0 18px rgba(127, 243, 255, .55)); }
-/* while the drone explains it there is no card: the shape floats in the light as a solid hologram. It is
-   bigger, has depth (a darker layer under its lines, like the side of a solid piece) and turns slowly in
-   3D; its title floats above it. When it is collected the card forms round it again */
+/* while the drone explains it there is no card: the shape floats in the light as a hologram. It is bigger,
+   glows, and turns slowly in 3D; its title floats above it. When it is collected the card forms round it */
 .rcard.is-bare::before { opacity: 0; }
 .rcard.is-bare .rcard__fig { animation: holo-turn 4.5s ease-in-out infinite alternate; }
-.rcard.is-bare .rcard__fig .fig-svg { filter: drop-shadow(0 3px 0 rgba(10, 46, 120, .95)) drop-shadow(0 6px 0 rgba(10, 46, 120, .55)) drop-shadow(0 0 12px rgba(127, 243, 255, .6)); }
+.rcard.is-bare .rcard__fig .fig-svg { filter: drop-shadow(0 0 12px rgba(127, 243, 255, .6)); }
 @keyframes holo-turn {
   from { transform: perspective(700px) rotateX(14deg) rotateY(-16deg) scale(1.14); }
   to { transform: perspective(700px) rotateX(14deg) rotateY(16deg) scale(1.14); }
