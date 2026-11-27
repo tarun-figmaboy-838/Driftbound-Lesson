@@ -246,7 +246,7 @@ export class Dialogue {
     document.documentElement.classList.toggle('lipsync', on);
     if (!on && !this.lipBars) return;
     this.lipBars = this.lipBars || [];
-    if (on) this.lipBars = [...document.querySelectorAll('#narration .voice i, .drone__screen i')];
+    if (on) this.lipBars = [...document.querySelectorAll('#narration .voice i')];
     this.lipBars.forEach((el, i) => { if (on) el.style.setProperty('--lv', bands[i % 7].toFixed(3)); else el.style.removeProperty('--lv'); });
     if (!on) this.lipBars = null;
   }

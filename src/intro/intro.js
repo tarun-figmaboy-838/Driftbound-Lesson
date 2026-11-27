@@ -106,6 +106,7 @@ export async function playIntro({ banner, sound }) {
     banner.remove();
     pano?.remove();
     proj.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+    proj.querySelectorAll('.projector__beam, .projector__glow').forEach((el) => { el.style.opacity = ''; });
     [screen, bar, mute].forEach((el) => { el.style.opacity = ''; });
     room.style.transform = '';
     [screen, bar, mute].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
@@ -319,14 +320,16 @@ export async function playIntro({ banner, sound }) {
     skipBtn.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).finished.then(() => skipBtn.remove(), () => {});
     [screen, bar, mute].forEach((el) => { el.style.opacity = '0'; });
     body.classList.remove('intro-run');
-    const base = proj.querySelector('.projector__img'), column = proj.querySelector('.projector__beam');
+    const base = proj.querySelector('.projector__img'), column = proj.querySelector('.projector__beam'), lens = proj.querySelector('.projector__glow');
     const anim = (el, frames, opts) => el.animate(frames, { fill: 'both', ...opts }).finished.catch(() => {});
     column.style.opacity = '0';
+    lens.style.opacity = '0';                        // the lens lights up with the light, once the projector is up
     sound.hum();
     await anim(base, [{ opacity: 0, transform: 'translateY(30px)', filter: 'brightness(.4)' }, { opacity: 1, transform: 'none', filter: 'brightness(.6)', offset: 0.55 },
       { filter: 'brightness(1.7)', offset: 0.8 }, { opacity: 1, transform: 'none', filter: 'brightness(1)' }], { duration: 1000, easing: 'cubic-bezier(.22, 1, .36, 1)' });
     if (skipped) throw new Skip();
     column.style.opacity = '';
+    lens.style.opacity = '';
     sound.materialize();
     await anim(column, [{ transform: 'scaleY(0)', opacity: 0.4 }, { transform: 'none', opacity: 1 }], { duration: 650, easing: 'cubic-bezier(.45, 0, .2, 1)' });   // it grows up from the lens
     if (skipped) throw new Skip();

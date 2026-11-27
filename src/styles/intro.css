@@ -2,7 +2,7 @@
 
 /* ---------------------------------------------------------------- the intro (src/intro/intro.js): into the satellite,
    through its gate (Figma AI art cut into the frame and two door halves), down the corridor (its far doorway
-   cut open onto the real hall) and into the hall, where a drone brings the screen */
+   cut open onto the real hall) and into the hall, where the projector brings the lesson */
 .intro-run .hq, .intro-run .mute { visibility: hidden; }
 .intro { position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
 .intro__layer { position: absolute; left: 0; top: 0; width: 1536px; height: 1024px; transform-origin: 0 0; will-change: transform; }

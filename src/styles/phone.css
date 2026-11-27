@@ -28,7 +28,7 @@
 .is-tall .cards.fill > span.kept { grid-row: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .holo--glow, .holo--scan, .screen, .screen .fig { animation: none !important; }
+  .holo--glow, .holo--scan, .screen, .screen .fig, .projector__glow { animation: none !important; }
   .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
   .fig-svg .hint-hand, .fig-svg .hint-hand-wrap { animation: none; }
   .fig-svg .hand-ripple { animation: none; opacity: .6; }

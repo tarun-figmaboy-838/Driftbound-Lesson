@@ -95,7 +95,7 @@ export class Sound {
     src.stop(at + dur + 0.05);
   }
 
-  // the intro: footsteps, the gate (beeps, unlock, clunk, the doors' air), the drone and the screen
+  // the intro: footsteps, the gate (beeps, unlock, clunk, the doors' air), the projector and the lesson
   step() { this.tone('sine', 95, 55, 0.11, 0.16); this.noise(0.06, { f: 2600, q: 1.2, peak: 0.025 }); }
   beep(i = 0) { const f = [988, 1319][i % 2]; this.tone('triangle', f, f, 0.07, 0.12); }
   unlatch() { this.tone('triangle', 784, 784, 0.12, 0.16); this.tone('triangle', 1175, 1175, 0.2, 0.16, 0.09); }

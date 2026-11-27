@@ -75,7 +75,7 @@ and every drag task has a knob with arrows and also works with the arrow keys.
 | 15 | 36 | Does that still happen if we rotate a line? / Yes: vertically opposite angles stay equal. | Drags the line; all four angles update live, and ∠1 = ∠3 and ∠2 = ∠4 at every position | yes |
 | 16 | 37–41 | Let's see why it happens. / ∠1 and ∠2 form a linear pair. / ∠2 and ∠3 form another linear pair. / Both totals include the same ∠2. / So ∠1 and ∠3 must be equal. | Each linear pair sweeps its half turn; the working under the figure builds line by line (the two 180° totals merge, ∠2 is struck out) into ∠1 = ∠3, at the pace of the narration |  |
 | 17 | 42 | Can you find the other three angles if ∠1 is 68°? | Finds ∠3, ∠2 and ∠4 in turn | yes |
-| 18 | 43 | Recall | For each of the five cards the deck lists (angles, adjacent angles, linear pair, linear pair converse, vertically opposite angles), a drone flies in and stops in the middle, projects the card as a hologram in its beam (first the empty card, then its shape draws itself in), the diagram animates the idea while the drone says the deck's sentence, and the card flies down into the tray. While the drone works, the collected cards wait at the sides (two left, two right, level with the card in the middle). When the drone has gone the cards grow into the collection, the line says "You learned all about angles!" and Launch mission arrives. Tapping a card brings the drone back to explain it again. Next is Launch mission and opens the game | |
+| 18 | 43 | Recall | For each of the five cards the deck lists (angles, adjacent angles, linear pair, linear pair converse, vertically opposite angles), its shape rises in the floor projector's light in the middle as a hologram (no card) and draws itself in, the diagram animates the idea while the voice says the deck's sentence, then its card forms round it and flies to its place: the collected cards wait at the sides (two left, two right, level with the shape in the middle). When all five are explained the cards grow into the collection, the line says "You learned all about angles!" and Launch mission arrives. Tapping a card brings its shape back into the light to explain it again. Next is Launch mission and opens the game | |
 
 ## Interactions and animations
 
@@ -139,7 +139,7 @@ Kept to what the interactions need:
 - The intro's gate (cut into its frame and two door halves), corridor (its far doorway cut open) and
   the hall's right, back and left walls (stitched with the front into one strip for the full turn) are
   Figma AI pictures (`assets/ui/intro/`).
-- The start banner, title, play button, recall drone, recall card, hint hand and the hall's projector
+- The start banner, title, play button, recall card, hint hand and the hall's projector
   are Figma AI pictures (`assets/ui/start/`, `assets/ui/recall/`, `assets/ui/hint/`, `assets/ui/hall/`).
   The title and the projector were made on flat green and cut out with `tools/ui/cut_green.py`.
 - The HQ background is two pictures made with Figma AI (`assets/ui/bg/`): a wide one for landscape

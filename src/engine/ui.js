@@ -1,4 +1,4 @@
-// Small shared helpers: DOM, text, maths and easing, reduced motion, the drone's markup, and the
+// Small shared helpers: DOM, text, maths and easing, reduced motion, and the
 // hexagon bursts used on right answers and the launch.
 
 export function h(html) {
@@ -26,9 +26,6 @@ export const EASE = {
   back: (t) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * (t - 1) ** 3 + c1 * (t - 1) ** 2; },
 };
 
-// the drone (Figma AI art) that explains the recall; its screen carries the voice's mouth
-export const droneMarkup = () => '<img class="drone__img" src="assets/ui/recall/drone.webp" alt="" draggable="false">'
-  + '<span class="drone__screen"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
 
 const COLORS = ['#7ff3ff', '#3ddcf2', '#d4ff7a', '#ffffff', '#ffe066'];
 

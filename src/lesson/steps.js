@@ -4,7 +4,7 @@
 // gate: true keeps Next locked until the step is done; lockHint is what the narration says if Next is
 // pressed too early. quiet: true marks steps with no instructions or hints (no second line in the bar).
 import { at, angleOf } from '../engine/figure.js';
-import { h, esc, angles, lerp, clamp, droneMarkup } from '../engine/ui.js';
+import { h, esc, angles, lerp, clamp } from '../engine/ui.js';
 
 export const CHAPTERS = [
   { name: 'Warm-up', color: 'aqua' },
@@ -1016,26 +1016,20 @@ export const STEPS = [
   },
 
   // ============================================================ RECALL (the last step launches the game)
-  // deck slide 43: recall. A drone flies in and stops above the middle: it is the voice that explains. The
-  // five shapes rise one by one out of the floor projector's light as holograms (no card), each shape shows
-  // the idea while the voice says the deck's sentence, then its card forms round it and it flies to its
-  // place. When all five are collected the drone leaves and the cards open into the collection; tapping a
-  // card brings the drone back to explain it again.
+  // deck slide 43: recall. The five shapes rise one by one out of the floor projector's light as holograms
+  // (no card); each shape shows the idea while the voice says the deck's sentence, then its card forms round
+  // it and it flies to its place. When all five are collected the cards open into the collection; tapping a
+  // card brings its shape back into the light to explain it again.
   {
     id: 'recall', quiet: true, ch: 5, title: 'Recall', next: 'Launch mission', launch: true, nextAfter: true,   // Launch mission arrives once the recall is done
     async run(c) {
       c.caption('Recall');
-      const root = h(`<div class="recall"><div class="recall__stage"></div><div class="recall__slots"></div><div class="drone" aria-hidden="true">${droneMarkup()}</div></div>`);
+      const root = h('<div class="recall"><div class="recall__stage"></div><div class="recall__slots"></div></div>');
       const slots = root.querySelector('.recall__slots');
       const stage = root.querySelector('.recall__stage');
-      const drone = root.querySelector('.drone');
       c.stage(root);
-      // while the drone is here, it is the one talking: the mouth moves to its screen (and back when it leaves)
-      const bar = document.getElementById('narration');
-      const mouthOnDrone = (on) => bar.classList.toggle('mouth-on-drone', on);
-      c.later(() => mouthOnDrone(false));
-      // each card's place in the collection (invisible until the card lands); while the drone works, four of
-      // them wait at the sides (data-pos 0-3: left and right, top row then bottom row) and the last card
+      // each card's place in the collection (invisible until the card lands); while the shapes are explained,
+      // four of them wait at the sides (data-pos 0-3: left and right, top row then bottom row) and the last card
       // stays in the middle. Each card waits off stage until its shape rises in the projector's light
       const cards = RECALL.map((R, i) => {
         const slot = h('<div class="rslot"></div>');
@@ -1047,35 +1041,8 @@ export const STEPS = [
         return { R, slot, el };
       });
 
-      // ---- the drone: flies in from the left, hovers, flies out to the right
-      const W = () => root.clientWidth;
-      const place = (x, y, { now = false, tilt = 0 } = {}) => {
-        if (now) drone.style.transition = 'none';
-        drone.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-        drone.style.setProperty('--tilt', `${tilt}deg`);
-        if (now) { void drone.offsetWidth; drone.style.transition = ''; }
-      };
-      const hoverOver = (el) => {                         // where the drone hovers to explain el (above it)
-        const rr = root.getBoundingClientRect(), r = el.getBoundingClientRect();
-        return [r.left - rr.left + r.width / 2 - drone.offsetWidth / 2, Math.max(0, r.top - rr.top - drone.offsetHeight - 40)];
-      };
-      const flyIn = async (to) => {
-        mouthOnDrone(true);
-        place(-drone.offsetWidth - 40, to[1], { now: true, tilt: 9 });
-        c.sound.whoosh();
-        place(to[0], to[1], { tilt: 8 });
-        await c.wait(700);
-        drone.style.setProperty('--tilt', '0deg');         // levels out as it slows into the hover
-        await c.wait(800);
-      };
-      const flyOut = () => {
-        const y = parseFloat(drone.style.transform.split(',')[1]) || 0;
-        place(W() + 40, y, { tilt: 9 });
-        mouthOnDrone(false);
-      };
-
       // ---- the shape rises out of the floor projector's light: from a speck at its lens, growing up the light,
-      // flickering in (the drone does not project: it only talks)
+      // flickering in
       const release = async (el) => {
         el.classList.add('in', 'is-holo', 'is-bare');   // no card yet: the shape is a hologram in the light
         if (c.reduced) return;
@@ -1169,11 +1136,8 @@ export const STEPS = [
         await c.wait(450);
       };
 
-      // the drone flies in once and stops in the middle; it projects each card in turn, the card is
-      // explained, then flies to its place at the side (the last stays in the middle). The drone leaves
-      // when all five have been explained.
-      stage.appendChild(cards[0].el);
-      if (!c.reduced) await flyIn(hoverOver(stage));
+      // each shape in turn rises in the light in the middle and is explained, then its card forms and flies
+      // to its place at the side (the last stays in the middle)
       for (const k of cards) {
         stage.appendChild(k.el);
         if (!k.v) {                                       // the card's diagram, drawn once it has a size
@@ -1190,9 +1154,9 @@ export const STEPS = [
         await c.wait(c.reduced ? 0 : 280);
         if (k.slot.dataset.pos) { await collect(k); await c.wait(c.reduced ? 0 : 200); } else await cardForms(k.el);
       }
-      if (!c.reduced) { flyOut(); await c.wait(1000); } else mouthOnDrone(false);
+      await c.wait(c.reduced ? 0 : 500);
 
-      // the drone gone: the cards grow into the big collection, the last one from the middle to its place
+      // all five explained: the cards grow into the big collection, the last one from the middle to its place
       const home = (k) => { k.el.classList.remove('is-holo', 'is-on', 'is-bare'); k.slot.appendChild(k.el); k.slot.classList.add('got'); k.slot.classList.remove('away'); };
       const last = cards[cards.length - 1];
       await relayout(() => { home(last); root.classList.add('is-done'); });
@@ -1202,7 +1166,7 @@ export const STEPS = [
       c.ready();                                        // Launch mission arrives once that has been said
       c.sound.pop();
 
-      // tapping a card later: the drone flies back, projects onto it and explains it again
+      // tapping a card later: its shape comes back into the light and is explained again
       let busy = false;
       cards.forEach((k) => {
         k.el.disabled = false;
@@ -1212,20 +1176,18 @@ export const STEPS = [
           c.sound.tap();
           c.spawn(async () => {
             try {
-              // while the drone is here the cards stay small: the card goes to the middle and the other four
-              // to the places at the sides; the drone comes back and projects it; when the drone has gone,
-              // all grows back into the collection
+              // while it is explained the cards stay small: the card goes to the middle and the other four to
+              // the places at the sides; its card goes and the shape is a hologram again; then all grows back
+              // into the collection
               let p = 0;
               cards.forEach((o) => { if (o !== k) o.slot.dataset.pos = String(p++); });
               k.el.classList.add('is-on');
               await relayout(() => { stage.appendChild(k.el); k.slot.classList.add('away'); root.classList.remove('is-done'); }, { stagger: 30 });
-              if (!c.reduced) await flyIn(hoverOver(stage));
               k.el.classList.add('is-holo', 'is-bare');
               await explain(k);
               await cardForms(k.el);
               k.el.classList.remove('is-holo', 'is-on');
               await c.wait(c.reduced ? 0 : 280);
-              if (!c.reduced) { flyOut(); await c.wait(1000); } else mouthOnDrone(false);
               await relayout(() => { home(k); root.classList.add('is-done'); }, { stagger: 30 });
             } finally { busy = false; }
           });

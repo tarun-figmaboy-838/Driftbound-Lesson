@@ -499,7 +499,7 @@ const fontsIn = Promise.race([Promise.all(fonts.map((f) => document.fonts?.load(
 const ready = Promise.race([Promise.all([fontsIn, scene.loaded]), new Promise((r) => setTimeout(r, 4000))]);
 
 // the start banner: the play button starts the intro (src/intro/intro.js: into the satellite, through its gate,
-// down the corridor into the hall, where a drone brings the screen), then the lesson. The tap also lets
+// down the corridor into the hall, where the projector brings the lesson), then the lesson. The tap also lets
 // the browser start the voice. A link to a given step (?step=N) or ?dev=1 skips both.
 const banner = $('start');
 function begin() {
