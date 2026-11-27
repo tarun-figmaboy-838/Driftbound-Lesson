@@ -403,7 +403,7 @@ function pickGroup(c) {
   return {
     list({ label, options, answer, fmt = (v) => `${v}`, why = {}, onOpen, onClose, onRight }) {
       const el = h(`<div class="pick">
-        <div class="pick__menu" role="group" aria-label="${esc(label)}">${options.map((o) => `<button type="button" class="pill pill--blue pick__opt" data-v="${esc(String(o))}">${angles(esc(fmt(o)))}</button>`).join('')}</div>
+        <div class="pick__menu" role="group" aria-label="${esc(label)}">${options.map((o, i) => `<button type="button" class="pill pill--blue pick__opt" data-v="${esc(String(o))}" style="--i:${i}"><span class="v">${angles(esc(fmt(o)))}</span></button>`).join('')}</div>
         <button type="button" class="pill pick__btn" aria-haspopup="true" aria-expanded="false" aria-label="${esc(label)}: choose"><span class="v">Choose</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none"/></svg></button>
       </div>`);
       const btn = el.querySelector('.pick__btn'), text = btn.querySelector('.v');
@@ -912,7 +912,7 @@ export const STEPS = [
       };
       const group = pickGroup(c);
       ROWS.forEach((R) => {
-        R.row = h(`<div class="eqs__row"><div class="eqs__line"><span class="eqs__eq"><span class="${R.cls}">${angles(R.name)}</span><span class="op">is opposite</span></span></div></div>`);
+        R.row = h(`<div class="eqs__row"><div class="eqs__line"><span class="eqs__eq"><span class="tag ${R.cls}">${angles(R.name)}</span><span class="op">is opposite</span></span></div></div>`);
         R.row.querySelector('.eqs__line').appendChild(group.list({
           label: `${R.name} is opposite`, options: R.opts, answer: R.ans, why: R.why,
           onOpen: () => { open = R; focus(); },
@@ -1133,7 +1133,7 @@ export const STEPS = [
       const group = pickGroup(c);
       ROWS.forEach((R) => {
         let list;
-        R.row = h(`<div class="eqs__row"><div class="eqs__line"><span class="eqs__eq">${R.eq.map(span).join('')}<span class="op">=</span></span></div></div>`);
+        R.row = h(`<div class="eqs__row"><div class="eqs__line"><span class="eqs__eq">${R.eq.map(([cls, t], i) => span([i ? cls : `tag ${cls}`, t])).join('')}<span class="op">=</span></span></div></div>`);
         R.row.querySelector('.eqs__line').appendChild((list = group.list({
           label: R.name, options: R.opts, answer: R.ans, fmt: deg, why: R.why,
           onOpen: () => { open = R; focus(); },

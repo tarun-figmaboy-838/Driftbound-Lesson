@@ -47,27 +47,54 @@
 .tcard.is-dim { opacity: .38; }
 
 /* ---------------------------------------------------------------- find all four: the equations beside the figure */
-/* the working, one line under another, in one neat column: each line ends on its = sign (or its question) and
-   the lists stand lined up after it. No hard box: the line in focus glows softly, the others stay readable but
-   step back; a line found glows green */
-.eqs { display: grid; grid-template-columns: max-content max-content; justify-content: center; align-content: center; row-gap: 8px;
-  padding: 18px 20px; border-radius: 18px; background: linear-gradient(180deg, rgba(8, 26, 74, .7), rgba(8, 26, 74, .45)); box-shadow: 0 0 34px rgba(61, 220, 242, .12); }
-.eqs__row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; column-gap: 14px; padding: 6px 12px; border-radius: 14px;
-  transition: opacity .25s ease, background .25s ease, box-shadow .25s ease; }
+/* the answer panel, built like a game piece: a glass panel with an ink outline, an inner light edge, a sheen on
+   top and a drop shadow. Each line is a slot (outline, a darker lip under it, a sheen): the slot in play lifts
+   and glows gold with a pointer bouncing beside it; one answered keeps its colours with a green rim; one still
+   to come waits, greyed. The = signs (or the questions) line up, the lists after them */
+.eqs { position: relative; display: grid; grid-template-columns: max-content max-content; justify-content: center; align-content: center; row-gap: 12px;
+  padding: 20px 22px 20px 34px; border-radius: 26px;
+  background: linear-gradient(180deg, rgba(36, 74, 160, .72), rgba(14, 32, 92, .82));
+  box-shadow: 0 0 0 3px var(--ink), inset 0 0 0 2px rgba(127, 243, 255, .38), inset 0 3px 0 rgba(255, 255, 255, .16), 0 18px 34px rgba(4, 8, 40, .5); }
+.eqs__row { position: relative; grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; column-gap: 14px; padding: 10px 14px 12px;
+  border-radius: 18px; background: linear-gradient(180deg, rgba(58, 104, 200, .55), rgba(22, 48, 122, .65));
+  box-shadow: 0 0 0 2.5px var(--ink), inset 0 2px 0 rgba(255, 255, 255, .18), inset 0 -4px 0 rgba(8, 18, 70, .55);
+  transition: opacity .25s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s ease; }
 .eqs__line { display: contents; }
 .eqs__eq { grid-column: 1; justify-self: end; display: flex; align-items: center; gap: .3em; white-space: nowrap;
-  font: 400 clamp(22px, .85rem + .9vw, 32px)/1.1 var(--font-display); color: #fff; letter-spacing: .02em; }
-.eqs .pick { grid-column: 2; justify-self: start; }
+  font: 400 clamp(22px, .85rem + .9vw, 32px)/1.1 var(--font-display); color: #fff; letter-spacing: .02em; text-shadow: 0 2px 0 var(--ink); }
 .eqs .o { color: #ffc46b; }
 .eqs .a { color: var(--holo); }
 .eqs .g { color: #d4ff7a; }
-.eqs .op { color: rgba(255, 255, 255, .7); }
-.eqs__row.is-focus { background: rgba(255, 224, 102, .08); box-shadow: 0 0 0 1.5px rgba(255, 224, 102, .4), 0 0 20px rgba(255, 197, 49, .16); }
-.eqs__row.is-dim { opacity: .5; }
-.eqs__row.is-right .eqs__eq { text-shadow: 0 0 12px rgba(166, 236, 60, .5); }
+.eqs .op { color: rgba(255, 255, 255, .78); }
+.eqs__eq > .op:only-of-type { font-size: .82em; }
+/* the angle being asked about: a coloured badge, built like a button */
+.eqs .tag { display: inline-flex; align-items: center; padding: .08em .42em .14em; border-radius: 999px; color: #fff; text-shadow: 0 2px 0 var(--ink);
+  box-shadow: 0 0 0 2.5px var(--ink), inset 0 2px 0 rgba(255, 255, 255, .45), inset 0 -3px 0 rgba(0, 0, 0, .22); }
+.eqs .tag.o { background: linear-gradient(180deg, #ffbf5e, #f08a16); }
+.eqs .tag.a { background: linear-gradient(180deg, #8ff6ff, #23b7da); }
+/* the given line: no slot, just the fact */
+.eqs__row.is-given { background: none; box-shadow: none; padding-top: 2px; padding-bottom: 2px; }
+/* the slot in play */
+.eqs__row.is-focus { transform: translateY(-2px) scale(1.03); z-index: 2;
+  box-shadow: 0 0 0 2.5px var(--ink), 0 0 0 5px #ffd23f, 0 0 26px rgba(255, 197, 49, .55), inset 0 2px 0 rgba(255, 255, 255, .22), inset 0 -4px 0 rgba(8, 18, 70, .55); }
+.eqs__row.is-focus::before { content: ''; position: absolute; left: -24px; top: 50%; width: 0; height: 0; margin-top: -9px;
+  border-style: solid; border-width: 9px 0 9px 13px; border-color: transparent transparent transparent #ffd23f; filter: drop-shadow(0 0 4px rgba(255, 197, 49, .8));
+  animation: nudge-in .7s ease-in-out infinite alternate; }
+@keyframes nudge-in { to { transform: translateX(5px); } }
+/* a slot still to come waits, greyed like a locked slot (not faded, which turns its colours muddy); an
+   answered one stays bright */
+.eqs__row.is-dim:not(.is-right) { filter: grayscale(.9) brightness(.78); transform: scale(.97); }
+.eqs__row.is-right { box-shadow: 0 0 0 2.5px var(--ink), 0 0 0 4px rgba(141, 230, 70, .85), 0 0 18px rgba(141, 230, 70, .35), inset 0 2px 0 rgba(255, 255, 255, .18), inset 0 -4px 0 rgba(8, 18, 70, .55); }
 .eqs .pick__btn { min-width: 140px; }
-.eqs .pick__menu { left: auto; right: 0; transform: translateY(-8px) scale(.96); transform-origin: 100% 0; }
-.eqs .pick.is-open .pick__menu { transform: none; }
+/* in the answer panel the options open inside their own slot, on a line under its equation (the slot grows):
+   they never cover the next slot */
+.eqs .pick { display: contents; }
+.eqs .pick__btn { grid-column: 2; grid-row: 1; justify-self: start; }
+.eqs .pick__menu { position: static; grid-column: 1 / -1; grid-row: 2; justify-self: end; margin-top: 16px; transform: none; opacity: 1; visibility: visible; }
+.eqs .pick:not(.is-open) .pick__menu { display: none; }
+.eqs .pick.is-open .pick__menu { transform: none; animation: menu-in .32s cubic-bezier(.34, 1.56, .64, 1) both; }
+.eqs .pick__menu::before { left: auto; right: 58px; translate: 0 0; }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-8px) scale(.85); } }
 
 /* the list: a capsule that says the type chosen (Choose until then); tapped, the three types open below it
    as buttons (blue capsules) in a row; a wrong one turns red and is crossed out */
@@ -76,11 +103,20 @@
 .pick__btn .ico { width: 20px; height: 20px; fill: none; transition: transform .2s ease; }
 .pick.is-open .pick__btn .ico { transform: rotate(180deg); }
 .pick__btn.is-right .ico { display: none; }
-.pick__menu { position: absolute; z-index: 4; left: 50%; top: calc(100% + 8px); display: flex; gap: 6px; width: max-content;
-  opacity: 0; visibility: hidden; transform: translate(-50%, -8px) scale(.96); transform-origin: 50% 0;
-  transition: opacity .15s ease, transform .2s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .2s; }
-.pick.is-open .pick__menu { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
-.pick__opt.pill { --cap: 22px; height: 44px; min-width: 0; padding: 0 calc(var(--cap) + 2px) 3px; font-size: 18px; }
+.pick__menu { position: absolute; z-index: 6; left: 50%; top: calc(100% + 14px); display: flex; gap: 8px; width: max-content; padding: 10px;
+  border-radius: 20px; background: linear-gradient(180deg, #1d3f8f, #0f2563);
+  box-shadow: 0 0 0 3px var(--ink), inset 0 0 0 2px rgba(127, 243, 255, .55), inset 0 3px 0 rgba(255, 255, 255, .22), 0 14px 26px rgba(4, 8, 40, .55);
+  opacity: 0; visibility: hidden; transform: translate(-50%, -10px) scale(.8); transform-origin: 50% 0;
+  transition: opacity .14s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1), visibility 0s linear .3s; }
+/* its pointer, up to the capsule it opens from */
+.pick__menu::before { content: ''; position: absolute; left: 50%; top: -11px; width: 18px; height: 18px; translate: -50% 0; rotate: 45deg; border-radius: 4px 0 0 0;
+  background: #1d3f8f; box-shadow: -3px -3px 0 0 var(--ink), inset 2px 2px 0 rgba(127, 243, 255, .55); }
+.pick.is-open .pick__menu { opacity: 1; visibility: visible; transform: translate(-50%, 0) scale(1); transition-delay: 0s; }
+/* the options pop in one after another */
+.pick.is-open .pick__opt { animation: opt-in .38s cubic-bezier(.34, 1.56, .64, 1) both; animation-delay: calc(var(--i, 0) * 55ms + 40ms); }
+@keyframes opt-in { from { opacity: 0; transform: translateY(-6px) scale(.6); } }
+.pick__opt.pill { --cap: 22px; height: 46px; min-width: 76px; padding: 0 calc(var(--cap) + 2px) 3px; font-size: 19px; }
+.pick__opt .v { white-space: nowrap; }
 .pick__opt.is-wrong { text-decoration: line-through; }
 
 /* ---------------------------------------------------------------- title (deck slide 1) */

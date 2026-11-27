@@ -320,7 +320,8 @@ export class Figure {
     const w = this.host.clientWidth, h = this.host.clientHeight;
     if (!w || !h) return false;
     const [x0, y0, x1, y1] = this.bx;
-    const s = Math.max(0.05, Math.min((w - 2 * this.pad) / (x1 - x0), (h - 2 * this.pad) / (y1 - y0)));
+    const pad = typeof this.pad === 'function' ? this.pad() : this.pad;   // (a function: it can change with the layout)
+    const s = Math.max(0.05, Math.min((w - 2 * pad) / (x1 - x0), (h - 2 * pad) / (y1 - y0)));
     this.s = s;
     this.k = Math.min(this.kMax, Math.max(this.kMin, s / this.kRef));
     this.ox = w / 2 - s * (x0 + x1) / 2;

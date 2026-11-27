@@ -43,7 +43,8 @@ const dialogue = new Dialogue($('narration'), {
   reduced,
   muted: () => sound.muted,
 });
-const fig = new Figure(els.fig);
+// the lesson's drawing; on phones it uses nearly the whole width (little padding round it)
+const fig = new Figure(els.fig, { pad: () => (document.documentElement.classList.contains('is-tall') ? 2 : 16) });
 
 // praise when the student gets something right, in the narration line: only a word of praise ("Great job!",
 // "Well done!", "Amazing work!", in turn), no explanation after it; then the line goes back to the caption.

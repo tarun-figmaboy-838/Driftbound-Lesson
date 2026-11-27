@@ -16,7 +16,7 @@
 .pill--blue, .pill.is-right, .pill.is-wrong { color: #ffffff; text-shadow: 0 2px 0 rgba(0, 20, 70, .45); }
 .pill.is-right { pointer-events: none; animation: pop 420ms ease-out; }
 .pill.is-wrong { opacity: .85; cursor: default; }
-.pill.is-off { opacity: .4; pointer-events: none; }
+.pill.is-off { filter: grayscale(.9) brightness(.7); opacity: .75; pointer-events: none; }   /* greyed, not faded (fading turns gold muddy) */
 .pill .ico { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .back { min-width: 0; width: 66px; padding: 0; }
 .back .ico { width: 24px; height: 24px; fill: none; stroke-width: 3.4; }

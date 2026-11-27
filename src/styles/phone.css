@@ -5,7 +5,7 @@
 .is-tall .controls { grid-area: ctl; }
 .is-tall .back { grid-area: back; }
 .is-tall .next-wrap { grid-area: next; }
-.is-tall .stage { padding: 14px 12px 12px; row-gap: 10px; }
+.is-tall .stage { padding: 14px 8px 12px; row-gap: 10px; }
 .is-tall .caption { column-gap: 12px; padding: 2px 52px 10px 2px; }
 .is-tall .mute { top: calc(var(--sy) + 12px); left: calc(var(--sx) + var(--sw) - 12px - 40px); width: 40px; height: 40px; }
 .is-tall .voice { width: 44px; height: 44px; gap: 2px; }
@@ -22,11 +22,14 @@
 .is-tall .tcard { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr); column-gap: 10px; align-items: center; padding: 6px 12px 6px 6px; }
 .is-tall .tcard__mini { align-self: stretch; }
 .is-tall .pick__btn { min-width: 136px; }
-.is-tall .pick__menu { left: auto; right: 0; transform: translateY(-6px) scale(.96); transform-origin: 100% 0; gap: 5px; }
-.is-tall .pick.is-open .pick__menu { transform: none; }
+.is-tall .tcard .pick__menu { left: auto; right: 0; transform: translateY(-6px) scale(.96); transform-origin: 100% 0; gap: 5px; }
+.is-tall .tcard .pick__menu::before { left: auto; right: 40px; translate: 0 0; }
+.is-tall .tcard .pick.is-open .pick__menu { transform: none; }
+.is-tall .eqs .pick__menu { gap: 6px; padding: 8px; margin-top: 12px; }
 .is-tall .pick__opt.pill { --cap: 19px; height: 38px; font-size: 16px; }
-.is-tall .eqs { row-gap: 4px; padding: 8px; }
-.is-tall .eqs__row { padding: 4px 6px; column-gap: 8px; }
+.is-tall .eqs { row-gap: 8px; padding: 10px 12px 10px 22px; border-radius: 20px; }
+.is-tall .eqs__row { padding: 6px 8px 8px; column-gap: 8px; border-radius: 14px; }
+.is-tall .eqs__row.is-focus::before { left: -17px; border-width: 7px 0 7px 10px; margin-top: -7px; }
 .is-tall .eqs__eq { font-size: 18px; }
 .is-tall .eqs .pick__btn { min-width: 104px; }
 .is-tall .cards { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); align-items: stretch; gap: 12px; padding: 2px 6px; }
@@ -36,7 +39,7 @@
 .is-tall .cards.fill > span.kept { grid-row: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .holo--scan, .screen, .screen .fig, .projector__glow { animation: none !important; }
+  .holo--scan, .screen, .screen .fig, .projector__glow, .eqs__row.is-focus::before { animation: none !important; }
   .enter, .caption h1 .w.on { animation: none !important; opacity: 1; }
   .fig-svg .hint-hand, .fig-svg .hint-hand-wrap { animation: none; }
   .fig-svg .hand-ripple { animation: none; opacity: .6; }
